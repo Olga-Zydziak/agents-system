@@ -1,0 +1,44 @@
+{
+  "agents": [
+    {
+      "role_name": "Causal Analyst",
+      "expertise_areas": ["przyczynowość", "statystyka"],
+      "thinking_style": "analytical",
+      "model": {
+        "provider": "google",
+        "model_name": "gemini-2.5-pro",
+        "temperature": 0.1
+      }
+    },
+    {
+      "role_name": "Creative Planner",
+      "expertise_areas": ["innowacje", "strategia"],
+      "thinking_style": "creative",
+      "model": {
+        "provider": "anthropic",
+        "model_name": "claude-sonnet-4-20250514",
+        "temperature": 0.7
+      }
+    },
+    {
+      "role_name": "Master Aggregator",
+      "expertise_areas": ["agregacja", "synergia", "meta-learning"],
+      "thinking_style": "systematic",
+      "model": {
+        "provider": "anthropic",
+        "model_name": "claude-opus-4-1-20250805",
+        "temperature": 0.4
+      }
+    },
+    {
+      "role_name": "Quality Critic",
+      "expertise_areas": ["walidacja", "quality assurance", "ryzyko"],
+      "thinking_style": "critical",
+      "model": {
+        "provider": "google",
+        "model_name": "gemini-2.5-pro",
+        "temperature": 0.3
+      }
+    }
+  ]
+}
