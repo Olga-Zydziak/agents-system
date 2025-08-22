@@ -1,0 +1,32 @@
+{
+  "error_type": "RuntimeError",
+  "error_message": "Debata zakończona bez finalnej wiadomości. Brak PLAN_ZATWIERDZONY i brak outputu agregatora.",
+  "stacktrace": "Traceback (most recent call last):\n  File \"/home/jupyter/olga_zydziak/version_beta/moa_debate/autogen_orchestrator.py\", line 891, in run_full_debate_cycle\n    raise RuntimeError(\"Debata zakończona bez finalnej wiadomości. Brak PLAN_ZATWIERDZONY i brak outputu agregatora.\")\nRuntimeError: Debata zakończona bez finalnej wiadomości. Brak PLAN_ZATWIERDZONY i brak outputu agregatora.\n",
+  "context": {
+    "mission": "Stwórz prosty pipeline do analizy danych CSV",
+    "proposers": [
+      {
+        "name": "Causal_Analyst",
+        "vendor": "google",
+        "model": "gemini-2.5-pro"
+      },
+      {
+        "name": "Creative_Planner",
+        "vendor": "anthropic",
+        "model": "claude-sonnet-4-20250514"
+      }
+    ],
+    "aggregator": {
+      "name": "Master_Aggregator",
+      "vendor": "anthropic",
+      "model": "claude-opus-4-1-20250805"
+    },
+    "critic": {
+      "name": "Quality_Critic",
+      "vendor": "google",
+      "model": "gemini-2.5-pro"
+    },
+    "max_rounds": 8,
+    "messages_seeded": false
+  }
+}

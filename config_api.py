@@ -63,6 +63,8 @@ os.environ["LANGCHAIN_PROJECT"] = "Projekt Multi-Agent-System Dynamic-graphs"
 os.environ["ANTHROPIC_API_KEY"] =ANTHROPIC_API_KEY
 os.environ["TAVILY_API_KEY"] = TAVILY_API_KEY
 # os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
+
+os.environ.setdefault("MOA_SANITY_PING", "0")
 #---cache-------
 langchain.llm_cache = SQLiteCache(database_path=".langchain.db")
 

@@ -4,3 +4,61 @@
 2025-08-19T11:07:58.211137 | === AutoGen MOA Orchestrator initialized for mission: Stwórz prosty pipeline do analizy danych CSV... ===
 2025-08-19T11:07:58.212486 | Retrieve context for mission='Stwórz prosty pipeline do analizy danych CSV', suggestions=[]
 2025-08-19T11:10:04.602417 | Final plan extracted: False
+2025-08-19T22:01:07.575443 | [SECRETS] GCP SM read failed for ANTHROPIC_API_KEY: PermissionDenied: 403 Permission denied on resource project YOUR_GCP_PROJECT_ID. [reason: "CONSUMER_INVALID"
+domain: "googleapis.com"
+metadata {
+  key: "service"
+  value: "secretmanager.googleapis.com"
+}
+metadata {
+  key: "containerInfo"
+  value: "YOUR_GCP_PROJECT_ID"
+}
+metadata {
+  key: "consumer"
+  value: "projects/YOUR_GCP_PROJECT_ID"
+}
+, locale: "en-US"
+message: "Permission denied on resource project YOUR_GCP_PROJECT_ID."
+, links {
+  description: "Google developers console"
+  url: "https://console.developers.google.com"
+}
+]
+2025-08-19T23:32:52.924801 | [LLM CFG] provider=google model=gemini-2.5-pro has_adc=False api_key=no
+2025-08-19T23:32:53.004958 | [LLM CFG] provider=anthropic model=claude-sonnet-4-20250514 has_adc=False api_key=yes
+2025-08-19T23:32:53.052400 | [LLM CFG] provider=anthropic model=claude-opus-4-1-20250805 has_adc=False api_key=yes
+2025-08-19T23:32:53.076943 | [LLM CFG] provider=google model=gemini-2.5-pro has_adc=False api_key=no
+2025-08-19T23:40:47.717115 | [LLM CFG] provider=google model=gemini-2.5-pro has_adc=False api_key=no
+2025-08-19T23:40:47.815123 | [LLM CFG] provider=anthropic model=claude-sonnet-4-20250514 has_adc=False api_key=yes
+2025-08-19T23:40:47.863510 | [LLM CFG] provider=anthropic model=claude-opus-4-1-20250805 has_adc=False api_key=yes
+2025-08-19T23:40:47.888640 | [LLM CFG] provider=google model=gemini-2.5-pro has_adc=False api_key=no
+2025-08-19T23:42:16.708803 | [LLM CFG] provider=google model=gemini-2.5-pro has_adc=False api_key=no
+2025-08-19T23:42:16.794379 | [LLM CFG] provider=anthropic model=claude-sonnet-4-20250514 has_adc=False api_key=yes
+2025-08-19T23:42:16.847942 | [LLM CFG] provider=anthropic model=claude-opus-4-1-20250805 has_adc=False api_key=yes
+2025-08-19T23:42:16.873619 | [LLM CFG] provider=google model=gemini-2.5-pro has_adc=False api_key=no
+2025-08-19T23:42:16.888554 | Initialized 2 proposers, 1 aggregator, 1 critic using AutoGen
+2025-08-19T23:42:16.888712 | === AutoGen MOA Orchestrator initialized for mission: Stwórz prosty pipeline do analizy danych CSV... ===
+2025-08-19T23:42:16.888933 | ======================================================================
+2025-08-19T23:42:16.888987 | 🚀 STARTING AUTOGEN MOA DEBATE CYCLE
+2025-08-19T23:42:16.889031 | ======================================================================
+2025-08-19T23:45:29.663519 | [LLM CFG] provider=google model=gemini-2.5-pro has_adc=False api_key=no
+2025-08-19T23:45:29.792980 | [LLM CFG] provider=anthropic model=claude-sonnet-4-20250514 has_adc=False api_key=yes
+2025-08-19T23:45:29.842378 | [LLM CFG] provider=anthropic model=claude-opus-4-1-20250805 has_adc=False api_key=yes
+2025-08-19T23:45:29.867447 | [LLM CFG] provider=google model=gemini-2.5-pro has_adc=False api_key=no
+2025-08-19T23:45:29.881653 | Initialized 2 proposers, 1 aggregator, 1 critic using AutoGen
+2025-08-19T23:45:29.881757 | === AutoGen MOA Orchestrator initialized for mission: Stwórz prosty pipeline do analizy danych CSV... ===
+2025-08-19T23:45:29.881918 | ======================================================================
+2025-08-19T23:45:29.881967 | 🚀 STARTING AUTOGEN MOA DEBATE CYCLE
+2025-08-19T23:45:29.882017 | ======================================================================
+2025-08-19T23:45:29.884149 | [FAILSAFE] Saved failure report: reports/failure_report_20250819_234529.json
+2025-08-20T11:47:29.643426 | [LLM CFG] provider=google model=gemini-2.5-pro has_adc=False api_key=no
+2025-08-20T11:47:29.768712 | [LLM CFG] provider=anthropic model=claude-sonnet-4-20250514 has_adc=False api_key=yes
+2025-08-20T11:47:30.101035 | [LLM CFG] provider=anthropic model=claude-opus-4-1-20250805 has_adc=False api_key=yes
+2025-08-20T11:47:30.126330 | [LLM CFG] provider=google model=gemini-2.5-pro has_adc=False api_key=no
+2025-08-20T11:47:30.140388 | Initialized 2 proposers, 1 aggregator, 1 critic using AutoGen
+2025-08-20T11:47:30.140494 | === AutoGen MOA Orchestrator initialized for mission: Stwórz prosty pipeline do analizy danych CSV... ===
+2025-08-20T11:47:30.140675 | ======================================================================
+2025-08-20T11:47:30.140728 | 🚀 STARTING AUTOGEN MOA DEBATE CYCLE
+2025-08-20T11:47:30.140765 | ======================================================================
+2025-08-20T11:47:30.142949 | [FAILSAFE] Saved failure report: reports/failure_report_20250820_114730.json

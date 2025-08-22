@@ -7,7 +7,9 @@
       "model": {
         "provider": "google",
         "model_name": "gemini-2.5-pro",
-        "temperature": 0.1
+        "temperature": 0.1,
+        "project_id": "dark-data-discovery",
+         "location": "us-central1"
       }
     },
     {
@@ -27,7 +29,7 @@
       "model": {
         "provider": "anthropic",
         "model_name": "claude-opus-4-1-20250805",
-        "temperature": 0.4
+        "temperature": 0.2
       }
     },
     {
@@ -37,7 +39,9 @@
       "model": {
         "provider": "google",
         "model_name": "gemini-2.5-pro",
-        "temperature": 0.3
+        "temperature": 0.1,
+        "project_id": "dark-data-discovery",
+         "location": "us-central1"
       }
     }
   ]

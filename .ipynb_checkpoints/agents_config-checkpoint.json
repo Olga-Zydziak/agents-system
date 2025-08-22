@@ -17,6 +17,11 @@
       "model": {
         "provider": "anthropic",
         "model_name": "claude-sonnet-4-20250514",
+        "secret_manager": {
+          "project_id": "dark-data-discovery",
+          "secret_id": "ANTHROPIC_API_KEY",
+          "version": "latest"
+        },
         "temperature": 0.7
       }
     },
@@ -27,7 +32,12 @@
       "model": {
         "provider": "anthropic",
         "model_name": "claude-opus-4-1-20250805",
-        "temperature": 0.4
+        "secret_manager": {
+          "project_id": "dark-data-discovery",
+          "secret_id": "ANTHROPIC_API_KEY",
+          "version": "latest"
+        },
+        "temperature": 0.2
       }
     },
     {
