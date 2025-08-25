@@ -1,0 +1,2650 @@
+--- FILE: Untitled.ipynb ---
+
+import importlib, process_logger as pl
+importlib.reload(pl)
+from process_logger import log as process_log
+process_log("Logger OK")
+
+# --- Koniec komórki ---
+from autogen_orchestrator import AutoGenMOAOrchestrator
+from autogen import ConversableAgent
+from config_api import *
+import autogen
+from autogen import ConversableAgent
+
+
+
+
+from autogen import ConversableAgent, UserProxyAgent
+llm_cfg = {
+  "role_name": "Causal Analyst",
+  "model": {
+    "provider": "google",
+    "model_name": "gemini-2.5-pro",
+    "temperature": 0.1,
+    "client_args": {
+      "vertex_project": "dark-data-discovery",
+      "vertex_location": "us-central1"
+    }
+  }
+}
+g = ConversableAgent("gemini_test", llm_config=llm_cfg)
+u = UserProxyAgent("user", human_input_mode="NEVER", max_consecutive_auto_reply=1)
+u.initiate_chat(g, message="Powiedz jedno zdanie o mechanice kwantowej.")
+# --- Koniec komórki ---
+import os
+import zipfile
+from datetime import datetime
+
+def spakuj_biezacy_folder(nazwa_pliku_zip=None):
+    """
+    Pakuje cały bieżący folder roboczy (wraz z podfolderami) do pliku ZIP.
+    Archiwum ZIP jest tworzone w folderze nadrzędnym, aby uniknąć
+    dodania samego siebie do archiwum.
+
+    Args:
+        nazwa_pliku_zip (str, optional): Opcjonalna nazwa dla pliku ZIP (bez rozszerzenia .zip).
+                                        Jeśli nie zostanie podana, nazwa zostanie wygenerowana
+                                        automatycznie na podstawie nazwy folderu i aktualnej daty.
+
+    Returns:
+        str: Pełna ścieżka do utworzonego pliku ZIP lub None w przypadku błędu.
+    """
+    try:
+        # Pobierz pełną ścieżkę do bieżącego folderu
+        biezacy_folder = os.getcwd()
+        
+        # Uzyskaj nazwę bieżącego folderu
+        nazwa_folderu = os.path.basename(biezacy_folder)
+
+        # Ustal nazwę pliku wyjściowego
+        if nazwa_pliku_zip is None:
+            # Wygeneruj domyślną nazwę, jeśli nie podano własnej
+            znacznik_czasu = datetime.now().strftime("%Y%m%d_%H%M%S")
+            nazwa_pliku_zip = f"{nazwa_folderu}_{znacznik_czasu}"
+        
+        # Dodaj rozszerzenie .zip, jeśli go brakuje
+        if not nazwa_pliku_zip.endswith('.zip'):
+            nazwa_pliku_zip += '.zip'
+            
+        # Utwórz plik ZIP w folderze nadrzędnym, aby uniknąć rekursji
+        folder_nadrzedny = os.path.dirname(biezacy_folder)
+        sciezka_do_zipa = os.path.join(folder_nadrzedny, nazwa_pliku_zip)
+
+        print(f"Tworzenie archiwum: {sciezka_do_zipa}")
+
+        # Otwórz plik ZIP do zapisu
+        with zipfile.ZipFile(sciezka_do_zipa, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            # Przejdź przez wszystkie pliki i foldery w bieżącym katalogu
+            for root, dirs, files in os.walk(biezacy_folder):
+                for file in files:
+                    # Stwórz pełną ścieżkę do pliku
+                    sciezka_pliku = os.path.join(root, file)
+                    # Oblicz ścieżkę względną, aby zachować strukturę folderów w ZIPie
+                    sciezka_w_archiwum = os.path.relpath(sciezka_pliku, biezacy_folder)
+                    # Zapisz plik do archiwum
+                    zipf.write(sciezka_pliku, sciezka_w_archiwum)
+
+        print("Archiwum zostało pomyślnie utworzone!")
+        return sciezka_do_zipa
+
+    except Exception as e:
+        print(f"Wystąpił błąd podczas tworzenia archiwum: {e}")
+        return None
+
+# --- Koniec komórki ---
+spakuj_biezacy_folder()
+# --- Koniec komórki ---
+
+
+
+--- FILE: autogen_main.py ---
+
+"""
+Główny plik demonstracyjny dla systemu MOA używającego AutoGen
+"""
+import os
+import json
+from autogen_orchestrator import AutoGenMOAOrchestrator
+from process_logger import log as process_log
+
+# Przykładowa biblioteka węzłów
+NODE_LIBRARY = {
+    'load_data': {'description': 'Wczytuje dane z różnych źródeł'},
+    'clean_data': {'description': 'Czyści dane'},
+    'validate_data': {'description': 'Waliduje dane'},
+    'discover_causality': {'description': 'Odkrywa relacje przyczynowe (może zawieść)'},
+    'error_handler': {'description': 'Obsługuje błędy'},
+    'rollback': {'description': 'Cofa zmiany'},
+    'generate_report': {'description': 'Generuje raport'},
+    'validate_model': {'description': 'Waliduje model'},
+    'optimize_performance': {'description': 'Optymalizuje wydajność'}
+}
+
+def ensure_dummy_wrapper():
+    """Upewnia się, że LLMWrapper działa w trybie dummy"""
+    # Import extended wrapper żeby dodać lepsze dummy responses
+    try:
+        import extended_llm_wrapper
+        print("✓ Extended LLM wrapper loaded (better dummy responses)")
+    except:
+        print("ℹ Using basic LLM wrapper")
+
+def run_autogen_demo():
+    """Uruchamia demo z AutoGen"""
+    
+    print("""
+╔══════════════════════════════════════════════════════════════════════╗
+║           🤖 AUTOGEN MOA DEBATE SYSTEM                              ║
+║                                                                      ║
+║  • Multi-agent debate using AutoGen GroupChat                       ║
+║  • Dynamic context injection from memory                            ║
+║  • Iterative improvements with critic feedback                      ║
+║  • Automatic termination on "PLAN_ZATWIERDZONY"                    ║
+╚══════════════════════════════════════════════════════════════════════╝
+    """)
+    
+    # Przykładowe misje
+    missions = {
+        "1": "Stwórz prosty pipeline do analizy danych CSV",
+        "2": "Zaprojektuj ODPORNY NA BŁĘDY przepływ odkrywania przyczynowości z mechanizmem retry",
+        "3": "Zbuduj adaptacyjny system ML z continuous learning"
+    }
+    
+    print("\nChoose a mission:")
+    for key, mission in missions.items():
+        print(f"  {key}. {mission[:60]}...")
+    print("  4. Custom mission")
+    print("  0. Exit")
+    
+    choice = input("\nYour choice: ").strip()
+    
+    if choice == "0":
+        return
+    elif choice in missions:
+        mission = missions[choice]
+    elif choice == "4":
+        mission = input("\nEnter your custom mission:\n> ").strip()
+        if not mission:
+            print("Mission cannot be empty!")
+            return
+    else:
+        print("Invalid choice!")
+        return
+    
+    print(f"\n📋 MISSION: {mission}")
+    print("-" * 70)
+    
+    # Inicjalizuj orchestrator
+    orchestrator = AutoGenMOAOrchestrator(
+        mission=mission,
+        node_library=NODE_LIBRARY,
+        config_file="agents_config.json"
+    )
+    
+    # Uruchom pełny cykl debaty
+    final_plan = orchestrator.run_full_debate_cycle()
+    
+    if final_plan:
+        print("\n" + "="*70)
+        print("📊 FINAL APPROVED PLAN:")
+        print(json.dumps(final_plan, indent=2))
+    else:
+        print("\n❌ No plan was approved")
+    
+    print("\n" + "="*70)
+    print("📁 Check outputs/ for saved plans")
+    print("📝 Check logs/conversation_log.txt for detailed logs")
+    print("🧠 Check memory/ for learned patterns")
+
+def main():
+    """Główna funkcja"""
+    # Upewnij się że katalogi istnieją
+    os.makedirs("outputs", exist_ok=True)
+    os.makedirs("logs", exist_ok=True) 
+    os.makedirs("memory", exist_ok=True)
+    
+    # Załaduj extended wrapper dla lepszych dummy responses
+    ensure_dummy_wrapper()
+    
+    # Log start
+    process_log("=== AutoGen MOA System Started ===")
+    
+    try:
+        run_autogen_demo()
+    except KeyboardInterrupt:
+        print("\n\n⚠️ Interrupted by user")
+    except Exception as e:
+        print(f"\n❌ Error: {e}")
+        import traceback
+        traceback.print_exc()
+    finally:
+        process_log("=== AutoGen MOA System Ended ===")
+
+if __name__ == "__main__":
+    main()
+
+
+--- FILE: autogen_orchestrator.py ---
+
+"""
+Pełny orchestrator MOA używający AutoGen do zarządzania debatą agentów
+"""
+import json
+import config_api
+from autogen import UserProxyAgent, ConversableAgent, GroupChat, GroupChatManager
+from typing import Dict, List, Any, Optional
+from datetime import datetime
+import autogen
+from google.cloud import secretmanager
+from models_config import AgentRole
+from moa_prompts import MOAPrompts
+from memory_system import ContextMemory
+# Używamy structured parsera zamiast heurystycznego response_parser
+from structured_response_parser import StructuredResponseParser
+from process_logger import log as process_log
+import os, json, time, traceback
+from typing import Any, Dict, Optional
+from process_logger import log as process_log
+import vertexai
+
+from config_api import basic_config_agent
+
+class AutoGenMOAOrchestrator:
+    """
+    Orchestrator systemu MOA używający AutoGen do wieloturowej debaty
+    """
+    
+    def __init__(self, mission: str, node_library: Dict[str, Any], config_file: str = "agents_config.json"):
+        self.mission = mission
+        self.node_library = node_library
+        self.memory = ContextMemory(max_episodes=50)
+        # Parser oparty na Pydantic – oczekuje czystego JSON zgodnego ze schematem
+        self.parser = StructuredResponseParser()
+        
+        # Wczytaj konfigurację
+        self._load_config(config_file)
+        
+        # Stan debaty
+        self.iteration_count = 0
+        self.max_iterations = 5
+        self.current_context = {}
+        self.final_plan = None
+        self._forced_speaker: Optional[str] = None
+        # Inicjalizuj agentów AutoGen
+        self.enable_sanity_ping = False
+        process_log(f"[CFG] enable_sanity_ping={self.enable_sanity_ping}")
+        self._initialize_autogen_agents()
+        self._secret_cache = {}
+        
+        process_log(f"=== AutoGen MOA Orchestrator initialized for mission: {mission[:100]}... ===")
+    
+    
+    def reset(self):
+        # ... resetuje liczniki ...
+        # Używa wbudowanej metody .reset() do wyczyszczenia historii każdego agenta
+        all_agents = [self.user_proxy, *self.proposer_agents, self.aggregator_agent, self.critic_agent]
+        for agent in all_agents:
+            if agent:
+                agent.reset()
+    
+    def _get_api_key_from_gcp_secret_manager(self, model_cfg: Dict) -> str | None:
+        """
+        Czyta klucz z GCP Secret Manager.
+        Oczekuje: model_cfg["secret_manager"] = {"project_id": "...", "secret_id": "...", "version": "latest"|"1"|...}
+        Zwraca: string lub None (gdy brak/nieudane).
+        """
+        sm = model_cfg.get("secret_manager") or {}
+        project_id = (sm.get("project_id") or "").strip()
+        secret_id  = (sm.get("secret_id") or "").strip()
+        version    = (sm.get("version") or "latest").strip()
+
+        if not project_id or not secret_id:
+            return None
+
+        cache_key = (project_id, secret_id, version)
+        if cache_key in self._secret_cache:
+            return self._secret_cache[cache_key]
+
+        try:
+            client = secretmanager.SecretManagerServiceClient()
+            name = f"projects/{project_id}/secrets/{secret_id}/versions/{version}"
+            resp = client.access_secret_version(name=name)
+            value = resp.payload.data.decode("utf-8")
+            # cache in-memory (nie logujemy!)
+            self._secret_cache[cache_key] = value
+            return value
+        except Exception as e:
+            # Nie loguj wartości sekretu. Możesz zalogować TYLKO metadane.
+            from process_logger import log as process_log
+            process_log(f"[SECRETS] Failed to read {secret_id}@{project_id}/{version}: {type(e).__name__}: {e}")
+            return None
+    
+    #Raport:
+    def _ensure_dir(self, path: str):
+        os.makedirs(path, exist_ok=True)
+
+    def _now_stamp(self) -> str:
+        return time.strftime("%Y%m%d_%H%M%S", time.localtime())
+
+    def _extract_llm_hint(self, text: str) -> Optional[str]:
+        """Prosta heurystyka do rozpoznawania typowych problemów LLM-a."""
+        if not text:
+            return None
+        t = text.lower()
+        hints = {
+            "quota/rate_limit": ["rate limit", "too many requests", "quota", "insufficient_quota"],
+            "context_length": ["maximum context length", "token limit", "context window", "too many tokens"],
+            "safety": ["safety", "blocked", "content filter"],
+            "auth/api": ["invalid api key", "unauthorized", "forbidden", "permission"],
+            "timeout": ["timeout", "timed out", "deadline exceeded"]
+        }
+        for label, kws in hints.items():
+            if any(k in t for k in kws):
+                return label
+        return None
+
+    def _write_failure_report(
+        self,
+        reason: str,
+        stage: str,
+        aggregator_raw: Optional[str],
+        critic_raw: Optional[str],
+        exception: Optional[BaseException] = None,
+        parsed_aggregator: Optional[Dict[str, Any]] = None
+    ) -> str:
+        """Zapisuje raport awaryjny JSON + MD i zwraca ścieżkę do pliku JSON."""
+        self._ensure_dir("reports")
+        ts = self._now_stamp()
+        jpath = f"reports/failure_report_{ts}.json"
+        mpath = f"reports/failure_report_{ts}.md"
+
+        agg_hint = self._extract_llm_hint(aggregator_raw or "")
+        crit_hint = self._extract_llm_hint(critic_raw or "")
+
+        report = {
+            "timestamp": ts,
+            "mission": self.mission,
+            "stage": stage,  # np. "aggregator", "groupchat", "critic"
+            "reason": reason,  # np. "AGGREGATOR_NO_VALID_JSON", "EXCEPTION_DURING_DEBATE"
+            "aggregator_model": getattr(self, "aggregator_config", {}).get("model", {}),
+            "critic_model": getattr(self, "critic_config", {}).get("model", {}),
+            "aggregator_output_excerpt": (aggregator_raw or "")[:4000],
+            "critic_output_excerpt": (critic_raw or "")[:4000],
+            "aggregator_llm_hint": agg_hint,
+            "critic_llm_hint": crit_hint,
+            "parsed_aggregator": parsed_aggregator,
+            "exception": None if not exception else {
+                "type": type(exception).__name__,
+                "message": str(exception),
+                "traceback": traceback.format_exc()
+            }
+        }
+
+        with open(jpath, "w", encoding="utf-8") as f:
+            json.dump(report, f, ensure_ascii=False, indent=2)
+
+        # krótkie MD dla ludzi
+        with open(mpath, "w", encoding="utf-8") as f:
+            f.write(f"# Failure Report ({ts})\n\n")
+            f.write(f"**Mission:** {self.mission}\n\n")
+            f.write(f"**Stage:** {stage}\n\n")
+            f.write(f"**Reason:** {reason}\n\n")
+            if agg_hint:
+                f.write(f"**Aggregator LLM hint:** `{agg_hint}`\n\n")
+            if crit_hint:
+                f.write(f"**Critic LLM hint:** `{crit_hint}`\n\n")
+            if exception:
+                f.write(f"**Exception:** `{type(exception).__name__}: {exception}`\n\n")
+            f.write("## Last Aggregator Output (excerpt)\n\n")
+            f.write("```\n" + (aggregator_raw or "")[:4000] + "\n```\n\n")
+            f.write("## Last Critic Output (excerpt)\n\n")
+            f.write("```\n" + (critic_raw or "")[:4000] + "\n```\n")
+
+        
+        process_log(f"[FAILSAFE] Saved failure report: {jpath}")
+
+        return jpath
+
+    def _get_last_message_from(self, groupchat, agent_name: str) -> Optional[str]:
+        """Zwraca tekst ostatniej wiadomości danego agenta z obiektu GroupChat."""
+        try:
+            msgs = getattr(groupchat, "messages", [])
+            for m in reversed(msgs):
+                if (m.get("name") or m.get("role")) == agent_name:
+                    return m.get("content") or ""
+        except Exception:
+            pass
+        return None
+    
+    
+    # ========== UNIVERSAL JSON REPAIR ==========
+
+    MAX_REPAIR_ATTEMPTS = 2
+    REPAIR_JSON_SUFFIX = "\n\nZWRÓĆ TYLKO I WYŁĄCZNIE JSON, bez komentarzy, bez dodatkowego tekstu."
+
+    def _schema_example_for(self, role: str) -> str:
+        if role == "proposer":
+            return (
+                '{\n'
+                '  "thought_process": ["Krok 1...", "Krok 2..."],\n'
+                '  "plan": {\n'
+                '    "entry_point": "Start_Node",\n'
+                '    "nodes": [ {"name":"Start_Node","implementation":"load_data"} ],\n'
+                '    "edges": [ {"from":"Start_Node","to":"Next_Node","condition":"on_success"} ]\n'
+                '  },\n'
+                '  "confidence": 0.80\n'
+                '}'
+            )
+        if role == "aggregator":
+            return (
+                '{\n'
+                '  "thought_process": ["Agreguję elementy X i Y..."],\n'
+                '  "final_plan": {\n'
+                '    "entry_point": "Start_Node",\n'
+                '    "nodes": [ {"name":"Start_Node","implementation":"load_data"} ],\n'
+                '    "edges": [ {"from":"Start_Node","to":"Next_Node","condition":"on_success"} ]\n'
+                '  },\n'
+                '  "confidence_score": 0.90\n'
+                '}'
+            )
+        if role == "critic":
+            return (
+                '{\n'
+                '  "critique_summary": {\n'
+                '    "verdict": "ZATWIERDZONY",\n'
+                '    "statement": "Uzasadnienie...",\n'
+                '    "key_strengths": ["..."],\n'
+                '    "identified_weaknesses": [{"weakness":"...", "severity":"Low", "description":"..."}]\n'
+                '  },\n'
+                '  "quality_metrics": {\n'
+                '    "Complexity_Score_C": 3.1,\n'
+                '    "Robustness_Score_R": 50,\n'
+                '    "Innovation_Score_I": 100,\n'
+                '    "Completeness_Score": 100,\n'
+                '    "Overall_Quality_Q": 84.07\n'
+                '  },\n'
+                '  "final_synthesized_plan": {\n'
+                '    "entry_point": "Start_Node",\n'
+                '    "nodes": [ {"name":"Start_Node","implementation":"load_data"} ],\n'
+                '    "edges": [ {"from":"Start_Node","to":"Next_Node","condition":"on_success"} ]\n'
+                '  }\n'
+                '}'
+            )
+        return "{}"
+
+    def _try_parse_by_role(self, role: str, text: str):
+        try:
+            if role == "proposer":
+                parsed = self.parser.parse_agent_response(text)
+            elif role == "aggregator":
+                parsed = self.parser.parse_aggregator_response(text)
+            elif role == "critic":
+                parsed = self.parser.parse_critic_response(text)
+            else:
+                return None, f"Unknown role: {role}"
+            if parsed:
+                return parsed, None
+            return None, "Parser returned None"
+        except Exception as e:
+            return None, f"{type(e).__name__}: {e}"
+
+    def _repair_prompt_for(self, role: str, err_msg: str) -> str:
+        return (
+            f"Twoja poprzednia odpowiedź NIE SPEŁNIA wymaganego schematu dla roli '{role}'.\n"
+            f"Błąd/diagnoza parsera: {err_msg}\n\n"
+            f"Wymagana struktura JSON (minimalny przykład):\n{self._schema_example_for(role)}\n"
+            f"{REPAIR_JSON_SUFFIX}"
+        )
+
+    def _force_one_turn(self, agent, manager) -> str:
+        self._forced_speaker = agent.name
+        try:
+            manager.step()  # jeśli Twoja wersja AG2 nie wspiera .step(), użyj run(max_round=1)
+        except Exception:
+            pass
+        return self._get_last_message_from(manager.groupchat, agent.name) or ""
+
+    def _auto_repair_and_parse(self, role: str, agent, manager, last_text: str):
+        parsed, err = self._try_parse_by_role(role, last_text or "")
+        if parsed:
+            return parsed
+        
+        for attempt in range(1, MAX_REPAIR_ATTEMPTS + 1):
+            repair_msg = self._repair_prompt_for(role, err or "Invalid JSON")
+            manager.groupchat.messages.append({
+                "role": "user",
+                "name": "Orchestrator",
+                "content": repair_msg
+            })
+            process_log(f"[REPAIR][{role}] attempt {attempt}: requesting strictly JSON output.")
+            repaired_text = self._force_one_turn(agent, manager)
+            parsed, err2 = self._try_parse_by_role(role, repaired_text or "")
+            if parsed:
+                return parsed
+            err = err2
+        return None
+    
+    
+    
+    def _load_config(self, config_file: str):
+        """Wczytuje konfigurację agentów"""
+        with open(config_file, 'r', encoding='utf-8') as f:
+            self.config = json.load(f)
+    
+    
+    def _is_final_plan_message(self, m: dict) -> bool:
+        """Kończymy TYLKO na odpowiedzi CRITICA, gdy kończy się markerem."""
+        content = (m.get("content") or "").strip()
+        name = (m.get("name") or "").lower()
+        role = (m.get("role") or "").lower()
+        return role == "assistant" and content.endswith("PLAN_ZATWIERDZONY") and "critic" in name
+    
+    
+#     def custom_speaker_selection_logic(self, last_speaker: ConversableAgent, groupchat: GroupChat):
+#         """
+#         Zarządza cyklem debaty: Proposerzy -> Aggregator -> Krytyk.
+#         """
+#         messages = groupchat.messages
+
+#         # **POPRAWKA:** Jeśli rozmowa dopiero się zaczyna (tylko 1 wiadomość od Orchestratora),
+#         # zawsze zaczynaj od pierwszego proposera.
+#         if len(messages) <= 1:
+#             return self.proposer_agents[0]
+
+#         if last_speaker.name == "Master_Aggregator":
+#             return self.critic_agent
+
+#         if last_speaker.name == "Quality_Critic":
+#             last_message_content = messages[-1].get("content", "").upper()
+#             if "PLAN_ZATWIERDZONY" in last_message_content:
+#                 return None  # Zakończ debatę
+
+#             self.iteration_count += 1
+#             if self.iteration_count >= self.max_iterations:
+#                 process_log(f"Max iterations ({self.max_iterations}) reached. Ending debate.")
+#                 return None
+            
+#             process_log(f"--- Starting iteration {self.iteration_count + 1} ---")
+#             self._update_context_from_last_critique(messages[-1].get("content", ""))
+#             return self.proposer_agents[0]
+
+#         if last_speaker in self.proposer_agents:
+#             try:
+#                 idx = self.proposer_agents.index(last_speaker)
+#                 if idx < len(self.proposer_agents) - 1:
+#                     return self.proposer_agents[idx + 1]
+#                 else:
+#                     return self.aggregator_agent
+#             except ValueError:
+#                 return self.aggregator_agent
+        
+#         # Domyślny fallback na wszelki wypadek
+#         return self.proposer_agents[0]
+
+    def custom_speaker_selection_logic(self, last_speaker, groupchat):
+        """
+        Proposers → Aggregator → Critic. Jeśli Critic nie zatwierdzi, nowa iteracja od pierwszego Proposera.
+        Porównujemy po NAZWACH z historii wiadomości (AutoGen może podawać inne instancje agentów).
+        """
+        msgs = groupchat.messages
+        
+        for msg in msgs:
+            if "PLAN_ZATWIERDZONY" in msg.get("content", ""):
+                raise StopIteration("Plan zatwierdzony - kończymy debatę")
+        
+        last_name = (msgs[-1].get("name") or "").lower() if msgs else ""
+        last_content = (msgs[-1].get("content") or "")
+
+        # ❶ Po bootstrapie (ostatni był Orchestrator → wybieramy pierwszego proposera)
+        if last_name == (self.user_proxy.name or "").lower() and last_content.strip():
+            return self.proposer_agents[0]
+
+        # ❷ Po Aggregatorze → czas na Critica
+        if last_name == (self.aggregator_agent.name or "").lower():
+            return self.critic_agent
+
+        # ❸ Po Criticu → zatwierdzenie albo nowa iteracja
+        if last_name == (self.critic_agent.name or "").lower():
+            if "PLAN_ZATWIERDZONY" in last_content:
+                return None
+            # nowa iteracja
+            self.iteration_count += 1
+            if self.iteration_count >= self.max_iterations:
+                process_log(f"[FAILSAFE] Osiągnięto maksymalną liczbę iteracji ({self.max_iterations}). Koniec debaty.")
+                return None
+            process_log(f"===== ROZPOCZYNAM ITERACJĘ DEBATY NR {self.iteration_count + 1} =====")
+            self._update_context_from_last_critique(last_content)
+            return self.proposer_agents[0]
+
+        # ❹ Wewnątrz puli proposerów – leć kolejno po nazwach
+        proposer_names = [p.name.lower() for p in self.proposer_agents]
+        if last_name in proposer_names:
+            idx = proposer_names.index(last_name)
+            if idx < len(self.proposer_agents) - 1:
+                return self.proposer_agents[idx + 1]
+            return self.aggregator_agent  # po ostatnim proposerze mówi Aggregator
+
+        # ❺ Domyślnie – zacznij od pierwszego proposera
+        return self.proposer_agents[0]
+    
+    
+    
+    def _initialize_autogen_agents(self):
+        """Inicjalizuje agentów AutoGen dla debaty — minimalistycznie i niezawodnie."""
+        # Atrybuty ZAWSZE istnieją
+        self.proposer_agents = []
+        self.aggregator = None
+        self.critic = None
+        self.aggregator_agent = None
+        self.critic_agent = None
+
+        # User Proxy – nigdy nie kończy rozmowy
+        self.user_proxy = autogen.ConversableAgent( # <-- POPRAWKA
+        name="Orchestrator",
+        human_input_mode="NEVER",
+        llm_config=False,  # Ten agent nie potrzebuje LLM, tylko rozpoczyna rozmowę
+        system_message="You are the orchestrator who starts the debate and then observes."
+        )
+        self.user_proxy.silent = False
+        process_log("[INIT] UserProxy initialized")
+
+        # Proposerzy
+        for agent_config in self.config['agents']:
+            rn = agent_config['role_name'].lower()
+            if 'aggregator' in rn or 'critic' in rn:
+                continue
+            role = AgentRole(
+                role_name=agent_config['role_name'],
+                expertise_areas=agent_config['expertise_areas'],
+                thinking_style=agent_config['thinking_style']
+            )
+            prompt = self._build_proposer_prompt(role)
+            ag = autogen.ConversableAgent(
+                name=agent_config['role_name'].replace(" ", "_"),
+                llm_config=self._build_llm_config(agent_config['model']),
+                system_message=prompt,
+                human_input_mode="NEVER"
+            )
+            ag.silent = False
+            self.proposer_agents.append(ag)
+            process_log(f"[INIT] Proposer initialized: {ag.name}")
+
+        # Aggregator
+        aggregator_config = next((a for a in self.config['agents'] if 'aggregator' in a['role_name'].lower()), None)
+        if aggregator_config:
+            self.aggregator = autogen.ConversableAgent(
+                name="Master_Aggregator",
+                llm_config=self._build_llm_config(aggregator_config['model']),
+                system_message=MOAPrompts.get_aggregator_prompt(),
+                human_input_mode="NEVER",
+                is_termination_msg=lambda m: False,
+            )
+        else:
+            self.aggregator = autogen.ConversableAgent(
+                name="Master_Aggregator",
+                llm_config={"config_list": [{"model": "dummy", "api_type": "dummy"}]},
+                system_message=MOAPrompts.get_aggregator_prompt(),
+                human_input_mode="NEVER",
+                is_termination_msg=lambda m: False,
+            )
+        self.aggregator.silent = False
+        self.aggregator_agent = self.aggregator
+        process_log("[INIT] Aggregator initialized")
+
+        # Critic
+        critic_config = next((a for a in self.config['agents'] if 'critic' in a['role_name'].lower()), None)
+        if critic_config:
+            self.critic = autogen.ConversableAgent(
+                name="Quality_Critic",
+                llm_config=self._build_llm_config(critic_config['model']),
+                system_message=self._build_critic_prompt(),
+                human_input_mode="NEVER",
+                is_termination_msg=self._is_final_plan_message,
+            )
+        else:
+            self.critic = autogen.ConversableAgent(
+                name="Quality_Critic",
+                llm_config={"config_list": [{"model": "dummy", "api_type": "dummy"}]},
+                system_message=self._build_critic_prompt(),
+                human_input_mode="NEVER",
+                is_termination_msg=self._is_final_plan_message,
+            )
+        self.critic.silent = False
+        self.critic_agent = self.critic
+        process_log("[INIT] Critic initialized")
+
+        process_log(f"Initialized {len(self.proposer_agents)} proposers, 1 aggregator, 1 critic using AutoGen")
+    
+    
+    def _runtime_env_snapshot(self) -> dict:
+        # tylko presence, bez wartości
+        def present(k): return bool(os.getenv(k))
+        return {
+            "VERTEXAI_PROJECT": present("VERTEXAI_PROJECT") or present("GOOGLE_CLOUD_PROJECT") or present("GCP_PROJECT"),
+            "VERTEXAI_LOCATION": present("VERTEXAI_LOCATION") or present("GOOGLE_CLOUD_REGION"),
+            "ANTHROPIC_API_KEY": present("ANTHROPIC_API_KEY"),
+            "OPENAI_API_KEY": present("OPENAI_API_KEY"),
+        }
+
+    def _agent_signature(self, agent) -> dict:
+        llm = getattr(agent, "llm_config", {})
+        # wyciągamy pierwszy wpis z config_list dla krótkiego podpisu
+        vendor = None; model = None
+        try:
+            entry = (llm.get("config_list") or [{}])[0]
+            if "google" in entry:
+                vendor = "google"; model = entry["google"].get("model")
+            elif "anthropic" in entry:
+                vendor = "anthropic"; model = entry["anthropic"].get("model")
+            elif "openai" in entry:
+                vendor = "openai"; model = entry["openai"].get("model")
+            else:
+                vendor = (entry.get("api_type") or "unknown")
+                model = entry.get("model")
+        except Exception:
+            pass
+        return {"name": getattr(agent, "name", "?"), "vendor": vendor, "model": model}
+
+    def _sanity_ping_agent(self, agent) -> None:
+        tmp_user = UserProxyAgent(
+            "sanity_user", human_input_mode="NEVER", max_consecutive_auto_reply=1,
+            is_termination_msg=lambda m: True, code_execution_config=False
+        )
+        try:
+            tmp_user.initiate_chat(agent, message="Odpowiedz dokładnie słowem: PONG")
+        except Exception as e:
+            sig = self._agent_signature(agent)
+            snap = self._runtime_env_snapshot()
+            raise RuntimeError(
+                f"[SANITY PING FAILED] agent={sig} | env={snap} | err={type(e).__name__}: {e}"
+            ) from e
+    
+    
+    
+    
+    
+    
+    def _build_llm_config(self, model_config: dict) -> dict:
+        """
+        Buduje llm_config dla AutoGen na bazie agents_config.json,
+        używając config_api.basic_config_agent (ten sam format co w solo).
+        Google => Vertex/ADC (bez api_key), Anthropic/OpenAI => klucze z ENV/SM.
+        """
+        from config_api import basic_config_agent, PROJECT_ID as DEFAULT_PROJECT_ID, LOCATION as DEFAULT_LOCATION
+
+        # --- helpery ---
+        DEFAULT_MODEL_BY_PROVIDER = {
+            "google": "gemini-2.5-pro",
+            "anthropic": "claude-3-7-sonnet",
+            "openai": "gpt-4o-mini",
+        }
+
+        def _map_provider_to_api_type(provider: str) -> str:
+            p = (provider or "google").strip().lower()
+            return {
+                "google": "google", "gemini": "google", "vertex": "google",
+                "anthropic": "anthropic",
+                "openai": "openai", "azure_openai": "openai",
+            }.get(p, p)
+
+        def _validate_provider_model_pair(api_type: str, model: str) -> None:
+            m = (model or "").lower()
+            if api_type == "google" and not m.startswith("gemini"):
+                raise ValueError(f"Model '{model}' nie pasuje do providera 'google' (Vertex/Gemini).")
+            if api_type == "anthropic" and not m.startswith("claude"):
+                raise ValueError(f"Model '{model}' nie pasuje do 'anthropic'.")
+            if api_type == "openai" and not ("gpt" in m or m.startswith("o")):
+                raise ValueError(f"Model '{model}' nie wygląda na model OpenAI.")
+
+        # 1) provider -> api_type
+        api_type = _map_provider_to_api_type(model_config.get("provider"))
+
+        # 2) model + sanity
+        agent_name = model_config.get("model_name") or DEFAULT_MODEL_BY_PROVIDER.get(api_type, "gemini-2.5-pro")
+        _validate_provider_model_pair(api_type, agent_name)
+
+        # 3) projekt/region tylko dla Google/Vertex
+        project_id = model_config.get("project_id") or DEFAULT_PROJECT_ID
+        location   = model_config.get("location")   or DEFAULT_LOCATION
+        if api_type == "google" and not project_id:
+            raise RuntimeError("Vertex/Gemini: brak project_id. Ustaw VERTEXAI_PROJECT/GOOGLE_CLOUD_PROJECT albo podaj 'project_id' w agents_config.json.")
+
+        # 4) api_key tylko dla nie-Google
+        api_key_arg = None if api_type == "google" else model_config.get("api_key")
+
+        # 5) wołamy Twój builder
+        flat_list = basic_config_agent(
+            agent_name = agent_name,
+            api_type   = api_type,
+            location   = (location if api_type == "google" else None),   # <-- KLUCZOWA ZMIANA
+            project_id = (project_id if api_type == "google" else None), # <-- KLUCZOWA ZMIANA
+            api_key    = api_key_arg,
+        )
+        if not isinstance(flat_list, list) or not flat_list:
+            raise ValueError("basic_config_agent powinien zwrócić niepustą listę.")
+
+        entry = dict(flat_list[0])  # kopia, żeby móc czyścić
+
+        # 6) sanity: dla nie-Google WYTNJIJ project/location (gdyby kiedyś znów wpadły)
+        if api_type != "google":
+            entry.pop("project_id", None)
+            entry.pop("location", None)
+
+        # 7) finalny llm_config
+        return {
+            "config_list": [entry],
+            "temperature": float(model_config.get("temperature", 0.0)),
+            "seed": 42,
+            "cache_seed": 42,
+        }
+       
+    
+    def _build_proposer_prompt(self, role: AgentRole) -> str:
+        """Buduje prompt dla proposera z kontekstem"""
+        base_prompt = MOAPrompts.get_proposer_prompt(role, self.mission, self.node_library)
+        
+        # Dodaj dynamiczny kontekst
+        if self.current_context:
+            context_injection = self._build_context_injection()
+            return base_prompt + "\n\n" + context_injection
+        
+        return base_prompt
+    
+    def _build_critic_prompt(self) -> str:
+        """Buduje prompt dla krytyka"""
+        base_prompt = MOAPrompts.get_critic_prompt()
+
+        # Dodaj specjalną instrukcję o frazie kończącej i nowej strukturze JSON
+        additional_instruction = """
+
+        ## CRITICAL OUTPUT STRUCTURE
+        - If you REJECT the plan, provide your standard critique with weaknesses and suggestions.
+        - If you APPROVE the plan, your JSON response MUST contain a top-level key named `plan_approved`. Inside this key, you MUST place the complete, final, synthesized plan object. The other keys (like critique_summary) should still be present.
+
+        Example of an APPROVED response structure:
+        ```json
+        {
+          "critique_summary": {
+            "verdict": "ZATWIERDZONY",
+            "statement": "Plan jest doskonały, spełnia wszystkie wymagania.",
+            ...
+          },
+          "plan_approved": {
+            "entry_point": "Start_Node",
+            "nodes": [ ... ],
+            "edges": [ ... ]
+          },
+          ...
+        }
+        ```
+
+        ## GOLDEN TERMINATION RULE
+        If you approve the plan, you MUST end your ENTIRE response with the exact phrase on a new line, after the JSON block:
+        PLAN_ZATWIERDZONY
+        """
+
+        return base_prompt + additional_instruction
+    
+    def _build_context_injection(self) -> str:
+        """Buduje wstrzyknięcie kontekstu"""
+        parts = []
+        
+        if self.current_context.get('recommended_strategies'):
+            parts.append("## 💡 RECOMMENDED STRATEGIES (from memory):")
+            for strategy in self.current_context['recommended_strategies']:
+                parts.append(f"• {strategy}")
+        
+        if self.current_context.get('common_pitfalls'):
+            parts.append("\n## ⚠️ COMMON PITFALLS TO AVOID:")
+            for pitfall in self.current_context['common_pitfalls']:
+                parts.append(f"• {pitfall}")
+        
+        if self.current_context.get('last_feedback'):
+            parts.append(f"\n## 📝 LAST FEEDBACK:\n{self.current_context['last_feedback']}")
+        
+        return "\n".join(parts)
+    
+
+    def run_full_debate_cycle(self):
+        from autogen import GroupChat, GroupChatManager
+        import json, os, traceback
+        from datetime import datetime
+        self.reset()
+        # Lazy-guard: jeśli ktoś zawoła przed init
+        for must in ("user_proxy", "proposer_agents", "aggregator_agent", "critic_agent"):
+            if not hasattr(self, must) or getattr(self, must) is None:
+                self._initialize_autogen_agents()
+                break
+
+        # Szybkie asserty z czytelnym komunikatem
+        if not self.proposer_agents:
+            raise RuntimeError("Brak proposerów. Sprawdź agents_config.json (role bez 'aggregator'/'critic').")
+        if not self.aggregator_agent:
+            raise RuntimeError("Brak agregatora. Sprawdź agents_config.json (rola 'Aggregator').")
+        if not self.critic_agent:
+            raise RuntimeError("Brak krytyka. Sprawdź agents_config.json (rola 'Critic').")
+
+        max_rounds = len(self.proposer_agents) + 2
+
+        # Bootstrap misji – bez 'PLAN_ZATWIERDZONY' w treści, żeby manager nie kończył po 1 msg
+        bootstrap = (
+            f"## MISJA\n{self.mission}\n\n"
+    "Zaproponuj kompletny PLAN w formacie JSON {entry_point, nodes[], edges[]}.\n"
+    "Rola: Proposerzy proponują swoje wersje planu. Następnie Aggregator scala je w jedną, spójną propozycję. "
+    "Na końcu, Quality_Critic oceni finalny, zagregowany plan."
+        )
+
+        # Uczestnicy – tylko agenci
+        agents = [*self.proposer_agents, self.aggregator_agent, self.critic_agent]
+
+        turns_per_iteration = len(self.proposer_agents) + 2 
+        max_rounds = self.max_iterations * turns_per_iteration + 5 # Dodajemy bufor bezpieczeństwa
+
+        gc = GroupChat(
+            agents=agents,
+            messages=[],
+            max_round=max_rounds, # Używamy nowej, dynamicznie obliczonej wartości
+            speaker_selection_method=self.custom_speaker_selection_logic)
+        
+        manager = GroupChatManager(
+            groupchat=gc,
+            llm_config=self.aggregator_agent.llm_config,
+            human_input_mode="NEVER",
+            system_message=MOAPrompts.get_aggregator_prompt(),
+            is_termination_msg=self._is_final_plan_message
+        )
+
+        try:
+            # Start rozmowy – to uruchamia całą maszynkę
+            self.user_proxy.initiate_chat(manager, message=bootstrap, max_turns=max_rounds)
+        except StopIteration:
+            # To jest OK - plan został zatwierdzony
+            process_log("[SUCCESS] Debata zakończona przez StopIteration - plan zatwierdzony")
+        try:
+            # Szukamy finalnej odpowiedzi
+            final_plan_message_content = None
+            messages = manager.groupchat.messages
+            for msg in reversed(messages):
+                # Używamy Twojej nowej, precyzyjnej funkcji sprawdzającej
+                if "PLAN_ZATWIERDZONY" in msg.get("content", ""):
+                    final_plan_message_content = msg.get("content")
+                    break
+                    
+
+            # Jeśli znaleziono zatwierdzoną wiadomość, sparsuj ją
+            if final_plan_message_content:
+                process_log("[SUCCESS] Krytyk zatwierdził plan. Rozpoczynam parsowanie...")
+                try:
+                    parsed_critic_response = self.parser.parse_critic_response(final_plan_message_content)
+
+                    # TUTAJ WKLEJ NOWY KOD (zamiast linii 67-75):
+                    if parsed_critic_response:
+                        # Szukaj planu w różnych możliwych miejscach
+                        final_plan = None
+
+                        # Lista możliwych kluczy
+                        possible_keys = [
+                            "plan_approved",
+                            "final_synthesized_plan", 
+                            "final_plan",
+                            "synthesized_plan",
+                            "approved_plan",
+                            "plan"
+                        ]
+
+                        for key in possible_keys:
+                            if key in parsed_critic_response:
+                                candidate = parsed_critic_response[key]
+                                # Sprawdź czy to wygląda jak plan (ma entry_point i nodes)
+                                if isinstance(candidate, dict) and "entry_point" in candidate and "nodes" in candidate:
+                                    final_plan = candidate
+                                    process_log(f"[SUCCESS] Znaleziono plan pod kluczem: '{key}'")
+                                    break
+
+                        if final_plan:
+                            self.final_plan = final_plan
+                            self._save_successful_plan()
+                            return self.final_plan
+                        else:
+                            # Jeśli nie znaleziono planu w żadnym kluczu
+                            raise RuntimeError(f"Nie znaleziono planu w odpowiedzi. Dostępne klucze: {list(parsed_critic_response.keys())}")
+                    else:
+                        raise RuntimeError("Parser zwrócił None - nie udało się sparsować JSON")
+            
+                except Exception as parse_error:
+                    # Sytuacja awaryjna: nie udało się sparsować odpowiedzi krytyka
+                    process_log(f"[ERROR] Nie udało się sparsować odpowiedzi krytyka: {parse_error}")
+                    # Zapisz raport z surową odpowiedzią do analizy
+                    self._write_failure_report(
+                        reason="CRITIC_RESPONSE_PARSE_FAILURE",
+                        stage="post-debate_parsing",
+                        aggregator_raw=None, # Nieistotne na tym etapie
+                        critic_raw=final_plan_message_content,
+                        exception=parse_error
+                    )
+                    return None # Zwracamy None w przypadku błędu parsowania
+            else:
+                # Jeśli pętla się zakończyła i nie znaleziono zatwierdzonej wiadomości
+                raise RuntimeError("Debata zakończona, ale krytyk nigdy nie zwrócił wiadomości z 'PLAN_ZATWIERDZONY'.")
+
+        except Exception as e:
+            # Raport diagnostyczny
+            tb = traceback.format_exc()
+            os.makedirs("reports", exist_ok=True)
+            path = f"reports/failure_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump({"error_type": type(e).__name__,
+                           "error_message": str(e),
+                           "stacktrace": tb}, f, ensure_ascii=False, indent=2)
+            process_log(f"[FAILSAFE] Saved failure report: {path}")
+            process_log(tb)
+            return None
+    
+   
+
+    
+        
+    
+    def _update_context_from_last_critique(self, critique_message: str):
+        """Aktualizuje kontekst na podstawie krytyki"""
+        # Parsuj krytykę
+        parsed = self.parser.parse_agent_response(critique_message)
+        
+        if parsed:
+            feedback = f"Score: {parsed.get('score', 'N/A')}. "
+            feedback += f"Weaknesses: {', '.join(parsed.get('weaknesses', []))}. "
+            feedback += f"Improvements: {', '.join(parsed.get('improvements', []))}"
+            
+            self.current_context['last_feedback'] = feedback
+            
+            # Zapisz do pamięci
+            self.memory.add_iteration_feedback(
+                iteration=self.iteration_count,
+                feedback=feedback,
+                timestamp=datetime.now()
+            )
+        
+        # Odśwież kontekst z pamięci
+        self.current_context = self.memory.get_relevant_context(self.mission)
+        
+        process_log(f"Context updated for iteration {self.iteration_count}")
+    
+    def _extract_final_plan(self, messages: List[Dict]):
+        """Wyodrębnia zatwierdzony plan z historii wiadomości"""
+        # Szukaj od końca
+        for msg in reversed(messages):
+            content = msg.get("content", "")
+            name = msg.get("name", "")
+            
+            # Jeśli krytyk zatwierdził
+            if name == "Quality_Critic" and "PLAN_ZATWIERDZONY" in content:
+                # Znajdź ostatni plan od agregatora
+                for prev_msg in reversed(messages):
+                    if prev_msg.get("name") == "Master_Aggregator":
+                        parsed = self.parser.parse_agent_response(prev_msg.get("content", ""))
+                        if parsed:
+                            self.final_plan = parsed.get("final_plan", parsed.get("plan"))
+                            break
+                break
+        
+        process_log(f"Final plan extracted: {self.final_plan is not None}")
+    
+    def _save_successful_plan(self):
+        """Zapisuje udany plan do pamięci i pliku"""
+        if not self.final_plan:
+            return
+        
+        # Zapisz do pamięci
+        self.memory.add_successful_plan(
+            plan=self.final_plan,
+            mission=self.mission,
+            metadata={
+                'iterations': self.iteration_count,
+                'agents_count': len(self.proposer_agents)
+            }
+        )
+        
+        # Zapisz do pliku
+        output = {
+            "mission": self.mission,
+            "final_plan": self.final_plan,
+            "metadata": {
+                "iterations": self.iteration_count,
+                "timestamp": datetime.now().isoformat(),
+                "autogen_debate": True
+            }
+        }
+        
+        os.makedirs("outputs", exist_ok=True)
+        output_file = f"outputs/autogen_plan_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        
+        with open(output_file, "w", encoding="utf-8") as f:
+            json.dump(output, f, indent=2, ensure_ascii=False)
+        
+        print(f"💾 Plan saved to: {output_file}")
+        process_log(f"Successful plan saved to {output_file}")
+        
+        
+    def _debug_dump_transcript(self, groupchat, tail: int = 30):
+        """Wypisz ostatnie ~N wiadomości debaty, żeby było je widać w notebooku."""
+        from process_logger import log as process_log
+        try:
+            msgs = getattr(groupchat, "messages", [])[-tail:]
+            process_log("----- TRANSCRIPT (tail) -----")
+            for m in msgs:
+                role = m.get("role") or m.get("name") or "?"
+                name = m.get("name") or ""
+                content = m.get("content") or ""
+                head = (content[:400] + "...") if len(content) > 400 else content
+                process_log(f"{role} {name}: {head}")
+            process_log("----- END TRANSCRIPT -----")
+        except Exception as e:
+            process_log(f"[TRANSCRIPT_DUMP_FAIL] {type(e).__name__}: {e}")
+
+
+--- FILE: config_api.py ---
+
+import os
+import logging
+from enum import Enum
+from google.cloud import secretmanager
+import langchain
+from langchain.cache import SQLiteCache
+
+
+
+
+
+def get_secret(project_id: str, secret_id: str, version_id: str = "latest") -> str:
+    """Pobiera wartość sekretu z Google Secret Manager."""
+    client = secretmanager.SecretManagerServiceClient()
+    name = f"projects/{project_id}/secrets/{secret_id}/versions/{version_id}"
+    response = client.access_secret_version(request={"name": name})
+   
+    return response.payload.data.decode("UTF-8")
+
+
+class ApiType(Enum):
+    GOOGLE = "google"
+    ANTHROPIC = "anthropic"
+    OPENAI = "openai"
+    def __str__(self):
+        return self.value
+
+
+LOCATION="us-central1"
+PROJECT_ID="dark-data-discovery"
+
+#---------AGENTS--------:
+MAIN_AGENT="gemini-2.5-pro"
+API_TYPE_GEMINI=str(ApiType.GOOGLE)
+
+CRITIC_MODEL="claude-3-7-sonnet-20250219"
+ARCHITECT_MODEL ="claude-opus-4-1-20250805"
+CODE_MODEL="claude-sonnet-4-20250514"
+QUICK_SMART_MODEL="gemini-2.5-flash"
+
+GPT_MODEL = "gpt-4o" # Używamy gpt-4o jako odpowiednika "gpt-5"
+API_TYPE_OPENAI = str(ApiType.OPENAI)
+
+API_TYPE_SONNET = str(ApiType.ANTHROPIC)
+
+LANGCHAIN_API_KEY = get_secret(PROJECT_ID,"LANGCHAIN_API_KEY")
+ANTHROPIC_API_KEY=get_secret(PROJECT_ID,"ANTHROPIC_API_KEY")
+TAVILY_API_KEY = get_secret(PROJECT_ID,"TAVILY_API_KEY")
+OPENAI_API_KEY = get_secret(PROJECT_ID, "OPENAI_API_KEY")
+
+MEMORY_ENGINE_DISPLAY_NAME="memory-gamma-way"
+
+INPUT_FILE_PATH = "gs://super_model/data/structural_data/synthetic_fraud_dataset.csv"
+
+MAX_CORRECTION_ATTEMPTS=5
+
+
+
+os.environ["LANGCHAIN_TRACING_V2"] = "true"
+os.environ["LANGCHAIN_API_KEY"] = LANGCHAIN_API_KEY
+os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
+os.environ["LANGCHAIN_PROJECT"] = "Projekt Multi-Agent-System Dynamic-graphs"
+os.environ["ANTHROPIC_API_KEY"] =ANTHROPIC_API_KEY
+os.environ["TAVILY_API_KEY"] = TAVILY_API_KEY
+# os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
+
+os.environ.setdefault("MOA_SANITY_PING", "0")
+#---cache-------
+langchain.llm_cache = SQLiteCache(database_path=".langchain.db")
+
+
+
+
+#FUNKCJA KONFIGURACYJNA AGENTOW AUTOGEN
+def basic_config_agent(agent_name:str, api_type:str, location:str=None, project_id:str=None, api_key:str=None):
+    try:
+        configuration = {"model": agent_name}
+        configuration.update({"api_type": api_type})
+        if api_key: configuration["api_key"] = api_key
+        if project_id: configuration["project_id"] = project_id
+        if location: configuration["location"] = location
+
+        logging.info(f"Model configuration: {configuration}")
+        return [configuration]
+
+    except Exception as e:
+        logging.error(f"Failed to initialize Vertex AI or configure LLM: {e}")
+        print(f"Error: Failed to initialize Vertex AI or configure LLM. Please check your project ID, region, and permissions. Details: {e}")
+        exit()
+
+
+
+--- FILE: extended_llm_wrapper.py ---
+
+"""
+Rozszerzony wrapper LLM z bardziej realistycznymi dummy responses dla różnych ról
+"""
+import json
+import random
+from typing import Dict, Any
+
+class ExtendedLLMWrapper:
+    """
+    Rozszerzona wersja wrappera z różnorodnymi odpowiedziami dla demo
+    """
+    
+    @staticmethod
+    def generate_dummy_response(model_name: str, prompt: str) -> str:
+        """Generuje różne odpowiedzi w zależności od typu agenta"""
+        
+        # Sprawdź typ agenta na podstawie nazwy modelu lub promptu
+        if "causal" in model_name.lower() or "Causal" in prompt:
+            return ExtendedLLMWrapper._causal_analyst_response()
+        elif "creative" in model_name.lower() or "Creative" in prompt:
+            return ExtendedLLMWrapper._creative_planner_response()
+        elif "risk" in model_name.lower() or "Risk" in prompt:
+            return ExtendedLLMWrapper._risk_analyst_response()
+        elif "aggregator" in model_name.lower() or "Aggregator" in prompt:
+            return ExtendedLLMWrapper._aggregator_response(prompt)
+        elif "critic" in model_name.lower() or "Critic" in prompt:
+            return ExtendedLLMWrapper._critic_response(prompt)
+        else:
+            return ExtendedLLMWrapper._default_response()
+    
+    @staticmethod
+    def _causal_analyst_response() -> str:
+        """Odpowiedź analityka przyczynowego"""
+        response = {
+            "thought_process": [
+                "Analizuję potencjalne relacje przyczynowe w przepływie danych",
+                "Identyfikuję zmienne confounding i mediatory",
+                "Projektuję DAG (Directed Acyclic Graph) dla workflow"
+            ],
+            "plan": {
+                "entry_point": "validate_data",
+                "nodes": [
+                    {"name": "validate_data", "implementation": "validate_data"},
+                    {"name": "check_quality", "implementation": "check_quality"},
+                    {"name": "discover_causality", "implementation": "discover_causality"},
+                    {"name": "error_handler", "implementation": "error_handler"},
+                    {"name": "validate_model", "implementation": "validate_model"},
+                    {"name": "generate_report", "implementation": "generate_report"}
+                ],
+                "edges": [
+                    {"from": "validate_data", "to": "check_quality"},
+                    {"from": "check_quality", "to": "discover_causality"},
+                    {"from": "discover_causality", "to": "validate_model", "condition": "check_success"},
+                    {"from": "discover_causality", "to": "error_handler", "condition": "check_error"},
+                    {"from": "error_handler", "to": "discover_causality"},
+                    {"from": "validate_model", "to": "generate_report"}
+                ]
+            },
+            "confidence": 0.85,
+            "key_innovations": [
+                "Dodanie pętli retry dla discover_causality",
+                "Walidacja jakości przed analizą przyczynową"
+            ],
+            "risk_mitigation": {
+                "data_quality": "Podwójna walidacja przed analizą",
+                "algorithm_failure": "Error handler z retry mechanism"
+            }
+        }
+        return json.dumps(response)
+    
+    @staticmethod
+    def _creative_planner_response() -> str:
+        """Odpowiedź kreatywnego planera"""
+        response = {
+            "thought_process": [
+                "Myślę nieszablonowo - co gdyby pipeline sam się optymalizował?",
+                "Inspiracja z natury: mrówki znajdują optymalną ścieżkę",
+                "Dodaję element adaptacyjności i uczenia się"
+            ],
+            "plan": {
+                "entry_point": "load_data",
+                "nodes": [
+                    {"name": "load_data", "implementation": "load_data"},
+                    {"name": "clean_data", "implementation": "clean_data"},
+                    {"name": "optimize_performance", "implementation": "optimize_performance"},
+                    {"name": "discover_causality", "implementation": "discover_causality"},
+                    {"name": "train_model", "implementation": "train_model"},
+                    {"name": "notify_user", "implementation": "notify_user"}
+                ],
+                "edges": [
+                    {"from": "load_data", "to": "clean_data"},
+                    {"from": "clean_data", "to": "optimize_performance"},
+                    {"from": "optimize_performance", "to": "discover_causality"},
+                    {"from": "discover_causality", "to": "train_model"},
+                    {"from": "train_model", "to": "notify_user"}
+                ]
+            },
+            "confidence": 0.75,
+            "key_innovations": [
+                "Samooptymalizacja pipeline'u",
+                "Proaktywne powiadomienia użytkownika",
+                "Adaptacyjne dostosowanie do typu danych"
+            ],
+            "risk_mitigation": {
+                "performance": "Continuous optimization",
+                "user_experience": "Real-time notifications"
+            }
+        }
+        return json.dumps(response)
+    
+    @staticmethod
+    def _risk_analyst_response() -> str:
+        """Odpowiedź analityka ryzyka"""
+        response = {
+            "thought_process": [
+                "Identyfikuję wszystkie możliwe punkty awarii",
+                "Analizuję cascading failures",
+                "Projektuję redundancję i fallback paths"
+            ],
+            "plan": {
+                "entry_point": "validate_data",
+                "nodes": [
+                    {"name": "validate_data", "implementation": "validate_data"},
+                    {"name": "clean_data", "implementation": "clean_data"},
+                    {"name": "check_quality", "implementation": "check_quality"},
+                    {"name": "discover_causality", "implementation": "discover_causality"},
+                    {"name": "error_handler", "implementation": "error_handler"},
+                    {"name": "rollback", "implementation": "rollback"},
+                    {"name": "validate_model", "implementation": "validate_model"},
+                    {"name": "generate_report", "implementation": "generate_report"}
+                ],
+                "edges": [
+                    {"from": "validate_data", "to": "clean_data"},
+                    {"from": "clean_data", "to": "check_quality"},
+                    {"from": "check_quality", "to": "discover_causality", "condition": "quality_ok"},
+                    {"from": "check_quality", "to": "rollback", "condition": "quality_fail"},
+                    {"from": "discover_causality", "to": "validate_model", "condition": "success"},
+                    {"from": "discover_causality", "to": "error_handler", "condition": "error"},
+                    {"from": "error_handler", "to": "rollback", "condition": "cannot_recover"},
+                    {"from": "error_handler", "to": "discover_causality", "condition": "can_retry"},
+                    {"from": "validate_model", "to": "generate_report"},
+                    {"from": "rollback", "to": "generate_report"}
+                ]
+            },
+            "confidence": 0.90,
+            "key_innovations": [
+                "Comprehensive error handling",
+                "Multiple fallback paths",
+                "Quality gates at critical points"
+            ],
+            "risk_mitigation": {
+                "data_corruption": "Rollback mechanism",
+                "algorithm_failure": "Multiple retry with degradation",
+                "quality_issues": "Early detection and abort"
+            }
+        }
+        return json.dumps(response)
+    
+    @staticmethod
+    def _aggregator_response(prompt: str) -> str:
+        """Odpowiedź agregatora - synteza propozycji"""
+        # Sprawdź iterację jeśli jest w prompcie
+        iteration = 1
+        if "ITERATION:" in prompt:
+            try:
+                iteration = int(prompt.split("ITERATION:")[1].split("/")[0].strip())
+            except:
+                pass
+        
+        response = {
+            "thought_process": [
+                "Analizuję siły każdej propozycji",
+                "Identyfikuję synergie między podejściami",
+                "Łączę najlepsze elementy w spójną całość"
+            ],
+            "final_plan": {
+                "entry_point": "validate_data",
+                "nodes": [
+                    {"name": "validate_data", "implementation": "validate_data"},
+                    {"name": "clean_data", "implementation": "clean_data"},
+                    {"name": "check_quality", "implementation": "check_quality"},
+                    {"name": "optimize_performance", "implementation": "optimize_performance"},
+                    {"name": "discover_causality", "implementation": "discover_causality"},
+                    {"name": "error_handler", "implementation": "error_handler"},
+                    {"name": "rollback", "implementation": "rollback"},
+                    {"name": "train_model", "implementation": "train_model"},
+                    {"name": "validate_model", "implementation": "validate_model"},
+                    {"name": "generate_report", "implementation": "generate_report"},
+                    {"name": "notify_user", "implementation": "notify_user"}
+                ],
+                "edges": [
+                    {"from": "validate_data", "to": "clean_data"},
+                    {"from": "clean_data", "to": "check_quality"},
+                    {"from": "check_quality", "to": "optimize_performance", "condition": "quality_ok"},
+                    {"from": "check_quality", "to": "rollback", "condition": "quality_fail"},
+                    {"from": "optimize_performance", "to": "discover_causality"},
+                    {"from": "discover_causality", "to": "train_model", "condition": "success"},
+                    {"from": "discover_causality", "to": "error_handler", "condition": "error"},
+                    {"from": "error_handler", "to": "rollback", "condition": "max_retries"},
+                    {"from": "error_handler", "to": "discover_causality", "condition": "can_retry"},
+                    {"from": "train_model", "to": "validate_model"},
+                    {"from": "validate_model", "to": "generate_report"},
+                    {"from": "generate_report", "to": "notify_user"}
+                ]
+            },
+            "synthesis_reasoning": "Połączyłem solidną obsługę błędów od Risk Analyst, innowacyjną optymalizację od Creative Planner, i rygorystyczną walidację od Causal Analyst",
+            "component_sources": {
+                "Causal Analyst": ["validate_data", "check_quality", "validate_model"],
+                "Creative Planner": ["optimize_performance", "notify_user"],
+                "Risk Analyst": ["error_handler", "rollback", "conditional_edges"]
+            },
+            "confidence_score": 0.80 + iteration * 0.05,  # Rośnie z iteracjami
+            "improvements": [
+                "Dodanie cache dla powtarzalnych operacji",
+                "Implementacja progressive enhancement",
+                "Monitoring w czasie rzeczywistym"
+            ]
+        }
+        return json.dumps(response)
+    
+    @staticmethod
+    def _critic_response(prompt: str) -> str:
+        """Odpowiedź krytyka - ocena planu"""
+        # Sprawdź iterację
+        iteration = 1
+        if "ITERATION:" in prompt:
+            try:
+                iteration = int(prompt.split("ITERATION:")[1].split("/")[0].strip())
+            except:
+                pass
+        
+        # Dostosuj ocenę do iteracji
+        base_score = 60 + iteration * 8
+        approved = base_score >= 75 or iteration >= 4
+        
+        response = {
+            "approved": approved,
+            "score": min(base_score + random.randint(-5, 10), 95),
+            "strengths": [
+                "Comprehensive error handling",
+                "Good balance between robustness and efficiency",
+                "Clear separation of concerns",
+                "Innovative optimization approach"
+            ][:2 + iteration],  # Więcej mocnych stron w późniejszych iteracjach
+            "weaknesses": [
+                "Missing parallelization opportunities",
+                "No caching mechanism",
+                "Limited monitoring capabilities",
+                "Could benefit from more granular error types"
+            ][iteration-1:],  # Mniej słabości w późniejszych iteracjach
+            "feedback": f"Plan shows {'significant' if iteration > 2 else 'good'} improvement. {'Ready for deployment.' if approved else 'Further refinement needed.'}",
+            "improvements": [
+                "Add parallel processing for independent steps",
+                "Implement result caching",
+                "Add detailed logging and monitoring",
+                "Consider adding A/B testing capability"
+            ][iteration-1:] if not approved else []
+        }
+        
+        # KLUCZOWA ZMIANA: Dodaj frazę "PLAN_ZATWIERDZONY" jeśli zatwierdzamy
+        response_json = json.dumps(response)
+        
+        if approved:
+            # Dodaj magiczną frazę PO JSONie
+            response_json += "\n\nPLAN_ZATWIERDZONY"
+        
+        return response_json
+    
+    @staticmethod
+    def _default_response() -> str:
+        """Domyślna odpowiedź"""
+        response = {
+            "thought_process": ["Analyzing task", "Creating plan"],
+            "plan": {
+                "entry_point": "load_data",
+                "nodes": [
+                    {"name": "load_data", "implementation": "load_data"},
+                    {"name": "process", "implementation": "clean_data"},
+                    {"name": "output", "implementation": "generate_report"}
+                ],
+                "edges": [
+                    {"from": "load_data", "to": "process"},
+                    {"from": "process", "to": "output"}
+                ]
+            },
+            "confidence": 0.7
+        }
+        return json.dumps(response)
+
+# Zastąp oryginalną klasę LLMWrapper
+import llm_wrapper
+original_call = llm_wrapper.LLMWrapper.__call__
+
+def enhanced_call(self, prompt: str) -> str:
+    """Rozszerzone wywołanie z lepszymi dummy responses"""
+    if self.provider == "dummy":
+        return ExtendedLLMWrapper.generate_dummy_response(self.model_name, prompt)
+    else:
+        return original_call(self, prompt)
+
+# Monkey-patch oryginalnej klasy
+llm_wrapper.LLMWrapper.__call__ = enhanced_call
+
+
+--- FILE: llm_wrapper.py ---
+
+"""
+Wrapper modeli LLM. Umożliwia łatwą zamianę źródła modelu (np. OpenAI, lokalny model itp.).
+W tym przykładzie implementujemy klasę `LLMWrapper`, która w trybie demonstracyjnym
+generuje sztuczną odpowiedź. Aby użyć prawdziwego modelu (np. GPT‑5), należy
+uzupełnić implementację wywołania API w metodzie `__call__`.
+"""
+
+import os
+import json
+
+
+class LLMWrapper:
+    def __init__(self, provider: str, model_name: str, api_key_env: str = None, temperature: float = 0.5):
+        """
+        :param provider: dostawca modelu, np. "openai" lub "dummy" dla demonstracji
+        :param model_name: nazwa modelu u dostawcy
+        :param api_key_env: nazwa zmiennej środowiskowej z kluczem API
+        :param temperature: parametr kreatywności dla modeli typu GPT
+        """
+        self.provider = provider
+        self.model_name = model_name
+        self.temperature = temperature
+        self.api_key = os.environ.get(api_key_env) if api_key_env else None
+
+    def __call__(self, prompt: str) -> str:
+        """
+        Zwraca odpowiedź modelu na dany prompt. W wersji demonstracyjnej,
+        jeśli provider to "dummy", generuje prosty plan w formacie JSON.
+        W przeciwnym razie wymaga zaimplementowania wywołania API.
+        """
+        if self.provider == "dummy":
+            # Zwróć przykładowy JSON jako ciąg znaków
+            response = {
+                "thought_process": ["Analiza zadania", "Propozycja rozwiązania"],
+                "plan": {
+                    "entry_point": "start",
+                    "nodes": [
+                        {"name": "start", "implementation": "init_task"},
+                        {"name": "finish", "implementation": "end_task"}
+                    ],
+                    "edges": [
+                        {"from": "start", "to": "finish"}
+                    ]
+                },
+                "confidence": 0.85
+            }
+            return json.dumps(response)
+        elif self.provider == "openai":
+            # Przykład wywołania OpenAI ChatCompletion – wymaga biblioteki openai i klucza API
+            try:
+                import openai  # zaimportuj wewnątrz, aby uniknąć zależności dla dummy
+            except ImportError:
+                raise RuntimeError("Biblioteka openai nie jest zainstalowana. Zainstaluj ją lub użyj provider='dummy'.")
+            if not self.api_key:
+                raise RuntimeError("Brak klucza API. Ustaw zmienną środowiskową lub przekaż api_key_env.")
+            openai.api_key = self.api_key
+            # Buduj listę wiadomości zgodnie z API ChatCompletion
+            messages = [
+                {"role": "system", "content": "You are an advanced planning agent."},
+                {"role": "user", "content": prompt}
+            ]
+            response = openai.ChatCompletion.create(
+                model=self.model_name,
+                messages=messages,
+                temperature=self.temperature
+            )
+            return response.choices[0].message["content"]
+        else:
+            raise NotImplementedError(f"Provider '{self.provider}' nie jest obsługiwany.")
+
+
+--- FILE: memory_system.py ---
+
+"""
+System pamięci kontekstowej z uczeniem się z poprzednich iteracji
+"""
+from typing import Dict, List, Any, Optional
+from datetime import datetime
+import json
+import numpy as np
+from collections import deque
+import os
+
+# Zewnętrzne biblioteki do obliczania podobieństwa tekstu
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+# Lokalny logger procesu
+from process_logger import log as process_log
+
+class ContextMemory:
+    """
+    Zaawansowany system pamięci dla agentów MOA
+    Implementuje episodic memory, semantic memory i procedural memory
+    """
+    
+    def __init__(self, max_episodes: int = 100):
+        # Episodic Memory - konkretne wydarzenia/iteracje
+        self.episodes: deque = deque(maxlen=max_episodes)
+        
+        # Semantic Memory - wyuczone wzorce i koncepty
+        self.learned_patterns: Dict[str, Any] = {}
+        
+        # Procedural Memory - sprawdzone strategie
+        self.successful_strategies: List[Dict] = []
+        
+        # Working Memory - bieżący kontekst
+        self.current_context: Dict[str, Any] = {}
+        
+        # Meta-Memory - informacje o skuteczności pamięci
+        self.memory_performance: Dict[str, float] = {
+            "retrieval_accuracy": 1.0,
+            "pattern_recognition_rate": 0.0
+        }
+        
+        self._load_persistent_memory()
+    
+    def add_iteration_feedback(self, iteration: int, feedback: str, timestamp: datetime):
+        """Dodaje feedback z iteracji do pamięci epizodycznej"""
+        episode = {
+            "iteration": iteration,
+            "feedback": feedback,
+            "timestamp": timestamp.isoformat(),
+            "extracted_issues": self._extract_issues(feedback),
+            "success": False  # Będzie zaktualizowane jeśli plan zostanie zatwierdzony
+        }
+        
+        self.episodes.append(episode)
+        self._update_learned_patterns(episode)
+        # Zaloguj dodanie feedbacku wraz z potencjalnymi problemami
+        try:
+            process_log(
+                f"Add iteration feedback (iter={iteration}) issues={episode['extracted_issues']}"
+            )
+        except Exception:
+            pass
+    
+    def add_successful_plan(self, plan: Dict[str, Any], mission: str, metadata: Dict):
+        """Zapisuje udany plan do pamięci proceduralnej"""
+        strategy = {
+            "mission_type": self._classify_mission(mission),
+            "plan_structure": self._extract_plan_structure(plan),
+            "success_factors": metadata.get("success_factors", []),
+            "performance_metrics": metadata.get("metrics", {}),
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        self.successful_strategies.append(strategy)
+        self._persist_memory()
+        # Loguj dodanie udanego planu
+        try:
+            process_log(
+                f"Add successful plan for mission_type={strategy['mission_type']}, structure={strategy['plan_structure']}"
+            )
+        except Exception:
+            pass
+    
+    def get_relevant_context(self, mission: str) -> Dict[str, Any]:
+        """
+        Pobiera relevantny kontekst dla danej misji
+        Używa similarity search i pattern matching
+        """
+        context = {
+            "similar_missions": self._find_similar_missions(mission),
+            "relevant_patterns": self._get_relevant_patterns(mission),
+            "recommended_strategies": self._recommend_strategies(mission),
+            "common_pitfalls": self._get_common_pitfalls(),
+            "last_feedback": self._get_last_feedback()
+        }
+        # Zaloguj pobranie kontekstu
+        try:
+            process_log(
+                f"Retrieve context for mission='{mission}', suggestions={context['recommended_strategies']}"
+            )
+        except Exception:
+            pass
+        return context
+    
+    def _extract_issues(self, feedback: str) -> List[str]:
+        """Ekstraktuje konkretne problemy z feedbacku"""
+        issues: List[str] = []
+        # Rozszerzona lista wskaźników problemów (różne formy i synonimy)
+        problem_indicators = [
+            "brak", "niewystarczający", "niewystarczająca", "niepoprawny", "niepoprawna",
+            "błąd", "problem", "wadliwy", "wadliwa", "niekompletny", "niekompletna",
+            "niespójny", "niespójna", "niedostateczny", "niedostateczna",
+            "nieprawidłowy", "nieprawidłowa", "awaria", "usterka"
+        ]
+        for sentence in feedback.split("."):
+            s_low = sentence.lower()
+            if any(ind in s_low for ind in problem_indicators):
+                stripped = sentence.strip()
+                if stripped:
+                    issues.append(stripped)
+        return issues
+    
+    def _update_learned_patterns(self, episode: Dict):
+        """Aktualizuje wyuczone wzorce na podstawie nowego epizodu"""
+        for issue in episode["extracted_issues"]:
+            # Tworzymy hash problemu dla grupowania podobnych
+            issue_hash = self._hash_issue(issue)
+            
+            if issue_hash not in self.learned_patterns:
+                self.learned_patterns[issue_hash] = {
+                    "occurrences": 0,
+                    "examples": [],
+                    "solutions": []
+                }
+            
+            self.learned_patterns[issue_hash]["occurrences"] += 1
+            self.learned_patterns[issue_hash]["examples"].append(issue)
+    
+    def _classify_mission(self, mission: str) -> str:
+        """Klasyfikuje typ misji"""
+        mission_lower = mission.lower()
+        
+        if "przyczynow" in mission_lower or "causal" in mission_lower:
+            return "causal_analysis"
+        elif "dane" in mission_lower or "data" in mission_lower:
+            return "data_processing"
+        elif "model" in mission_lower:
+            return "model_validation"
+        elif "optymali" in mission_lower:
+            return "optimization"
+        else:
+            return "general"
+    
+    def _extract_plan_structure(self, plan: Dict) -> Dict:
+        """Ekstraktuje strukturalne cechy planu"""
+        return {
+            "num_nodes": len(plan.get("nodes", [])),
+            "num_edges": len(plan.get("edges", [])),
+            "has_error_handling": any("error" in str(node).lower() 
+                                     for node in plan.get("nodes", [])),
+            "has_validation": any("valid" in str(node).lower() 
+                                 for node in plan.get("nodes", [])),
+            "graph_complexity": self._calculate_complexity(plan)
+        }
+    
+    def _calculate_complexity(self, plan: Dict) -> float:
+        """Oblicza złożoność grafu"""
+        nodes = len(plan.get("nodes", []))
+        edges = len(plan.get("edges", []))
+        
+        if nodes == 0:
+            return 0.0
+        
+        # Złożoność cyklomatyczna aproksymowana
+        return (edges - nodes + 2) / nodes
+    
+    def _find_similar_missions(self, mission: str, top_k: int = 3) -> List[Dict]:
+        """Znajduje podobne misje z historii"""
+        similar = []
+        
+        for strategy in self.successful_strategies[-20:]:  # Ostatnie 20 strategii
+            similarity = self._calculate_similarity(
+                mission, 
+                strategy.get("mission_type", "")
+            )
+            similar.append({
+                "strategy": strategy,
+                "similarity": similarity
+            })
+        
+        similar.sort(key=lambda x: x["similarity"], reverse=True)
+        return similar[:top_k]
+    
+    def _calculate_similarity(self, text1: str, text2: str) -> float:
+        """
+        Oblicza podobieństwo między dwoma tekstami za pomocą TF‑IDF i kosinusowej miary odległości.
+        Jeżeli którykolwiek tekst jest pusty, zwraca 0.0. Użycie TF‑IDF pozwala na lepsze
+        odzwierciedlenie znaczenia słów w różnych kontekstach.
+        """
+        if not text1 or not text2:
+            return 0.0
+        try:
+            vectorizer = TfidfVectorizer().fit([text1, text2])
+            vectors = vectorizer.transform([text1, text2])
+            sim = cosine_similarity(vectors[0], vectors[1])[0][0]
+            return float(sim)
+        except Exception:
+            # W razie błędu zwróć minimalne podobieństwo
+            return 0.0
+    
+    def _get_relevant_patterns(self, mission: str) -> List[Dict]:
+        """Pobiera wzorce relevantne dla misji"""
+        relevant = []
+        
+        for pattern_hash, pattern_data in self.learned_patterns.items():
+            if pattern_data["occurrences"] >= 2:  # Wzorzec musi wystąpić co najmniej 2 razy
+                relevant.append({
+                    "pattern": pattern_data["examples"][0] if pattern_data["examples"] else "",
+                    "frequency": pattern_data["occurrences"],
+                    "solutions": pattern_data["solutions"]
+                })
+        
+        return sorted(relevant, key=lambda x: x["frequency"], reverse=True)[:5]
+    
+    def _recommend_strategies(self, mission: str) -> List[str]:
+        """Rekomenduje strategie na podstawie historii"""
+        recommendations: List[str] = []
+        mission_type = self._classify_mission(mission)
+        for strat in self.successful_strategies:
+            if strat.get("mission_type") == mission_type:
+                plan_struct = strat.get("plan_structure", {})
+                success_factors = strat.get("success_factors", [])
+                if plan_struct.get("has_error_handling"):
+                    recommendations.append(
+                        "Dodaj obsługę błędów – zwiększa odporność na nieprzewidziane sytuacje"
+                    )
+                if plan_struct.get("has_validation"):
+                    recommendations.append(
+                        "Włącz kroki walidacji – pomaga wykryć odchylenia i błędne dane"
+                    )
+                for factor in success_factors:
+                    recommendations.append(f"Zastosuj czynnik sukcesu: {factor}")
+        # Zwróć unikalne rekomendacje (maksymalnie 5)
+        return list(dict.fromkeys(recommendations))[:5]
+    
+    def _get_common_pitfalls(self) -> List[str]:
+        """Zwraca najczęstsze problemy z historii"""
+        pitfalls = []
+        
+        for pattern_data in self.learned_patterns.values():
+            if pattern_data["occurrences"] >= 3:
+                pitfalls.append(f"Częsty problem ({pattern_data['occurrences']}x): {pattern_data['examples'][0]}")
+        
+        return pitfalls[:5]
+    
+    def _get_last_feedback(self) -> Optional[str]:
+        """Pobiera ostatni feedback jeśli istnieje"""
+        if self.episodes:
+            return self.episodes[-1]["feedback"]
+        return None
+    
+    def _hash_issue(self, issue: str) -> str:
+        """Tworzy hash dla grupowania podobnych problemów"""
+        # Usuń liczby i szczegóły, zostaw istotę problemu
+        core_words = []
+        for word in issue.lower().split():
+            if len(word) > 3 and not word.isdigit():
+                core_words.append(word)
+        
+        return "_".join(sorted(core_words)[:5])
+    
+    def _persist_memory(self):
+        """
+        Zapisuje pamięć do pliku JSON. Plik JSON jest bezpieczniejszy i pozwala na łatwiejszy
+        podgląd zawartości niż pickle.
+        """
+        os.makedirs("memory", exist_ok=True)
+        memory_file = "memory/learned_strategies.json"
+        data = {
+            "patterns": self.learned_patterns,
+            "strategies": self.successful_strategies
+        }
+        try:
+            with open(memory_file, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            print(f"⚠ Nie udało się zapisać pamięci: {e}")
+    
+    def _load_persistent_memory(self):
+        """
+        Ładuje pamięć z pliku JSON, a w razie braku – z pliku pickle.
+        """
+        json_file = "memory/learned_strategies.json"
+        pickle_file = "memory/learned_strategies.pkl"
+        if os.path.exists(json_file):
+            try:
+                with open(json_file, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                self.learned_patterns = data.get("patterns", {})
+                self.successful_strategies = data.get("strategies", [])
+                print("✓ Załadowano pamięć z poprzednich sesji (JSON)")
+            except Exception as e:
+                print(f"⚠ Nie udało się załadować pamięci JSON: {e}")
+        elif os.path.exists(pickle_file):
+            try:
+                import pickle
+                with open(pickle_file, "rb") as f:
+                    data = pickle.load(f)
+                self.learned_patterns = data.get("patterns", {})
+                self.successful_strategies = data.get("strategies", [])
+                print("✓ Załadowano pamięć z poprzednich sesji (pickle)")
+            except Exception as e:
+                print(f"⚠ Nie udało się załadować pamięci pickle: {e}")
+
+
+--- FILE: moa_prompts.py ---
+
+"""
+Zaawansowane prompty dla systemu MOA z technikami Chain-of-Thought i Self-Consistency
+"""
+from typing import Dict, Any, List
+from config.models_config import AgentRole
+
+class MOAPrompts:
+    """Centralna biblioteka promptów dla systemu MOA"""
+    
+    # Uniwersalne zasady dla wszystkich agentów
+    UNIVERSAL_PRINCIPLES = """
+## UNIVERSAL REASONING & OUTPUT POLICY
+
+1) Deterministic, Structured Reasoning
+- Decompose the mission into atomic steps; make dependencies explicit.
+- Prefer DAG-like flows with clear success/failure transitions.
+
+2) Output Contract (STRICT)
+- Final output MUST be a single valid JSON object (no prose, no code fences, no comments).
+- Keys and schema names are in English; user-facing strings are in Polish.
+- If you risk exceeding token limits, compress explanations but keep structure intact.
+
+3) Memory & Retrieval Discipline
+- When WRITING memory: always store concise English bullet points or JSON objects
+  (normalized nouns, present tense, ≤200 tokens per write).
+- When READING memory: query only what is needed for the current decision.
+- Never copy large memory chunks into the output; summarize instead.
+
+4) Robustness by Design
+- For each critical step, state the expected preconditions and postconditions.
+- Include failure transitions (on_failure) and remediation (retry, rollback, notify).
+
+5) Metrics & Confidence
+- Quantify uncertainty (0–1). Justify with observable signals (e.g., data_quality).
+- Prefer measurable thresholds over vague conditions.
+
+6) Tooling Constraints
+- Use ONLY nodes present in the node library (exact implementation names).
+- Allowed edge.condition values: on_success, on_failure, retry, validated, partial_success,
+  needs_optimization, else (as a last-resort catch-all).
+"""
+    
+    @staticmethod
+    def get_proposer_prompt(role: AgentRole, mission: str, node_library: Dict) -> str:
+        """English prompt for Proposers; user-facing strings must be Polish."""
+        style_mod = {
+            "analytical": "Be precise and data-driven; justify every decision with observable signals.",
+            "creative": "Explore non-obvious combinations and alternative paths; propose at least one novel twist.",
+            "critical": "Stress-test assumptions and highlight edge cases and single points of failure.",
+            "systematic": "Aim for holistic, end-to-end coherence with explicit interfaces between steps."
+        }
+
+        expertise = f"""
+    # ROLE: {role.role_name}
+
+    ## YOUR EXPERTISE
+    You specialize in: {', '.join(role.expertise_areas)}
+
+    ## THINKING STYLE
+    {style_mod.get(role.thinking_style, "Default to clarity and rigor.")}
+
+    {MOAPrompts.UNIVERSAL_PRINCIPLES}
+
+    ## ROLE-SPECIFIC TECHNIQUES
+    """
+        rl = role.role_name.lower()
+        if "causal" in rl:
+            expertise += """
+    - Causal Reasoning:
+      * Identify variables and likely causal relations (confounders, mediators).
+      * Prefer testable interventions; annotate assumptions explicitly.
+    """
+        elif "strategic" in rl:
+            expertise += """
+    - Strategic Planning:
+      * SWOT per component; map critical dependencies and critical path.
+      * Prepare 1–2 realistic what-if branches with measurable triggers.
+    """
+        elif "creative" in rl:
+            expertise += """
+    - Creative Expansion:
+      * Apply SCAMPER to at least two nodes.
+      * Propose 3 alternative micro-approaches and pick one with rationale.
+    """
+        elif "risk" in rl or "quality" in rl:
+            expertise += """
+    - Risk/Quality:
+      * FMEA table in your head; identify top 3 failure modes and mitigations.
+      * Add explicit rollback/notify paths for irrecoverable states.
+    """
+
+        return f"""
+    {expertise}
+
+    ## MISSION
+    {mission}
+
+    ## AVAILABLE NODE LIBRARY
+    {MOAPrompts._format_node_library(node_library)}
+
+    ## OUTPUT CONTRACT (ONLY JSON, NO PROSE)
+    - Keys in English; user-facing strings in Polish.
+    - Use ONLY implementations from the node library.
+    - Ensure failure paths exist for critical steps.
+    - Keep "thought_process" and justifications concise in Polish.
+
+    Expected JSON structure:
+    {{
+      "thought_process": ["Krok 1: ...", "Krok 2: ...", "Krok 3: ..."],
+      "plan": {{
+        "entry_point": "Start_Node_Name",
+        "nodes": [
+          {{"name": "Load_Data", "implementation": "load_data"}},
+          {{"name": "Clean_Data", "implementation": "clean_data"}},
+          {{"name": "Validate_Data", "implementation": "validate_data"}}
+        ],
+        "edges": [
+          {{"from": "Load_Data", "to": "Clean_Data", "condition": "on_success"}},
+          {{"from": "Load_Data", "to": "Error_Handler", "condition": "on_failure"}}
+        ]
+      }},
+      "confidence": 0.80,
+      "key_innovations": ["Innowacja 1", "Innowacja 2"],
+      "risk_mitigation": {{"Ryzyko A": "Mitigacja A", "Ryzyko B": "Mitigacja B"}}
+    }}
+    - Do NOT include code fences or comments.
+    - When you write ANY memory (outside this output), save it in concise EN.
+"""
+    
+    @staticmethod
+    def get_aggregator_prompt() -> str:
+        """English prompt for the Master Aggregator; output JSON only; user-facing text Polish."""
+        return """
+    # ROLE: MASTER AGGREGATOR — SYNTHESIS & GOVERNANCE
+
+    You merge multiple proposals into a single, coherent, executable plan with strong
+    robustness and measurable gates. You remove duplication, resolve conflicts, and
+    preserve the best ideas.
+
+    {UNIVERSAL_POLICY}
+
+    ## SYNTHESIS PROTOCOL
+    1) Score each proposal on: logical soundness, feasibility, innovation, robustness.
+    2) Extract the best subcomponents and compose them (component interfaces must align).
+    3) Resolve conflicts by explicit trade-offs; document rationale concisely (Polish).
+    4) Guarantee failure paths (on_failure/rollback/notify) for critical nodes.
+    5) Prefer measurable conditions (e.g., data_quality > 0.9) where applicable.
+
+    ## META-LEARNING HOOKS
+    - If prior successful patterns are known, prefer them; otherwise, annotate assumptions.
+
+    ## OUTPUT CONTRACT (ONLY JSON, NO PROSE)
+    - Keys in English; user-facing strings in Polish.
+    - Provide a final executable DAG under `final_plan`.
+    - Include a brief Polish synthesis rationale and confidence score in [0,1].
+
+    Expected JSON structure:
+    {
+      "thought_process": ["Łączę elementy X i Y...", "Ujednolicam warunki..."],
+      "final_plan": {
+        "entry_point": "Load_Data",
+        "nodes": [
+          {"name": "Load_Data", "implementation": "load_data"},
+          {"name": "Clean_Data", "implementation": "clean_data"},
+          {"name": "Validate_Data", "implementation": "validate_data"},
+          {"name": "Error_Handler", "implementation": "error_handler"},
+          {"name": "Rollback_Changes", "implementation": "rollback"},
+          {"name": "Generate_Report", "implementation": "generate_report"}
+        ],
+        "edges": [
+          {"from": "Load_Data", "to": "Clean_Data", "condition": "on_success"},
+          {"from": "Load_Data", "to": "Error_Handler", "condition": "on_failure"},
+          {"from": "Clean_Data", "to": "Validate_Data", "condition": "on_success"}
+        ]
+      },
+      "synthesis_reasoning": "Krótko po polsku: dlaczego taki układ jest najlepszy.",
+      "component_sources": {"Causal Analyst": ["Validate_Data"], "Creative Planner": ["Generate_Report"]},
+      "confidence_score": 0.90
+    }
+    - Do NOT include code fences or comments.
+    - Any memory writes you perform must be saved in concise English.
+    """.replace("{UNIVERSAL_POLICY}", MOAPrompts.UNIVERSAL_PRINCIPLES)
+    
+    @staticmethod
+    def get_critic_prompt() -> str:
+        return """
+# ROLE: QUALITY CRITIC — ADVERSARIAL VALIDATOR
+
+You are the final gate. Stress-test structure, semantics, robustness and compliance
+with the mission. If and only if the plan passes, approve it.
+
+{UNIVERSAL_POLICY}
+
+## VALIDATION CHECKLIST
+- Structural: valid JSON; required fields present; node names & implementations align with library.
+- Semantic: mission alignment; logical flow; dependencies satisfied; measurable conditions preferred.
+- Robustness: explicit error paths; rollback and notify; identify SPOFs and mitigations.
+- Metrics: compute concise quality metrics; justify scores briefly in Polish.
+
+## DECISION RULE
+- APPROVE only if Overall Quality >= threshold you deem reasonable and no critical gaps remain.
+- When you APPROVE, set `critique_summary.verdict` to "ZATWIERDZONY" (Polish, uppercase).
+- Also include a short Polish justification.
+
+## OUTPUT CONTRACT (ONLY JSON, NO PROSE)
+- Keys in English; user-facing strings in Polish.
+- If approved, include a complete `final_synthesized_plan` (same schema as proposer/aggregator).
+- Optionally include `decision_marker`: "PLAN_ZATWIERDZONY" to facilitate orchestration.
+
+Expected JSON structure:
+{
+  "critique_summary": {
+    "verdict": "ZATWIERDZONY",
+    "statement": "Krótki powód po polsku.",
+    "key_strengths": ["Mocna strona 1", "Mocna strona 2"],
+    "identified_weaknesses": [
+      {"weakness": "Słabość X", "severity": "Medium", "description": "Dlaczego to problem"}
+    ]
+  },
+  "quality_metrics": {
+    "Complexity_Score_C": 3.1,
+    "Robustness_Score_R": 50,
+    "Innovation_Score_I": 100,
+    "Completeness_Score": 100,
+    "Overall_Quality_Q": 84.07
+  },
+  "final_synthesized_plan": {
+    "entry_point": "Load_Data",
+    "nodes": [
+      {"name": "Load_Data", "implementation": "load_data"},
+      {"name": "Clean_Data", "implementation": "clean_data"}
+    ],
+    "edges": [
+      {"from": "Load_Data", "to": "Clean_Data", "condition": "on_success"}
+    ]
+  },
+  "decision_marker": "PLAN_ZATWIERDZONY"
+}
+- Do NOT include code fences or comments.
+-In the final response, end with a line containing only PLAN_ZATWIERDZONY.
+- Any memory writes you perform must be saved in concise English.
+""".replace("{UNIVERSAL_POLICY}", MOAPrompts.UNIVERSAL_PRINCIPLES)
+    
+    @staticmethod
+    def _format_node_library(node_library: Dict) -> str:
+        """Formatuje bibliotekę węzłów dla promptu"""
+        formatted = []
+        for name, details in node_library.items():
+            formatted.append(f"- {name}: {details.get('description', 'Brak opisu')}")
+        return "\n".join(formatted)
+
+
+--- FILE: models_config.py ---
+
+"""
+Definicje struktur danych używanych do opisu ról agentów.
+"""
+
+from dataclasses import dataclass
+from typing import List
+
+
+@dataclass
+class AgentRole:
+    """
+    Klasa opisująca rolę agenta w systemie multi‑agentowym.
+
+    :param role_name: Nazwa roli (np. "Causal Analyst", "Creative Planner").
+    :param expertise_areas: Lista dziedzin, w których agent się specjalizuje.
+    :param thinking_style: Styl myślenia ("analytical", "creative", "critical", "systematic" itp.).
+    """
+    role_name: str
+    expertise_areas: List[str]
+    thinking_style: str
+
+
+--- FILE: process_logger.py ---
+
+"""
+Prosty logger procesu generowania planu i rozmów między agentami.
+Wszystkie komunikaty są dopisywane do pliku tekstowego z sygnaturą czasu.
+"""
+
+import sys
+from datetime import datetime  # zamiast: import datetime
+
+LOG_FILE = "process_log.txt"
+STREAM_STDOUT = True
+
+def log(msg: str):
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # zamiast: datetime.datetime.now()
+    line = f"[{ts}] {msg}"
+    try:
+        with open(LOG_FILE, "a", encoding="utf-8") as f:
+            f.write(line + "\n")
+    except Exception:
+        pass
+    if STREAM_STDOUT:
+        print(line, file=sys.stdout, flush=True)
+
+
+--- FILE: response_parser.py ---
+
+"""
+Inteligentny parser odpowiedzi agentów z auto-korekcją
+"""
+import json
+import re
+from typing import Dict, Any, Optional
+import ast
+
+# Lokalny logger procesu
+from process_logger import log as process_log
+
+class ResponseParser:
+    """
+    Zaawansowany parser który radzi sobie z różnymi formatami odpowiedzi
+    """
+    
+    def parse_agent_response(self, response: str) -> Optional[Dict[str, Any]]:
+        """
+        Parsuje odpowiedź agenta próbując różnych strategii
+        """
+        if not response:
+            return None
+        # Zaloguj otrzymaną odpowiedź (obcinamy do 200 znaków, aby log nie rósł nadmiernie)
+        process_log(f"Received response: {response[:200]}")
+        
+        # Strategia 1: Czysty JSON
+        parsed = self._try_pure_json(response)
+        if parsed:
+            process_log(f"Parsed using pure JSON: {parsed}")
+            return parsed
+        
+        # Strategia 2: JSON z dodatkami (markdown, komentarze)
+        parsed = self._try_extract_json(response)
+        if parsed:
+            process_log(f"Parsed using extract JSON: {parsed}")
+            return parsed
+        
+        # Strategia 3: Python dict jako string (bez wykonywania kodu)
+        parsed = self._try_python_dict(response)
+        if parsed:
+            process_log(f"Parsed using python-like dict: {parsed}")
+            return parsed
+        
+        # Strategia 4: Strukturalna ekstrakcja
+        parsed = self._try_structural_extraction(response)
+        if parsed:
+            process_log(f"Parsed using structural extraction: {parsed}")
+            return parsed
+        
+        # Strategia 5: AI-based repair (używa regex i heurystyk)
+        parsed = self._try_ai_repair(response)
+        if parsed:
+            process_log(f"Parsed using AI repair: {parsed}")
+            return parsed
+        
+        process_log(f"Parse failed: {response[:200]}")
+        print(f"⚠ Nie udało się sparsować odpowiedzi: {response[:100]}...")
+        return None
+    
+    def _try_pure_json(self, response: str) -> Optional[Dict]:
+        """Próbuje parsować jako czysty JSON"""
+        try:
+            return json.loads(response.strip())
+        except:
+            return None
+    
+    def _try_extract_json(self, response: str) -> Optional[Dict]:
+        """Ekstraktuje JSON z tekstu"""
+        # Szukamy JSON w blokach kodu
+        json_pattern = r'```(?:json)?\s*(\{.*?\})\s*```'
+        match = re.search(json_pattern, response, re.DOTALL)
+        if match:
+            try:
+                return json.loads(match.group(1))
+            except:
+                pass
+        
+        # Szukamy pierwszego { i ostatniego }
+        start = response.find('{')
+        end = response.rfind('}')
+        
+        if start != -1 and end != -1 and end > start:
+            try:
+                return json.loads(response[start:end+1])
+            except:
+                pass
+        
+        return None
+    
+    def _try_python_dict(self, response: str) -> Optional[Dict]:
+        """
+        Próbuje sparsować słownik zapisany w notacji Pythona bez użycia eval. Wyszukuje
+        pierwszą strukturę w nawiasach klamrowych, następnie zamienia pojedyncze cudzysłowy
+        na podwójne i dodaje cudzysłowy do kluczy, aby użyć json.loads. Jeśli napotka błąd,
+        zwraca None.
+        """
+        try:
+            # Wyszukaj fragment przypominający słownik
+            dict_pattern = r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}'
+            match = re.search(dict_pattern, response)
+            if not match:
+                return None
+            obj_str = match.group(0)
+            # Zamień pojedyncze cudzysłowy na podwójne
+            json_like = obj_str.replace("'", '"')
+            # Dodaj cudzysłowy do kluczy, jeśli ich brakuje
+            json_like = re.sub(r'(?<!\")\b([A-Za-z_][A-Za-z0-9_]*)\b\s*:', r'"\1":', json_like)
+            return json.loads(json_like)
+        except Exception:
+            return None
+    
+    def _try_structural_extraction(self, response: str) -> Optional[Dict]:
+        """Ekstraktuje strukturę na podstawie kluczowych słów"""
+        result = {}
+        
+        # Szukamy kluczowych sekcji
+        patterns = {
+            "thought_process": r'(?:thought_process|thinking|reasoning)[:\s]+([^\n]+(?:\n(?!\w+:)[^\n]+)*)',
+            "entry_point": r'(?:entry_point|start)[:\s]+["\']?(\w+)["\']?',
+            "confidence": r'(?:confidence|certainty)[:\s]+(\d*\.?\d+)',
+            "nodes": r'nodes[:\s]+\[(.*?)\]',
+            "edges": r'edges[:\s]+\[(.*?)\]'
+        }
+        
+        for key, pattern in patterns.items():
+            match = re.search(pattern, response, re.IGNORECASE | re.DOTALL)
+            if match:
+                value = match.group(1).strip()
+                
+                if key == "confidence":
+                    try:
+                        result[key] = float(value)
+                    except:
+                        result[key] = 0.5
+                elif key in ["nodes", "edges"]:
+                    # Próbuj sparsować jako listę
+                    try:
+                        result[key] = ast.literal_eval(f"[{value}]")
+                    except:
+                        result[key] = []
+                elif key == "thought_process":
+                    # Podziel na kroki
+                    steps = [s.strip() for s in value.split('\n') if s.strip()]
+                    result[key] = steps
+                else:
+                    result[key] = value
+        
+        return result if result else None
+    
+    def _try_ai_repair(self, response: str) -> Optional[Dict]:
+        """Próbuje naprawić JSON używając heurystyk"""
+        # Usuń komentarze
+        response = re.sub(r'//.*?\n', '', response)
+        response = re.sub(r'/\*.*?\*/', '', response, flags=re.DOTALL)
+        
+        # Napraw typowe błędy
+        repairs = [
+            (r',\s*}', '}'),  # Usuń trailing commas
+            (r',\s*]', ']'),
+            (r'"\s*:\s*"([^"]*)"(?=[,}])', r'": "\1"'),  # Napraw cudzysłowy
+            (r'(\w+)(?=\s*:)', r'"\1"'),  # Dodaj cudzysłowy do kluczy
+            (r':\s*([^",\[\{}\]]+)(?=[,}])', r': "\1"'),  # Dodaj cudzysłowy do wartości
+        ]
+        
+        for pattern, replacement in repairs:
+            response = re.sub(pattern, replacement, response)
+        
+        # Spróbuj ponownie
+        return self._try_pure_json(response)
+
+
+--- FILE: run_debate.ipynb ---
+
+from autogen_orchestrator import AutoGenMOAOrchestrator
+import config_api
+
+
+import vertexai
+vertexai.init(project="dark-data-discovery", location="us-central1")
+
+# Biblioteka węzłów używana do generowania planów
+NODE_LIBRARY = {
+    'load_data': {'description': 'Wczytuje dane z różnych źródeł'},
+    'clean_data': {'description': 'Czyści dane'},
+    'validate_data': {'description': 'Waliduje dane'},
+    'discover_causality': {'description': 'Odkrywa relacje przyczynowe (może zawieść)'},
+    'error_handler': {'description': 'Obsługuje błędy'},
+    'rollback': {'description': 'Cofa zmiany'},
+    'generate_report': {'description': 'Generuje raport'},
+    'validate_model': {'description': 'Waliduje model'},
+    'optimize_performance': {'description': 'Optymalizuje wydajność'},
+    'train_model': {'description': 'Uczy model'},
+    'notify_user': {'description': 'Powiadamia użytkownika'}
+}
+
+# Możesz podać misję na stałe albo poprosić użytkownika o wpisanie
+mission = input("Podaj opis misji: ").strip()
+if not mission:
+    mission = "Stwórz prosty pipeline do analizy danych CSV"
+
+# Inicjalizacja orchestratora z definicją misji i ścieżką do konfiguracji agentów
+orchestrator = AutoGenMOAOrchestrator(
+    mission=mission,
+    node_library=NODE_LIBRARY,
+    config_file="agents_config.json"
+)
+
+# Uruchom pełną debatę; wynik to słownik z finalnym planem lub None
+final_plan = orchestrator.run_full_debate_cycle()
+
+# Wyświetl wynik w czytelnej formie
+if final_plan:
+    import json
+    print("\n✅ Zatwierdzony plan:")
+    print(json.dumps(final_plan, indent=2, ensure_ascii=False))
+else:
+    print("\n❌ Nie udało się uzyskać zatwierdzonego planu.")
+# --- Koniec komórki ---
+
+
+
+--- FILE: structured_response_parser.py ---
+
+"""
+Structured parser oparty na Pydantic.  Zamiast heurystycznych prób parsowania
+ręcznego, wykorzystuje schematy Pydantic do walidacji odpowiedzi LLM.  Ten
+moduł zastępuje dotychczasowy `response_parser` w nowej konfiguracji.
+
+Model `ProposerResponse` definiuje minimalną strukturę planu wygenerowanego
+przez agentów‑proposerów.  Model `AggregatorResponse` rozszerza go o pole
+`final_plan` oraz metadane używane przez agregatora.  Model `CriticResponse`
+zawiera ocenę, listę mocnych i słabych stron oraz ewentualne sugestie
+poprawek, zgodnie z założonym formatem JSON.
+
+Jeśli odpowiedź nie jest poprawnym JSON‑em (np. zawiera `````markdown````
+fences) lub nie spełnia schematu, parser zwraca `None`.
+"""
+
+from __future__ import annotations
+
+import json
+import re
+from typing import List, Optional, Dict, Any
+from process_logger import log as process_log
+from pydantic import BaseModel, ValidationError, Field
+
+
+class ProposerPlan(BaseModel):
+    """Reprezentuje plan proponowany przez agenta‐proposera."""
+
+    entry_point: str = Field(..., description="Nazwa pierwszego węzła w planie")
+    nodes: List[Dict[str, Any]] = Field(..., description="Lista węzłów planu")
+    edges: List[Dict[str, Any]] = Field(..., description="Lista krawędzi planu")
+
+
+class ProposerResponse(BaseModel):
+    """Struktura odpowiedzi agenta proponującego."""
+
+    thought_process: List[str] = Field(..., description="Opis kroków rozumowania")
+    plan: ProposerPlan = Field(..., description="Plan w formacie grafu")
+    confidence: float = Field(..., ge=0.0, le=1.0, description="Pewność (0–1)")
+    key_innovations: Optional[List[str]] = Field(default_factory=list)
+    risk_mitigation: Optional[Dict[str, Any]] = Field(default_factory=dict)
+
+
+class AggregatorResponse(BaseModel):
+    """Struktura odpowiedzi agregatora.  Rozszerza odpowiedź proponera o finalny plan."""
+
+    thought_process: List[str]
+    final_plan: ProposerPlan
+    synthesis_reasoning: Optional[str]
+    component_sources: Optional[Dict[str, Any]]
+    confidence_score: Optional[float]
+    improvements: Optional[List[str]] = Field(default_factory=list)
+
+
+class CriticResponse(BaseModel):
+    """Struktura odpowiedzi krytyka."""
+
+    approved: bool
+    score: float = Field(..., ge=0.0, le=100.0)
+    strengths: List[str] = Field(default_factory=list)
+    weaknesses: List[str] = Field(default_factory=list)
+    feedback: Optional[str]
+    improvements: Optional[List[str]] = Field(default_factory=list)
+
+
+class StructuredResponseParser:
+    """
+    Parser, który wykorzystuje modele Pydantic do walidacji i konwersji odpowiedzi
+    na słowniki.  Oczekuje, że agent zwraca poprawny JSON zgodny z jednym z
+    powyższych schematów.  Można łatwo rozszerzyć o kolejne typy odpowiedzi.
+    """
+
+    def __init__(self) -> None:
+        pass
+
+    def _strip_code_fences(self, response: str) -> str:
+        """Usuwa bloki kodu (```json ... ```) z odpowiedzi."""
+        # Usuń bloki ```json ... ``` lub ``` ... ```
+        pattern = r"```(?:json)?\s*(\{.*?\})\s*```"
+        match = re.search(pattern, response, re.DOTALL)
+        if match:
+            return match.group(1)
+        return response
+
+    def parse_agent_response(self, response: str) -> Optional[Dict[str, Any]]:
+        """
+        Przetwarza odpowiedź agenta i próbuje ją zmapować na jeden z
+        zdefiniowanych modeli.  Zwraca zserializowaną postać słownikową,
+        lub None, jeśli nie można sparsować.
+        """
+        if not response:
+            return None
+
+        # Usuń otaczające bloki kodu
+        cleaned = self._strip_code_fences(response.strip())
+
+        # Spróbuj sparsować jako JSON
+        try:
+            data = json.loads(cleaned)
+        except Exception:
+            return None
+
+        # Kolejno próbuj dopasować do modeli
+        for model_cls in (ProposerResponse, AggregatorResponse, CriticResponse):
+            try:
+                obj = model_cls.parse_obj(data)
+                return obj.dict()
+            except ValidationError:
+                continue
+
+        # Jeśli nic nie pasuje, zwróć oryginalne dane
+        return data
+    
+    def parse_critic_response(self, text: str):
+        """
+        Parsuje odpowiedź krytyka - zwraca CAŁY JSON
+        """
+        import json
+        import re
+
+        if not text:
+            return None
+
+        try:
+            # Usuń markdown code blocks
+            clean_text = text.strip()
+
+            # Usuń ```json i ```
+            clean_text = re.sub(r'```json\s*', '', clean_text)
+            clean_text = re.sub(r'```\s*', '', clean_text)
+
+            # Usuń PLAN_ZATWIERDZONY z końca
+            if "PLAN_ZATWIERDZONY" in clean_text:
+                # Znajdź ostatnie wystąpienie i usuń wszystko po nim
+                parts = clean_text.rsplit("PLAN_ZATWIERDZONY", 1)
+                clean_text = parts[0].strip()
+
+            # Teraz po prostu sparsuj JSON
+            result = json.loads(clean_text)
+
+            # Debug - wypisz co znalazłeś
+            process_log(f"[PARSER] Znaleziono klucze: {list(result.keys())}")
+
+            return result
+
+        except json.JSONDecodeError as e:
+            process_log(f"[PARSER] JSON decode error: {e}")
+
+            # Plan B - znajdź JSON manualnie
+            try:
+                # Znajdź od pierwszego { do ostatniego }
+                start = text.find('{')
+                end = text.rfind('}')
+
+                if start >= 0 and end > start:
+                    json_str = text[start:end+1]
+                    return json.loads(json_str)
+            except:
+                pass
+
+        return None
+
+
+--- FILE: config/models_config.py ---
+
+"""
+Definicje struktur danych używanych do opisu ról agentów.
+"""
+
+from dataclasses import dataclass
+from typing import List
+
+
+@dataclass
+class AgentRole:
+    """
+    Klasa opisująca rolę agenta w systemie multi‑agentowym.
+
+    :param role_name: Nazwa roli (np. "Causal Analyst", "Creative Planner").
+    :param expertise_areas: Lista dziedzin, w których agent się specjalizuje.
+    :param thinking_style: Styl myślenia ("analytical", "creative", "critical", "systematic" itp.).
+    """
+    role_name: str
+    expertise_areas: List[str]
+    thinking_style: str
+
+

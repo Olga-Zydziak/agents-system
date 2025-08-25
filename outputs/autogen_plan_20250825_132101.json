@@ -1,0 +1,178 @@
+{
+  "mission": "Zaprojektuj ODPORNY NA BŁĘDY przepływ odkrywania przyczynowości z mechanizmem retry",
+  "final_plan": {
+    "entry_point": "Load_Data",
+    "nodes": [
+      {
+        "name": "Load_Data",
+        "implementation": "load_data"
+      },
+      {
+        "name": "Clean_Data",
+        "implementation": "clean_data"
+      },
+      {
+        "name": "Quick_Validate",
+        "implementation": "validate_data"
+      },
+      {
+        "name": "Discover_Causality",
+        "implementation": "discover_causality"
+      },
+      {
+        "name": "Retry_Handler",
+        "implementation": "error_handler"
+      },
+      {
+        "name": "Optimize_Parameters",
+        "implementation": "optimize_performance"
+      },
+      {
+        "name": "Deep_Validate",
+        "implementation": "validate_model"
+      },
+      {
+        "name": "Learn_From_Errors",
+        "implementation": "train_model"
+      },
+      {
+        "name": "Generate_Report",
+        "implementation": "generate_report"
+      },
+      {
+        "name": "Fatal_Error_Handler",
+        "implementation": "error_handler"
+      },
+      {
+        "name": "Rollback_System",
+        "implementation": "rollback"
+      },
+      {
+        "name": "Notify_User",
+        "implementation": "notify_user"
+      }
+    ],
+    "edges": [
+      {
+        "from": "Load_Data",
+        "to": "Clean_Data",
+        "condition": "on_success"
+      },
+      {
+        "from": "Load_Data",
+        "to": "Fatal_Error_Handler",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Clean_Data",
+        "to": "Quick_Validate",
+        "condition": "on_success"
+      },
+      {
+        "from": "Clean_Data",
+        "to": "Fatal_Error_Handler",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Quick_Validate",
+        "to": "Discover_Causality",
+        "condition": "validated"
+      },
+      {
+        "from": "Quick_Validate",
+        "to": "Fatal_Error_Handler",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Discover_Causality",
+        "to": "Deep_Validate",
+        "condition": "on_success"
+      },
+      {
+        "from": "Discover_Causality",
+        "to": "Retry_Handler",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Retry_Handler",
+        "to": "Discover_Causality",
+        "condition": "retry"
+      },
+      {
+        "from": "Retry_Handler",
+        "to": "Optimize_Parameters",
+        "condition": "needs_optimization"
+      },
+      {
+        "from": "Retry_Handler",
+        "to": "Learn_From_Errors",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Optimize_Parameters",
+        "to": "Discover_Causality",
+        "condition": "on_success"
+      },
+      {
+        "from": "Optimize_Parameters",
+        "to": "Learn_From_Errors",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Deep_Validate",
+        "to": "Generate_Report",
+        "condition": "validated"
+      },
+      {
+        "from": "Deep_Validate",
+        "to": "Generate_Report",
+        "condition": "partial_success"
+      },
+      {
+        "from": "Deep_Validate",
+        "to": "Retry_Handler",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Learn_From_Errors",
+        "to": "Generate_Report",
+        "condition": "on_success"
+      },
+      {
+        "from": "Learn_From_Errors",
+        "to": "Fatal_Error_Handler",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Generate_Report",
+        "to": "Notify_User",
+        "condition": "on_success"
+      },
+      {
+        "from": "Generate_Report",
+        "to": "Notify_User",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Fatal_Error_Handler",
+        "to": "Rollback_System",
+        "condition": "on_success"
+      },
+      {
+        "from": "Rollback_System",
+        "to": "Generate_Report",
+        "condition": "on_success"
+      },
+      {
+        "from": "Rollback_System",
+        "to": "Generate_Report",
+        "condition": "on_failure"
+      }
+    ]
+  },
+  "metadata": {
+    "iterations": 0,
+    "timestamp": "2025-08-25T13:21:01.865254",
+    "autogen_debate": true
+  }
+}

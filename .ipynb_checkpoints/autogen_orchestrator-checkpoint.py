@@ -2,6 +2,7 @@
 Pełny orchestrator MOA używający AutoGen do zarządzania debatą agentów
 """
 import json
+from datetime import datetime
 import config_api
 from autogen import UserProxyAgent, ConversableAgent, GroupChat, GroupChatManager
 from typing import Dict, List, Any, Optional
@@ -377,6 +378,7 @@ class AutoGenMOAOrchestrator:
 
         # ❸ Po Criticu → zatwierdzenie albo nowa iteracja
         if last_name == (self.critic_agent.name or "").lower():
+            self._save_iteration_to_memory(last_content, self.iteration_count)
             if "PLAN_ZATWIERDZONY" in last_content:
                 return None
             # nowa iteracja
@@ -400,6 +402,40 @@ class AutoGenMOAOrchestrator:
         return self.proposer_agents[0]
     
     
+    def _save_iteration_to_memory(self, critic_response: str, iteration: int):
+        """Zapisuje dane z iteracji do pamięci"""
+        try:
+            # Parse odpowiedzi krytyka
+            parsed = self.parser.parse_critic_response(critic_response)
+            if not parsed:
+                process_log(f"[MEMORY] Nie mogę sparsować odpowiedzi krytyka w iteracji {iteration}")
+                return
+
+            # Wyciągnij kluczowe dane
+            score = parsed.get("quality_metrics", {}).get("Overall_Quality_Q", 0)
+            weaknesses = parsed.get("critique_summary", {}).get("identified_weaknesses", [])
+            verdict = parsed.get("critique_summary", {}).get("verdict", "")
+
+            # Stwórz feedback string
+            feedback_data = {
+                "score": score,
+                "verdict": verdict,
+                "weaknesses": [w.get("weakness", "") for w in weaknesses if isinstance(w, dict)],
+                "iteration": iteration
+            }
+
+            # ZAPISZ DO PAMIĘCI
+            self.memory.add_iteration_feedback(
+                iteration=iteration,
+                feedback=json.dumps(feedback_data),
+                timestamp=datetime.now()
+            )
+
+            process_log(f"[MEMORY] Zapisano iterację {iteration}: score={score}, verdict={verdict}")
+
+        except Exception as e:
+            process_log(f"[MEMORY ERROR] Błąd zapisu iteracji {iteration}: {e}")
+
     
     def _initialize_autogen_agents(self):
         """Inicjalizuje agentów AutoGen dla debaty — minimalistycznie i niezawodnie."""
@@ -776,6 +812,29 @@ class AutoGenMOAOrchestrator:
                         if final_plan:
                             self.final_plan = final_plan
                             self._save_successful_plan()
+                            
+                            
+                            
+                            # Zbierz stan orchestratora
+                            orchestrator_state = {
+                                "iteration_count": self.iteration_count,
+                                "execution_time": (datetime.now() - start_time).total_seconds() if 'start_time' in locals() else 0,
+                                "total_tokens": getattr(self, 'token_counter', 0),
+                                "api_calls": getattr(self, 'api_call_counter', 0)
+                            }
+
+                            # Zapisz KOMPLETNĄ misję
+                            mission_id = self.memory.save_complete_mission(
+                            mission=self.mission,
+                            final_plan=self.final_plan,
+                            all_messages=manager.groupchat.messages,
+                            orchestrator_state=orchestrator_state
+                            )
+
+                            process_log(f"[ORCHESTRATOR] Mission completed and saved as: {mission_id}")
+    
+                            
+                            
                             return self.final_plan
                         else:
                             # Jeśli nie znaleziono planu w żadnym kluczu
