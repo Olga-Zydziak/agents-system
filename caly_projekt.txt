@@ -1,3 +1,69 @@
+--- FILE: Memory_bank.ipynb ---
+
+import json
+import hashlib
+from datetime import datetime
+from typing import Any, Dict, Optional, Callable
+from vertexai import agent_engines as _agent_engines
+# --- Koniec komórki ---
+def get_or_create_agent_engine(display_name: str) :
+    """
+    Pobiera istniejący Agent Engine po nazwie wyświetlanej lub tworzy nowy, jeśli nie istnieje.
+    """
+    # 1. Pobierz listę wszystkich istniejących silników w projekcie
+    all_engines = _agent_engines.list()
+    
+    # 2. Sprawdź, czy któryś z nich ma pasującą nazwę
+    for engine in all_engines:
+        if engine.display_name == display_name:
+            print(f"INFO: Znaleziono i połączono z istniejącym Agent Engine: '{display_name}'")
+            return engine
+            
+    # 3. Jeśli pętla się zakończyła i nic nie znaleziono, stwórz nowy silnik
+    print(f"INFO: Nie znaleziono Agent Engine o nazwie '{display_name}'. Tworzenie nowego...")
+    try:
+        new_engine = agent_engines.create(
+            display_name=display_name
+        )
+        print(f"INFO: Pomyślnie utworzono nowy Agent Engine.")
+        return new_engine
+    except Exception as e:
+        print(f"KRYTYCZNY BŁĄD: Nie można utworzyć Agent Engine. Sprawdź konfigurację i uprawnienia. Błąd: {e}")
+        exit()
+# --- Koniec komórki ---
+MEMORY_ENGINE_DISPLAY_NAME="test_for_moa_debate"
+# --- Koniec komórki ---
+agent_engine =get_or_create_agent_engine(MEMORY_ENGINE_DISPLAY_NAME)
+AGENT_ENGINE_NAME = agent_engine.resource_name
+print(AGENT_ENGINE_NAME)
+# --- Koniec komórki ---
+from vertexai import Client  # przygotuj klienta wcześniej
+client = Client(project="dark-data-discovery", location="us-central1")
+from persist_missions_memory import persist_missions_to_vertex_memory
+# --- Koniec komórki ---
+
+persist_missions_to_vertex_memory(
+    json_path="memory/learned_strategies.json",
+    engine_name=AGENT_ENGINE_NAME,
+    client=client,
+    include_transcript=True,
+    max_transcript_chunk_chars=15000,
+)
+# --- Koniec komórki ---
+from retrieve_mission_memory import retrieve_mission_memory
+# --- Koniec komórki ---
+mission_data = retrieve_mission_memory(
+    engine_name=AGENT_ENGINE_NAME,
+    mission_id="mission_20250823_215948_92ed8ebc",
+    client=client
+)
+
+plan = mission_data["final_plan"]["content"]         # oryginalny plan
+transcript = mission_data["debate_transcript"]["content"]  # pełen transkrypt
+# --- Koniec komórki ---
+
+
+
 --- FILE: Untitled.ipynb ---
 
 import importlib, process_logger as pl
@@ -231,6 +297,7 @@ if __name__ == "__main__":
 Pełny orchestrator MOA używający AutoGen do zarządzania debatą agentów
 """
 import json
+from datetime import datetime
 import config_api
 from autogen import UserProxyAgent, ConversableAgent, GroupChat, GroupChatManager
 from typing import Dict, List, Any, Optional
@@ -606,6 +673,7 @@ class AutoGenMOAOrchestrator:
 
         # ❸ Po Criticu → zatwierdzenie albo nowa iteracja
         if last_name == (self.critic_agent.name or "").lower():
+            self._save_iteration_to_memory(last_content, self.iteration_count)
             if "PLAN_ZATWIERDZONY" in last_content:
                 return None
             # nowa iteracja
@@ -629,6 +697,40 @@ class AutoGenMOAOrchestrator:
         return self.proposer_agents[0]
     
     
+    def _save_iteration_to_memory(self, critic_response: str, iteration: int):
+        """Zapisuje dane z iteracji do pamięci"""
+        try:
+            # Parse odpowiedzi krytyka
+            parsed = self.parser.parse_critic_response(critic_response)
+            if not parsed:
+                process_log(f"[MEMORY] Nie mogę sparsować odpowiedzi krytyka w iteracji {iteration}")
+                return
+
+            # Wyciągnij kluczowe dane
+            score = parsed.get("quality_metrics", {}).get("Overall_Quality_Q", 0)
+            weaknesses = parsed.get("critique_summary", {}).get("identified_weaknesses", [])
+            verdict = parsed.get("critique_summary", {}).get("verdict", "")
+
+            # Stwórz feedback string
+            feedback_data = {
+                "score": score,
+                "verdict": verdict,
+                "weaknesses": [w.get("weakness", "") for w in weaknesses if isinstance(w, dict)],
+                "iteration": iteration
+            }
+
+            # ZAPISZ DO PAMIĘCI
+            self.memory.add_iteration_feedback(
+                iteration=iteration,
+                feedback=json.dumps(feedback_data),
+                timestamp=datetime.now()
+            )
+
+            process_log(f"[MEMORY] Zapisano iterację {iteration}: score={score}, verdict={verdict}")
+
+        except Exception as e:
+            process_log(f"[MEMORY ERROR] Błąd zapisu iteracji {iteration}: {e}")
+
     
     def _initialize_autogen_agents(self):
         """Inicjalizuje agentów AutoGen dla debaty — minimalistycznie i niezawodnie."""
@@ -1005,6 +1107,29 @@ class AutoGenMOAOrchestrator:
                         if final_plan:
                             self.final_plan = final_plan
                             self._save_successful_plan()
+                            
+                            
+                            
+                            # Zbierz stan orchestratora
+                            orchestrator_state = {
+                                "iteration_count": self.iteration_count,
+                                "execution_time": (datetime.now() - start_time).total_seconds() if 'start_time' in locals() else 0,
+                                "total_tokens": getattr(self, 'token_counter', 0),
+                                "api_calls": getattr(self, 'api_call_counter', 0)
+                            }
+
+                            # Zapisz KOMPLETNĄ misję
+                            mission_id = self.memory.save_complete_mission(
+                            mission=self.mission,
+                            final_plan=self.final_plan,
+                            all_messages=manager.groupchat.messages,
+                            orchestrator_state=orchestrator_state
+                            )
+
+                            process_log(f"[ORCHESTRATOR] Mission completed and saved as: {mission_id}")
+    
+                            
+                            
                             return self.final_plan
                         else:
                             # Jeśli nie znaleziono planu w żadnym kluczu
@@ -1636,52 +1761,481 @@ from sklearn.metrics.pairwise import cosine_similarity
 from process_logger import log as process_log
 
 class ContextMemory:
-    """
-    Zaawansowany system pamięci dla agentów MOA
-    Implementuje episodic memory, semantic memory i procedural memory
-    """
-    
     def __init__(self, max_episodes: int = 100):
-        # Episodic Memory - konkretne wydarzenia/iteracje
-        self.episodes: deque = deque(maxlen=max_episodes)
+        # Existing
+        self.episodes = deque(maxlen=max_episodes)
+        self.learned_patterns = {}
+        self.successful_strategies = []
         
-        # Semantic Memory - wyuczone wzorce i koncepty
-        self.learned_patterns: Dict[str, Any] = {}
-        
-        # Procedural Memory - sprawdzone strategie
-        self.successful_strategies: List[Dict] = []
-        
-        # Working Memory - bieżący kontekst
-        self.current_context: Dict[str, Any] = {}
-        
-        # Meta-Memory - informacje o skuteczności pamięci
-        self.memory_performance: Dict[str, float] = {
-            "retrieval_accuracy": 1.0,
-            "pattern_recognition_rate": 0.0
-        }
+        # NOWE - Pełne dane misji
+        self.full_mission_records = []  # Bez limitu - wszystko zapisujemy
+        self.mission_index = {}  # Szybkie wyszukiwanie po ID
         
         self._load_persistent_memory()
     
-    def add_iteration_feedback(self, iteration: int, feedback: str, timestamp: datetime):
-        """Dodaje feedback z iteracji do pamięci epizodycznej"""
-        episode = {
-            "iteration": iteration,
-            "feedback": feedback,
-            "timestamp": timestamp.isoformat(),
-            "extracted_issues": self._extract_issues(feedback),
-            "success": False  # Będzie zaktualizowane jeśli plan zostanie zatwierdzony
+    
+    
+    
+    def _learn_from_success(self, mission_record: Dict):
+        """Ekstraktuje i zapisuje PRAWDZIWE wzorce z udanej misji"""
+
+        # 1. Zapisz wzorzec sukcesu dla tego typu misji
+        pattern_key = f"success_pattern_{mission_record['mission_type']}"
+
+        if pattern_key not in self.learned_patterns:
+            self.learned_patterns[pattern_key] = {
+                "occurrences": 0,
+                "examples": [],
+                "common_elements": {},
+                "avg_score": 0,
+                "best_practices": []
+            }
+
+        # 2. Aktualizuj statystyki
+        pattern = self.learned_patterns[pattern_key]
+        pattern["occurrences"] += 1
+        current_score = mission_record.get("final_score", 0)
+        pattern["avg_score"] = (
+            (pattern["avg_score"] * (pattern["occurrences"] - 1) + current_score) 
+            / pattern["occurrences"]
+        )
+
+        # 3. Znajdź kluczowe elementy sukcesu
+        success_elements = []
+
+        # Sprawdź co było w tym planie
+        plan = mission_record.get("final_plan", {})
+        nodes = plan.get("nodes", [])
+
+        # Zapisz które węzły były użyte
+        node_types = [n.get("implementation") for n in nodes]
+
+        if "error_handler" in node_types:
+            success_elements.append("comprehensive_error_handling")
+        if "rollback" in node_types:
+            success_elements.append("rollback_mechanism")
+        if "validate_data" in node_types:
+            success_elements.append("data_validation")
+        if "optimize_performance" in node_types:
+            success_elements.append("performance_optimization")
+
+        # 4. Znajdź unikalne innowacje z tej misji
+        if "Adaptive_Router" in str(nodes):
+            success_elements.append("adaptive_routing")
+
+        # 5. Zapisz jako best practice jeśli score > 90
+        if current_score > 90:
+            best_practice = {
+                "mission_id": mission_record["memory_id"],
+                "score": current_score,
+                "key_success_factors": success_elements,
+                "node_count": len(nodes),
+                "complexity": mission_record["performance_metrics"].get("convergence_rate", 0)
+            }
+            pattern["best_practices"].append(best_practice)
+
+        # 6. Zaktualizuj common_elements (co występuje najczęściej)
+        for element in success_elements:
+            if element not in pattern["common_elements"]:
+                pattern["common_elements"][element] = 0
+            pattern["common_elements"][element] += 1
+
+        # 7. Dodaj przykład
+        pattern["examples"].append({
+            "mission_prompt": mission_record["mission_prompt"],
+            "success_factors": success_elements,
+            "score": current_score
+        })
+
+        process_log(f"[MEMORY] Learned from success: {pattern_key}, "
+                    f"occurrences={pattern['occurrences']}, "
+                    f"avg_score={pattern['avg_score']:.2f}")
+    
+    
+    
+    def export_temporal_report(self, filepath: str = "memory/temporal_patterns.json"):
+        """Eksportuje raport wzorców czasowych"""
+        patterns = self.analyze_temporal_patterns()
+
+        report = {
+            "generated_at": datetime.now().isoformat(),
+            "total_missions": len(self.full_mission_records),
+            "patterns": patterns,
+            "insights": []
+        }
+
+        # Znajdź najlepszy/najgorszy czas
+        best_day = max(patterns['by_weekday'].items(), 
+                       key=lambda x: x[1].get('avg_score', 0))
+        worst_day = min(patterns['by_weekday'].items(), 
+                        key=lambda x: x[1].get('avg_score', 100))
+
+        report['insights'].append(f"Best day: {best_day[0]} (avg: {best_day[1]['avg_score']:.1f})")
+        report['insights'].append(f"Worst day: {worst_day[0]} (avg: {worst_day[1]['avg_score']:.1f})")
+
+        with open(filepath, 'w') as f:
+            json.dump(report, f, indent=2)
+
+        return report
+    
+    
+    
+    def save_complete_mission(self, 
+                            mission: str,
+                            final_plan: Dict,
+                            all_messages: List[Dict],
+                            orchestrator_state: Dict) -> str:
+        """
+        Zapisuje KOMPLETNY rekord misji z wszystkimi danymi
+        """
+        from datetime import datetime
+        import hashlib
+        
+        # Generuj unikalne ID
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        mission_hash = hashlib.md5(mission.encode()).hexdigest()[:8]
+        mission_id = f"mission_{timestamp}_{mission_hash}"
+        
+        # Ekstraktuj kluczowe informacje z transcript
+        iterations_data = self._extract_iterations_from_transcript(all_messages)
+        
+        # Klasyfikuj misję i tagi
+        mission_type = self._classify_mission(mission)
+        tags = self._extract_tags(mission, final_plan)
+        
+        # Znajdź krytyczne momenty w debacie
+        critical_moments = self._identify_critical_moments(all_messages)
+        
+        # Przygotuj pełny rekord
+        mission_record = {
+            # === METADATA ===
+            "memory_id": mission_id,
+            "timestamp": datetime.now().isoformat(),
+            "mission_prompt": mission,
+            "mission_type": mission_type,
+            "tags": tags,
+            
+            # === OUTCOME ===
+            "outcome": "Success" if final_plan else "Failed",
+            "total_iterations": orchestrator_state.get("iteration_count", 0),
+            "total_messages": len(all_messages),
+            "time_taken_seconds": orchestrator_state.get("execution_time", 0),
+            
+            # === FINAL ARTIFACTS ===
+            "final_plan": final_plan,
+            "final_score": self._extract_final_score(all_messages),
+            
+            # === ITERATION DETAILS ===
+            "iterations": iterations_data,
+            
+            # === KEY INSIGHTS ===
+            "critique_evolution": self._track_critique_evolution(iterations_data),
+            "aggregator_reasoning": self._extract_aggregator_reasoning(all_messages),
+            "proposer_contributions": self._analyze_proposer_contributions(all_messages),
+            
+            # === LEARNING DATA ===
+            "llm_generated_summary": self._generate_mission_summary(all_messages, final_plan),
+            "identified_patterns": self._extract_patterns_from_debate(all_messages),
+            "success_factors": self._identify_success_factors(final_plan, iterations_data),
+            "failure_points": self._identify_failure_points(iterations_data),
+            
+            # === CRITICAL MOMENTS ===
+            "critical_moments": critical_moments,
+            "turning_points": self._identify_turning_points(iterations_data),
+            
+            # === FULL TRANSCRIPT ===
+            "full_transcript": all_messages,  # Kompletny zapis
+            
+            # === METRICS ===
+            "performance_metrics": {
+                "token_usage": orchestrator_state.get("total_tokens", 0),
+                "api_calls": orchestrator_state.get("api_calls", 0),
+                "convergence_rate": self._calculate_convergence_rate(iterations_data)
+            }
         }
         
-        self.episodes.append(episode)
-        self._update_learned_patterns(episode)
-        # Zaloguj dodanie feedbacku wraz z potencjalnymi problemami
-        try:
-            process_log(
-                f"Add iteration feedback (iter={iteration}) issues={episode['extracted_issues']}"
-            )
-        except Exception:
-            pass
+        # Zapisz do pamięci
+        self.full_mission_records.append(mission_record)
+        self.mission_index[mission_id] = len(self.full_mission_records) - 1
+        
+        if final_plan:  # Jeśli misja się udała
+            self._learn_from_success(mission_record)
+        
+        
+        
+        if len(self.full_mission_records) % 5 == 0:
+            patterns = self.analyze_temporal_patterns()
+            process_log(f"[MEMORY] Temporal patterns update: {len(patterns['by_weekday'])} weekdays analyzed")
+        
+        # Persist immediately
+        self._persist_full_memory()
+        
+        process_log(f"[MEMORY] Saved complete mission: {mission_id}")
+        return mission_id
     
+    def _extract_iterations_from_transcript(self, messages: List[Dict]) -> List[Dict]:
+        """Ekstraktuje dane każdej iteracji z transkryptu"""
+        iterations = []
+        current_iteration = {"proposers": [], "aggregator": None, "critic": None}
+        
+        for msg in messages:
+            role = msg.get("name", "").lower()
+            
+            if "proposer" in role or "analyst" in role or "planner" in role:
+                current_iteration["proposers"].append({
+                    "agent": msg.get("name"),
+                    "content": msg.get("content"),
+                    "key_ideas": self._extract_key_ideas(msg.get("content", ""))
+                })
+            
+            elif "aggregator" in role:
+                current_iteration["aggregator"] = {
+                    "content": msg.get("content"),
+                    "synthesis": self._extract_synthesis(msg.get("content", ""))
+                }
+            
+            elif "critic" in role:
+                current_iteration["critic"] = {
+                    "content": msg.get("content"),
+                    "verdict": self._extract_verdict(msg.get("content", "")),
+                    "score": self._extract_score(msg.get("content", "")),
+                    "weaknesses": self._extract_weaknesses(msg.get("content", ""))
+                }
+                
+                # Koniec iteracji - zapisz i zacznij nową
+                if current_iteration["proposers"]:
+                    iterations.append(current_iteration)
+                    current_iteration = {"proposers": [], "aggregator": None, "critic": None}
+        
+        return iterations
+    
+#     def _generate_mission_summary(self, messages: List[Dict], final_plan: Dict) -> str:
+#         """Generuje podsumowanie misji (możesz tu użyć LLM)"""
+#         # Prosta heurystyka - w przyszłości możesz wywołać LLM
+#         summary_parts = []
+        
+#         # Analiza iteracji
+#         iteration_count = sum(1 for m in messages if "critic" in m.get("name", "").lower())
+#         summary_parts.append(f"Misja wymagała {iteration_count} iteracji.")
+        
+#         # Kluczowe poprawki
+#         weaknesses_mentioned = set()
+#         for msg in messages:
+#             if "weakness" in msg.get("content", "").lower():
+#                 # Ekstraktuj weakness (uproszczenie)
+#                 weaknesses_mentioned.add("obsługa błędów")
+        
+#         if weaknesses_mentioned:
+#             summary_parts.append(f"Główne wyzwania: {', '.join(weaknesses_mentioned)}.")
+        
+#         # Finalny sukces
+#         if final_plan:
+#             node_count = len(final_plan.get("nodes", []))
+#             summary_parts.append(f"Finalny plan zawiera {node_count} węzłów.")
+        
+#         return " ".join(summary_parts)
+    
+    
+    def _generate_mission_summary(self, messages: List[Dict], final_plan: Dict) -> str:
+        """Generuje BOGATE podsumowanie misji"""
+        summary_parts = []
+
+        # 1. Liczba iteracji i czas
+        iteration_count = sum(1 for m in messages if "critic" in m.get("name", "").lower())
+        summary_parts.append(f"Misja zakończona w {iteration_count} iteracji.")
+
+        # 2. Kluczowe innowacje (szukaj w transkrypcie)
+        innovations = set()
+        for msg in messages:
+            content = msg.get("content", "").lower()
+            if "adaptive" in content or "adaptacyjny" in content:
+                innovations.add("adaptive routing")
+            if "rollback" in content:
+                innovations.add("rollback mechanism")
+            if "optimiz" in content or "optymali" in content:
+                innovations.add("optimization")
+
+        if innovations:
+            summary_parts.append(f"Zastosowano: {', '.join(innovations)}.")
+
+        # 3. Analiza struktury planu
+        if final_plan:
+            nodes = final_plan.get("nodes", [])
+            edges = final_plan.get("edges", [])
+
+            # Policz typy ścieżek
+            success_paths = len([e for e in edges if e.get("condition") == "on_success"])
+            failure_paths = len([e for e in edges if e.get("condition") == "on_failure"])
+
+            summary_parts.append(
+                f"Struktura: {len(nodes)} węzłów, "
+                f"{success_paths} ścieżek sukcesu, "
+                f"{failure_paths} ścieżek obsługi błędów."
+            )
+
+            # Znajdź kluczowe węzły
+            key_nodes = []
+            for node in nodes:
+                impl = node.get("implementation", "")
+                if impl in ["error_handler", "rollback", "validate_data", "optimize_performance"]:
+                    key_nodes.append(impl)
+
+            if key_nodes:
+                summary_parts.append(f"Kluczowe komponenty: {', '.join(set(key_nodes))}.")
+
+        # 4. Końcowy verdykt
+        for msg in reversed(messages):
+            if "critic" in msg.get("name", "").lower() and "ZATWIERDZONY" in msg.get("content", ""):
+                summary_parts.append("Plan zatwierdzony przez krytyka bez zastrzeżeń.")
+                break
+
+        return " ".join(summary_parts)
+    
+    
+    
+    
+    def _extract_tags(self, mission: str, final_plan: Dict) -> List[str]:
+        """Automatycznie taguje misję"""
+        tags = []
+        mission_lower = mission.lower()
+        
+        # Mission-based tags
+        tag_keywords = {
+            "error_handling": ["error", "błęd", "obsługa", "handler"],
+            "optimization": ["optym", "performance", "wydajność"],
+            "causality": ["causal", "przyczyn"],
+            "validation": ["valid", "walidac"],
+            "retry": ["retry", "ponow"],
+            "rollback": ["rollback", "cofn"],
+            "ml": ["model", "train", "uczenie"],
+            "data": ["data", "dane", "csv", "pipeline"]
+        }
+        
+        for tag, keywords in tag_keywords.items():
+            if any(kw in mission_lower for kw in keywords):
+                tags.append(tag)
+        
+        # Plan-based tags
+        if final_plan:
+            nodes_str = str(final_plan.get("nodes", []))
+            if "error_handler" in nodes_str:
+                tags.append("robust")
+            if "optimize" in nodes_str:
+                tags.append("optimized")
+        
+        return list(set(tags))  # Unique tags
+    
+    
+    def _load_persistent_memory(self):
+        """
+        Ładuje pamięć z pliku JSON
+        """
+        json_file = "memory/learned_strategies.json"
+
+        if os.path.exists(json_file):
+            try:
+                with open(json_file, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                self.learned_patterns = data.get("patterns", {})
+                self.successful_strategies = data.get("strategies", [])
+
+                # Załaduj też nowe full_mission_records jeśli istnieją
+                if "full_mission_records" in data:
+                    self.full_mission_records = data["full_mission_records"]
+                    # Odbuduj index
+                    for i, record in enumerate(self.full_mission_records):
+                        self.mission_index[record["memory_id"]] = i
+
+                print(f"✔ Załadowano pamięć: {len(self.successful_strategies)} strategies, {len(self.full_mission_records)} full records")
+            except Exception as e:
+                print(f"⚠ Nie udało się załadować pamięci: {e}")
+        else:
+            print("📝 Tworzę nową pamięć (brak istniejącego pliku)")
+            os.makedirs("memory", exist_ok=True)
+
+    def _persist_memory(self):
+        """
+        Zapisuje pamięć do pliku JSON
+        """
+        os.makedirs("memory", exist_ok=True)
+        memory_file = "memory/learned_strategies.json"
+
+        data = {
+            "patterns": self.learned_patterns,
+            "strategies": self.successful_strategies,
+            "full_mission_records": self.full_mission_records  # NOWE!
+        }
+
+        try:
+            with open(memory_file, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            print(f"⚠ Nie udało się zapisać pamięci: {e}")
+
+            
+            
+            
+            
+    def _persist_full_memory(self):
+        """Alias dla _persist_memory"""
+        self._persist_memory()
+
+
+        
+    def _extract_key_ideas(self, content: str) -> List[str]:
+        """Ekstraktuje kluczowe pomysły z contentu"""
+        # Prosta heurystyka - możesz ulepszyć
+        ideas = []
+        if "error_handler" in content.lower():
+            ideas.append("error_handling")
+        if "rollback" in content.lower():
+            ideas.append("rollback_mechanism")
+        if "optimiz" in content.lower():
+            ideas.append("optimization")
+        return ideas
+
+    def _extract_synthesis(self, content: str) -> str:
+        """Ekstraktuje syntezę z odpowiedzi aggregatora"""
+        # Szukaj "synthesis_reasoning" w JSON
+        try:
+            data = json.loads(content) if isinstance(content, str) else content
+            return data.get("synthesis_reasoning", "")
+        except:
+            return ""
+
+    def _extract_verdict(self, content: str) -> str:
+        """Ekstraktuje werdykt z odpowiedzi krytyka"""
+        if "ZATWIERDZONY" in content:
+            return "ZATWIERDZONY"
+        return "ODRZUCONY"
+
+    def _extract_score(self, content: str) -> float:
+        """Ekstraktuje score z odpowiedzi krytyka"""
+        try:
+            import re
+            score_match = re.search(r'"Overall_Quality_Q":\s*([\d.]+)', content)
+            if score_match:
+                return float(score_match.group(1))
+        except:
+            pass
+        return 0.0
+
+    def _extract_weaknesses(self, content: str) -> List[str]:
+        """Ekstraktuje weaknesses z odpowiedzi krytyka"""
+        weaknesses = []
+        try:
+            data = json.loads(content) if isinstance(content, str) else content
+            weak_list = data.get("critique_summary", {}).get("identified_weaknesses", [])
+            for w in weak_list:
+                if isinstance(w, dict):
+                    weaknesses.append(w.get("weakness", ""))
+                else:
+                    weaknesses.append(str(w))
+        except:
+            pass
+        return weaknesses
+
+
     def add_successful_plan(self, plan: Dict[str, Any], mission: str, metadata: Dict):
         """Zapisuje udany plan do pamięci proceduralnej"""
         strategy = {
@@ -1691,79 +2245,23 @@ class ContextMemory:
             "performance_metrics": metadata.get("metrics", {}),
             "timestamp": datetime.now().isoformat()
         }
-        
+
         self.successful_strategies.append(strategy)
-        self._persist_memory()
+        self._persist_memory()  # Zapisz od razu
+
         # Loguj dodanie udanego planu
-        try:
-            process_log(
-                f"Add successful plan for mission_type={strategy['mission_type']}, structure={strategy['plan_structure']}"
-            )
-        except Exception:
-            pass
-    
-    def get_relevant_context(self, mission: str) -> Dict[str, Any]:
-        """
-        Pobiera relevantny kontekst dla danej misji
-        Używa similarity search i pattern matching
-        """
-        context = {
-            "similar_missions": self._find_similar_missions(mission),
-            "relevant_patterns": self._get_relevant_patterns(mission),
-            "recommended_strategies": self._recommend_strategies(mission),
-            "common_pitfalls": self._get_common_pitfalls(),
-            "last_feedback": self._get_last_feedback()
-        }
-        # Zaloguj pobranie kontekstu
-        try:
-            process_log(
-                f"Retrieve context for mission='{mission}', suggestions={context['recommended_strategies']}"
-            )
-        except Exception:
-            pass
-        return context
-    
-    def _extract_issues(self, feedback: str) -> List[str]:
-        """Ekstraktuje konkretne problemy z feedbacku"""
-        issues: List[str] = []
-        # Rozszerzona lista wskaźników problemów (różne formy i synonimy)
-        problem_indicators = [
-            "brak", "niewystarczający", "niewystarczająca", "niepoprawny", "niepoprawna",
-            "błąd", "problem", "wadliwy", "wadliwa", "niekompletny", "niekompletna",
-            "niespójny", "niespójna", "niedostateczny", "niedostateczna",
-            "nieprawidłowy", "nieprawidłowa", "awaria", "usterka"
-        ]
-        for sentence in feedback.split("."):
-            s_low = sentence.lower()
-            if any(ind in s_low for ind in problem_indicators):
-                stripped = sentence.strip()
-                if stripped:
-                    issues.append(stripped)
-        return issues
-    
-    def _update_learned_patterns(self, episode: Dict):
-        """Aktualizuje wyuczone wzorce na podstawie nowego epizodu"""
-        for issue in episode["extracted_issues"]:
-            # Tworzymy hash problemu dla grupowania podobnych
-            issue_hash = self._hash_issue(issue)
-            
-            if issue_hash not in self.learned_patterns:
-                self.learned_patterns[issue_hash] = {
-                    "occurrences": 0,
-                    "examples": [],
-                    "solutions": []
-                }
-            
-            self.learned_patterns[issue_hash]["occurrences"] += 1
-            self.learned_patterns[issue_hash]["examples"].append(issue)
-    
+        process_log(
+            f"[MEMORY] Added successful plan for mission_type={strategy['mission_type']}, "
+            f"nodes={strategy['plan_structure']['num_nodes']}"
+        )
+
     def _classify_mission(self, mission: str) -> str:
         """Klasyfikuje typ misji"""
         mission_lower = mission.lower()
-        
+
         if "przyczynow" in mission_lower or "causal" in mission_lower:
             return "causal_analysis"
-        elif "dane" in mission_lower or "data" in mission_lower:
+        elif "dane" in mission_lower or "data" in mission_lower or "csv" in mission_lower:
             return "data_processing"
         elif "model" in mission_lower:
             return "model_validation"
@@ -1771,7 +2269,7 @@ class ContextMemory:
             return "optimization"
         else:
             return "general"
-    
+
     def _extract_plan_structure(self, plan: Dict) -> Dict:
         """Ekstraktuje strukturalne cechy planu"""
         return {
@@ -1783,155 +2281,237 @@ class ContextMemory:
                                  for node in plan.get("nodes", [])),
             "graph_complexity": self._calculate_complexity(plan)
         }
-    
+
     def _calculate_complexity(self, plan: Dict) -> float:
         """Oblicza złożoność grafu"""
         nodes = len(plan.get("nodes", []))
         edges = len(plan.get("edges", []))
-        
+
         if nodes == 0:
             return 0.0
-        
+
         # Złożoność cyklomatyczna aproksymowana
         return (edges - nodes + 2) / nodes
     
-    def _find_similar_missions(self, mission: str, top_k: int = 3) -> List[Dict]:
-        """Znajduje podobne misje z historii"""
-        similar = []
-        
-        for strategy in self.successful_strategies[-20:]:  # Ostatnie 20 strategii
-            similarity = self._calculate_similarity(
-                mission, 
-                strategy.get("mission_type", "")
-            )
-            similar.append({
-                "strategy": strategy,
-                "similarity": similarity
-            })
-        
-        similar.sort(key=lambda x: x["similarity"], reverse=True)
-        return similar[:top_k]
     
-    def _calculate_similarity(self, text1: str, text2: str) -> float:
-        """
-        Oblicza podobieństwo między dwoma tekstami za pomocą TF‑IDF i kosinusowej miary odległości.
-        Jeżeli którykolwiek tekst jest pusty, zwraca 0.0. Użycie TF‑IDF pozwala na lepsze
-        odzwierciedlenie znaczenia słów w różnych kontekstach.
-        """
-        if not text1 or not text2:
-            return 0.0
-        try:
-            vectorizer = TfidfVectorizer().fit([text1, text2])
-            vectors = vectorizer.transform([text1, text2])
-            sim = cosine_similarity(vectors[0], vectors[1])[0][0]
-            return float(sim)
-        except Exception:
-            # W razie błędu zwróć minimalne podobieństwo
-            return 0.0
-    
-    def _get_relevant_patterns(self, mission: str) -> List[Dict]:
-        """Pobiera wzorce relevantne dla misji"""
-        relevant = []
-        
-        for pattern_hash, pattern_data in self.learned_patterns.items():
-            if pattern_data["occurrences"] >= 2:  # Wzorzec musi wystąpić co najmniej 2 razy
-                relevant.append({
-                    "pattern": pattern_data["examples"][0] if pattern_data["examples"] else "",
-                    "frequency": pattern_data["occurrences"],
-                    "solutions": pattern_data["solutions"]
+    def _identify_critical_moments(self, messages: List[Dict]) -> List[Dict]:
+        """Identyfikuje krytyczne momenty w debacie"""
+        critical = []
+        for i, msg in enumerate(messages):
+            content = msg.get("content", "").lower()
+            # Moment krytyczny = duża zmiana w score lub verdict
+            if "zatwierdzony" in content or "odrzucony" in content:
+                critical.append({
+                    "index": i,
+                    "type": "verdict",
+                    "agent": msg.get("name"),
+                    "summary": "Decyzja krytyka"
                 })
-        
-        return sorted(relevant, key=lambda x: x["frequency"], reverse=True)[:5]
+        return critical
+
+    def _extract_final_score(self, messages: List[Dict]) -> float:
+        """Znajduje finalny score z ostatniej odpowiedzi krytyka"""
+        for msg in reversed(messages):
+            if "critic" in msg.get("name", "").lower():
+                score = self._extract_score(msg.get("content", ""))
+                if score > 0:
+                    return score
+        return 0.0
+
+    def _track_critique_evolution(self, iterations: List[Dict]) -> List[Dict]:
+        """Śledzi jak zmieniała się krytyka między iteracjami"""
+        evolution = []
+        for i, iteration in enumerate(iterations):
+            if iteration.get("critic"):
+                evolution.append({
+                    "iteration": i,
+                    "score": iteration["critic"].get("score", 0),
+                    "verdict": iteration["critic"].get("verdict", ""),
+                    "main_issues": iteration["critic"].get("weaknesses", [])[:2]
+                })
+        return evolution
+
+    def _extract_aggregator_reasoning(self, messages: List[Dict]) -> str:
+        """Wyciąga reasoning agregatora"""
+        for msg in reversed(messages):
+            if "aggregator" in msg.get("name", "").lower():
+                return self._extract_synthesis(msg.get("content", ""))
+        return ""
+
+    def _analyze_proposer_contributions(self, messages: List[Dict]) -> Dict[str, List[str]]:
+        """Analizuje wkład każdego proposera"""
+        contributions = {}
+        for msg in messages:
+            name = msg.get("name", "")
+            if any(role in name.lower() for role in ["analyst", "planner", "proposer"]):
+                if name not in contributions:
+                    contributions[name] = []
+                ideas = self._extract_key_ideas(msg.get("content", ""))
+                contributions[name].extend(ideas)
+        return contributions
+
+    def _extract_patterns_from_debate(self, messages: List[Dict]) -> List[str]:
+        """Ekstraktuje wzorce z całej debaty"""
+        patterns = []
+        # Szukaj powtarzających się konceptów
+        all_text = " ".join(m.get("content", "") for m in messages).lower()
+
+        if all_text.count("error_handler") > 3:
+            patterns.append("Częste odniesienia do obsługi błędów")
+        if all_text.count("rollback") > 2:
+            patterns.append("Rollback jako kluczowy element")
+        if all_text.count("optimiz") > 2:
+            patterns.append("Focus na optymalizację")
+
+        return patterns
+
+    def _identify_success_factors(self, final_plan: Dict, iterations: List[Dict]) -> List[str]:
+        """Identyfikuje co przyczyniło się do sukcesu"""
+        factors = []
+
+        if final_plan:
+            # Analiza struktury planu
+            if any("error" in str(n).lower() for n in final_plan.get("nodes", [])):
+                factors.append("Comprehensive error handling")
+            if any("valid" in str(n).lower() for n in final_plan.get("nodes", [])):
+                factors.append("Data validation steps")
+
+            # Analiza iteracji
+            if len(iterations) > 1:
+                factors.append(f"Iterative improvement ({len(iterations)} rounds)")
+
+        return factors
+
+    def _identify_failure_points(self, iterations: List[Dict]) -> List[Dict]:
+        """Identyfikuje gdzie były problemy"""
+        failures = []
+        for i, iteration in enumerate(iterations):
+            if iteration.get("critic", {}).get("verdict") == "ODRZUCONY":
+                failures.append({
+                    "iteration": i,
+                    "issues": iteration["critic"].get("weaknesses", []),
+                    "score": iteration["critic"].get("score", 0)
+                })
+        return failures
+
+    def _identify_turning_points(self, iterations: List[Dict]) -> List[Dict]:
+        """Znajduje punkty zwrotne w debacie"""
+        turning_points = []
+        prev_score = 0
+
+        for i, iteration in enumerate(iterations):
+            curr_score = iteration.get("critic", {}).get("score", 0)
+            if curr_score - prev_score > 20:  # Duży skok w score
+                turning_points.append({
+                    "iteration": i,
+                    "score_jump": curr_score - prev_score,
+                    "reason": "Significant improvement"
+                })
+            prev_score = curr_score
+
+        return turning_points
+
+    def _calculate_convergence_rate(self, iterations: List[Dict]) -> float:
+        """Oblicza jak szybko system doszedł do rozwiązania"""
+        if not iterations:
+            return 0.0
+
+        scores = [it.get("critic", {}).get("score", 0) for it in iterations]
+        if len(scores) < 2:
+            return 1.0
+
+        # Średni przyrost score na iterację
+        improvements = [scores[i+1] - scores[i] for i in range(len(scores)-1)]
+        avg_improvement = sum(improvements) / len(improvements) if improvements else 0
+
+        # Normalizuj do 0-1 (im wyższy przyrost, tym lepsza convergence)
+        return min(avg_improvement / 20, 1.0)  # 20 punktów na iterację = max convergence
     
-    def _recommend_strategies(self, mission: str) -> List[str]:
-        """Rekomenduje strategie na podstawie historii"""
-        recommendations: List[str] = []
-        mission_type = self._classify_mission(mission)
-        for strat in self.successful_strategies:
-            if strat.get("mission_type") == mission_type:
-                plan_struct = strat.get("plan_structure", {})
-                success_factors = strat.get("success_factors", [])
-                if plan_struct.get("has_error_handling"):
-                    recommendations.append(
-                        "Dodaj obsługę błędów – zwiększa odporność na nieprzewidziane sytuacje"
-                    )
-                if plan_struct.get("has_validation"):
-                    recommendations.append(
-                        "Włącz kroki walidacji – pomaga wykryć odchylenia i błędne dane"
-                    )
-                for factor in success_factors:
-                    recommendations.append(f"Zastosuj czynnik sukcesu: {factor}")
-        # Zwróć unikalne rekomendacje (maksymalnie 5)
-        return list(dict.fromkeys(recommendations))[:5]
     
-    def _get_common_pitfalls(self) -> List[str]:
-        """Zwraca najczęstsze problemy z historii"""
-        pitfalls = []
-        
-        for pattern_data in self.learned_patterns.values():
-            if pattern_data["occurrences"] >= 3:
-                pitfalls.append(f"Częsty problem ({pattern_data['occurrences']}x): {pattern_data['examples'][0]}")
-        
-        return pitfalls[:5]
-    
-    def _get_last_feedback(self) -> Optional[str]:
-        """Pobiera ostatni feedback jeśli istnieje"""
-        if self.episodes:
-            return self.episodes[-1]["feedback"]
-        return None
-    
-    def _hash_issue(self, issue: str) -> str:
-        """Tworzy hash dla grupowania podobnych problemów"""
-        # Usuń liczby i szczegóły, zostaw istotę problemu
-        core_words = []
-        for word in issue.lower().split():
-            if len(word) > 3 and not word.isdigit():
-                core_words.append(word)
-        
-        return "_".join(sorted(core_words)[:5])
-    
-    def _persist_memory(self):
-        """
-        Zapisuje pamięć do pliku JSON. Plik JSON jest bezpieczniejszy i pozwala na łatwiejszy
-        podgląd zawartości niż pickle.
-        """
-        os.makedirs("memory", exist_ok=True)
-        memory_file = "memory/learned_strategies.json"
-        data = {
-            "patterns": self.learned_patterns,
-            "strategies": self.successful_strategies
+    def analyze_temporal_patterns(self) -> Dict[str, Any]:
+        """Analizuje wzorce czasowe w performance systemu"""
+        from datetime import datetime
+
+        patterns = {
+            'by_weekday': {},
+            'by_hour': {},
+            'by_day_hour': {}
         }
-        try:
-            with open(memory_file, "w", encoding="utf-8") as f:
-                json.dump(data, f, ensure_ascii=False, indent=2)
-        except Exception as e:
-            print(f"⚠ Nie udało się zapisać pamięci: {e}")
-    
-    def _load_persistent_memory(self):
-        """
-        Ładuje pamięć z pliku JSON, a w razie braku – z pliku pickle.
-        """
-        json_file = "memory/learned_strategies.json"
-        pickle_file = "memory/learned_strategies.pkl"
-        if os.path.exists(json_file):
-            try:
-                with open(json_file, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                self.learned_patterns = data.get("patterns", {})
-                self.successful_strategies = data.get("strategies", [])
-                print("✓ Załadowano pamięć z poprzednich sesji (JSON)")
-            except Exception as e:
-                print(f"⚠ Nie udało się załadować pamięci JSON: {e}")
-        elif os.path.exists(pickle_file):
-            try:
-                import pickle
-                with open(pickle_file, "rb") as f:
-                    data = pickle.load(f)
-                self.learned_patterns = data.get("patterns", {})
-                self.successful_strategies = data.get("strategies", [])
-                print("✓ Załadowano pamięć z poprzednich sesji (pickle)")
-            except Exception as e:
-                print(f"⚠ Nie udało się załadować pamięci pickle: {e}")
+
+        if not self.full_mission_records:
+            return patterns
+
+        # Analiza per dzień tygodnia
+        for record in self.full_mission_records:
+            timestamp = datetime.fromisoformat(record['timestamp'])
+            weekday = timestamp.strftime('%A')
+            hour = timestamp.hour
+            day_hour = f"{weekday}_{hour:02d}h"
+
+            # Per weekday
+            if weekday not in patterns['by_weekday']:
+                patterns['by_weekday'][weekday] = {
+                    'missions': [],
+                    'avg_score': 0,
+                    'avg_iterations': 0,
+                    'common_issues': []
+                }
+
+            patterns['by_weekday'][weekday]['missions'].append(record['memory_id'])
+
+            # Per hour
+            if hour not in patterns['by_hour']:
+                patterns['by_hour'][hour] = {
+                    'missions': [],
+                    'avg_score': 0,
+                    'avg_iterations': 0
+                }
+
+            patterns['by_hour'][hour]['missions'].append(record['memory_id'])
+
+            # Per day+hour combo
+            if day_hour not in patterns['by_day_hour']:
+                patterns['by_day_hour'][day_hour] = {
+                    'missions': [],
+                    'scores': []
+                }
+
+            patterns['by_day_hour'][day_hour]['missions'].append(record['memory_id'])
+            patterns['by_day_hour'][day_hour]['scores'].append(record.get('final_score', 0))
+
+        # Oblicz średnie
+        for weekday, data in patterns['by_weekday'].items():
+            if data['missions']:
+                scores = [r['final_score'] for r in self.full_mission_records 
+                         if r['memory_id'] in data['missions']]
+                data['avg_score'] = sum(scores) / len(scores) if scores else 0
+
+        return patterns
+
+    def get_current_context_hints(self) -> str:
+        """Zwraca wskazówki kontekstowe na podstawie aktualnego czasu"""
+        from datetime import datetime
+
+        now = datetime.now()
+        patterns = self.analyze_temporal_patterns()
+
+        hints = []
+
+        # Sprawdź wzorce dla aktualnego dnia
+        weekday = now.strftime('%A')
+        if weekday in patterns['by_weekday']:
+            weekday_data = patterns['by_weekday'][weekday]
+            if weekday_data['avg_score'] < 90:
+                hints.append(f"Uwaga: {weekday} historycznie mają niższe score ({weekday_data['avg_score']:.1f})")
+
+        # Sprawdź wzorce dla aktualnej godziny
+        hour = now.hour
+        if hour in patterns['by_hour']:
+            hour_data = patterns['by_hour'][hour]
+            if len(hour_data['missions']) > 2:  # Jeśli mamy wystarczająco danych
+                hints.append(f"O godzinie {hour}:00 zazwyczaj wykonywane są misje tego typu")
+
+        return " | ".join(hints) if hints else ""
 
 
 --- FILE: moa_prompts.py ---
@@ -2212,6 +2792,372 @@ class AgentRole:
     thinking_style: str
 
 
+--- FILE: persist_missions_memory.py ---
+
+"""
+Utilities for persisting mission records and their corresponding debate artefacts
+into a Vertex AI Agent Engine memory bank.
+
+This module contains a single helper function, ``persist_missions_to_vertex_memory``,
+which expects a path to a JSON file containing missions (in the same shape
+as produced by your multi‑agent workflow) and writes several structured
+memories for each mission into a specified Agent Engine.  Unlike earlier
+implementations that attempted to write directly through the high‑level
+``vertexai.agent_engines`` module, this version uses a ``vertexai.Client``
+instance to perform the memory writes.  The Vertex SDK requires that
+``create_memory`` be invoked via ``client.agent_engines.create_memory(...)``
+when interacting with an existing engine by name.
+
+Example usage::
+
+    from vertexai import agent_engines
+    from tools.persist_missions_memory import persist_missions_to_vertex_memory
+
+    # create or fetch your Agent Engine up front
+    engine = agent_engines.create(display_name="my-engine")
+
+    # initialise a Vertex client (project and location can be omitted if
+    # configured via environment variables)
+    client = vertexai.Client(project="my-project", location="us-central1")
+
+    # persist the missions into memory
+    persist_missions_to_vertex_memory(
+        json_path="/path/to/learned_strategies.json",
+        engine_name=engine.resource_name,
+        client=client
+    )
+
+Each mission record will produce several memory entries: an overview,
+the final plan (graph), a summary of aggregator contributions, a critic
+report and optionally the full debate transcript split into chunks.  The
+``scope`` of each memory contains identifiers like ``mission_id`` and
+``mission_type`` so that downstream components can query the memory bank
+precisely.
+"""
+
+from __future__ import annotations
+
+import json
+import hashlib
+from datetime import datetime
+from typing import Any, Dict, Optional, Callable
+
+try:
+    import vertexai  # type: ignore
+except ImportError as e:  # pragma: no cover
+    raise RuntimeError(
+        "vertexai package is required for persist_missions_to_vertex_memory" ) from e
+
+__all__ = ["persist_missions_to_vertex_memory"]
+
+
+def _md5(text: str) -> str:
+    """Return an MD5 hex digest for the given text."""
+    return hashlib.md5(text.encode("utf-8")).hexdigest()
+
+
+def _now() -> str:
+    """Return current UTC time in ISO8601 format with a 'Z' suffix."""
+    return datetime.utcnow().isoformat() + "Z"
+
+
+def _merge_dicts(base: Dict[str, Any], extra: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """
+    Helper to merge two dictionaries.  ``extra`` entries override those in
+    ``base``.  None values are skipped.
+    """
+    result = dict(base)
+    if extra:
+        for k, v in extra.items():
+            if v is not None:
+                result[k] = v
+    return result
+
+
+def persist_missions_to_vertex_memory(
+    json_path: str,
+    *,
+    engine_name: str,
+    client: "vertexai.Client",
+    include_transcript: bool = True,
+    max_transcript_chunk_chars: int = 15000,
+    make_scope: Optional[Callable[[Dict[str, Any], Dict[str, Any]], Dict[str, Any]]] = None,
+) -> None:
+    """
+    Persist missions and their associated debate artefacts into a Vertex AI Agent
+    Engine memory bank.
+
+    Parameters
+    ----------
+    json_path: str
+        Path to the JSON file containing mission records.  Each record should
+        resemble the entries under ``full_mission_records`` in your data.
+
+    engine_name: str
+        The fully qualified resource name of the Agent Engine (e.g.
+        ``projects/123/locations/us-central1/reasoningEngines/456``).  The
+        engine must already exist; this function does not create or look up
+        the engine.
+
+    client: vertexai.Client
+        An initialised Vertex AI client.  Creation of memories must be
+        performed via ``client.agent_engines.create_memory(...)``.
+
+    include_transcript: bool, default True
+        Whether to write the full debate transcript (``full_transcript``) into
+        memory.  When ``True``, the transcript will be stored in one or
+        multiple memory records.  To satisfy the Vertex AI limitation that
+        ``fact`` strings must be shorter than ~2k characters, transcripts are
+        automatically split into chunks of approximately 2040 characters.
+
+    max_transcript_chunk_chars: int, default 15000
+        **Deprecated.** Previously controlled the size of transcript chunks,
+        but is now ignored.  All memory entries are automatically split to
+        satisfy the Vertex AI fact size limit of ~2k characters.
+
+    make_scope: Callable, optional
+        Optional callback to build a scope dictionary given the base mission
+        scope and a view-specific override.  If not provided, a simple
+        merge of dictionaries is used.  This can be used to inject custom
+        metadata or enforce specific scoping rules.
+
+    Notes
+    -----
+    Each mission produces the following memory entries:
+
+    1. ``mission_overview``: contains the prompt, mission type, tags and timestamps.
+    2. ``final_plan``: stores the ``final_plan`` object with nodes and edges and
+       the mission's final score.
+    3. ``aggregator_summary``: summarises the aggregator's reasoning and
+       proposer contributions, if present.
+    4. ``critic_report``: stores the critic's verdict, score and any
+       weaknesses.
+    5. ``debate_transcript``: optional, contains the full list of messages
+       exchanged during the debate.  For long transcripts a ``content_json_chunk``
+       field is used to store raw JSON segments.
+
+    All entries are written using the Vertex SDK's ``create_memory`` method on
+    ``client.agent_engines``, which attaches the memory to the specified engine
+    and associates a scope.  The scope includes identifiers like ``mission_id``
+    and ``mission_type`` so that consumers can later retrieve only the
+    relevant memories.
+    """
+    # Validate inputs early
+    if not engine_name:
+        raise ValueError("engine_name must be provided and non-empty")
+    if client is None:
+        raise ValueError("A vertexai.Client instance must be provided via the 'client' parameter")
+
+    # Limit for the fact field.  The Vertex AI Agent Engine requires the fact
+    # string to be under 2KiB (roughly 2048 characters).  We leave
+    # a comfortable margin so that after adding JSON overhead (field names,
+    # mission_id, imported_at etc.) the final string stays within the limit.
+    MAX_FACT_LENGTH = 1500
+
+    # Load the JSON file and compute a corpus signature to group related entries
+    with open(json_path, "r", encoding="utf-8") as f:
+        try:
+            data = json.load(f)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"Failed to parse JSON at {json_path}: {exc}") from exc
+
+    corpus_sig = _md5(json.dumps(data, ensure_ascii=False, sort_keys=True))
+
+    # Use provided or default scope builder
+    build_scope = (
+        make_scope
+        if make_scope is not None
+        else lambda base, extra: _merge_dicts(base, extra)
+    )
+
+    def _create_memory_fact(
+        *,
+        kind: str,
+        fact_dict: Dict[str, Any],
+        view: str,
+        replic_fields: Optional[tuple[str, ...]] = None,
+    ) -> None:
+        """
+        Construct a JSON fact from ``fact_dict`` (ensuring ``mission_id``,
+        ``kind`` and ``imported_at`` are present) and persist it to Vertex AI
+        memory.  If the resulting JSON string is small, it is stored directly.
+        Otherwise the payload is split into chunks small enough that each
+        serialized memory entry, including metadata, does not exceed 2048
+        characters in UTF‑8 encoding.  Each chunk entry has a
+        ``content_json_chunk`` field along with ``chunk_index`` and ``chunk_total``.
+        Selected fields listed in ``replic_fields`` are copied onto every
+        chunk to make retrieval easier.
+        """
+        # Compose the complete payload once (includes the entire fact_dict)
+        payload = dict(fact_dict)
+        payload["kind"] = kind
+        payload["mission_id"] = mission_id
+        payload["imported_at"] = _now()
+        payload_str = json.dumps(payload, ensure_ascii=False)
+        # Quick path: small payload
+        if len(payload_str.encode("utf-8")) < 2000:
+            # Under limit: write directly
+            client.agent_engines.create_memory(
+                name=engine_name,
+                fact=payload_str,
+                scope=build_scope(base_scope, {"view": view}),
+            )
+            return
+        # Otherwise, split the payload into parts that will fit into the 2 KiB limit
+        # Precompute replic field values (small data)
+        replic_values: Dict[str, Any] = {}
+        if replic_fields:
+            for field in replic_fields:
+                if field in fact_dict:
+                    replic_values[field] = fact_dict[field]
+        # Build the list of chunk strings (content_json_chunk) with dynamic sizing
+        parts: list[str] = []
+        # We will reduce the candidate content size until the entire serialized
+        # memory entry fits within the 2 KiB limit.  Initial candidate is
+        # MAX_FACT_LENGTH, which is conservatively small.
+        start_idx = 0
+        total_len = len(payload_str)
+        while start_idx < total_len:
+            # Start with the maximum allowed raw content size
+            candidate_len = min(MAX_FACT_LENGTH, total_len - start_idx)
+            # Dynamically shrink the candidate until the resulting JSON entry is within limit
+            while candidate_len > 0:
+                part_content = payload_str[start_idx : start_idx + candidate_len]
+                test_fact: Dict[str, Any] = {
+                    "kind": f"{kind}_part",
+                    "mission_id": mission_id,
+                    "chunk_index": 0,  # placeholder; true index set later
+                    "chunk_total": 0,  # placeholder; true total set later
+                    "imported_at": _now(),
+                    "content_json_chunk": part_content,
+                }
+                # copy replic field values to test_fact to measure overhead
+                test_fact.update(replic_values)
+                test_json = json.dumps(test_fact, ensure_ascii=False).encode("utf-8")
+                if len(test_json) < 2040:
+                    # Accept this candidate size
+                    parts.append(part_content)
+                    start_idx += candidate_len
+                    break
+                # Too large: shrink the candidate and try again
+                candidate_len -= 50
+            else:
+                # If no candidate size worked, raise an error
+                raise ValueError(
+                    f"Unable to fit payload part into memory fact for mission {mission_id}; content may be too large."
+                )
+        # Now persist each part with accurate chunk_index and chunk_total
+        total_parts = len(parts)
+        for idx, part in enumerate(parts):
+            part_fact: Dict[str, Any] = {
+                "kind": f"{kind}_part",
+                "mission_id": mission_id,
+                "chunk_index": idx,
+                "chunk_total": total_parts,
+                "imported_at": _now(),
+                "content_json_chunk": part,
+            }
+            part_fact.update(replic_values)
+            client.agent_engines.create_memory(
+                name=engine_name,
+                fact=json.dumps(part_fact, ensure_ascii=False),
+                scope=build_scope(base_scope, {"view": view}),
+            )
+
+    missions = data.get("full_mission_records", [])
+    for rec in missions:
+        # Derive mission identifiers; fall back to a digest of the record if missing
+        mission_id = (
+            rec.get("memory_id")
+            or rec.get("mission_id")
+            or _md5(json.dumps(rec, ensure_ascii=False, sort_keys=True))
+        )
+        mission_prompt = rec.get("mission_prompt")
+        mission_type = rec.get("mission_type")
+        final_plan = rec.get("final_plan")
+        final_score = rec.get("final_score")
+        tags = rec.get("tags", [])
+        timestamp = rec.get("timestamp")
+        aggregator_reasoning = rec.get("aggregator_reasoning")
+        proposer_contributions = rec.get("proposer_contributions")
+        critic = rec.get("critic", {}) or {}
+        verdict = critic.get("verdict")
+        critic_score = critic.get("score")
+        weaknesses = critic.get("weaknesses", [])
+        transcript = rec.get("full_transcript", [])
+
+        # Base scope for all memories of this mission
+        base_scope = {
+            "corpus_signature": corpus_sig,
+            "mission_id": mission_id,
+            "mission_type": mission_type,
+            "source": "learned_strategies_json",
+        }
+
+        # 1. Mission overview
+        overview_fact = {
+            "mission_prompt": mission_prompt,
+            "mission_type": mission_type,
+            "tags": tags,
+            "timestamp": timestamp,
+        }
+        _create_memory_fact(kind="mission_overview", fact_dict=overview_fact, view="overview")
+
+        # 2. Final plan (if present)
+        if final_plan:
+            plan_fact = {
+                "plan": final_plan,
+                "final_score": final_score,
+            }
+            _create_memory_fact(
+                kind="final_plan",
+                fact_dict=plan_fact,
+                view="plan",
+                replic_fields=("final_score",),
+            )
+
+        # 3. Aggregator summary (if present)
+        if aggregator_reasoning or proposer_contributions:
+            agg_fact = {
+                "aggregator_reasoning": aggregator_reasoning,
+                "proposer_contributions": proposer_contributions,
+            }
+            _create_memory_fact(
+                kind="aggregator_summary",
+                fact_dict=agg_fact,
+                view="aggregator",
+            )
+
+        # 4. Critic report (if any critic info exists)
+        if verdict or critic_score is not None or weaknesses:
+            critic_fact = {
+                "verdict": verdict,
+                "score": critic_score,
+                "weaknesses": weaknesses,
+            }
+            _create_memory_fact(
+                kind="critic_report",
+                fact_dict=critic_fact,
+                view="critic",
+                replic_fields=("verdict", "score", "weaknesses"),
+            )
+
+        # 5. Debate transcript (optional)
+        if include_transcript and transcript:
+            trans_fact = {
+                "content": transcript,
+            }
+            _create_memory_fact(
+                kind="debate_transcript",
+                fact_dict=trans_fact,
+                view="transcript",
+            )
+
+    # End of for loop
+    # Explicitly return None for clarity
+    return None
+
+
 --- FILE: process_logger.py ---
 
 """
@@ -2408,6 +3354,160 @@ class ResponseParser:
         
         # Spróbuj ponownie
         return self._try_pure_json(response)
+
+
+--- FILE: retrieve_mission_memory.py ---
+
+"""
+Helper functions for reconstructing mission memory entries from a Vertex AI Agent
+Engine Memory Bank.
+
+When using the `persist_missions_to_vertex_memory` helper to store mission
+records, long entries (e.g. final plans, aggregator reasoning or
+transcripts) are split into multiple memory records, each with a
+``content_json_chunk`` field, a ``chunk_index`` and a ``chunk_total``.  This
+module provides a utility to fetch and reassemble these parts into a single
+Python object for downstream processing.
+
+Example usage::
+
+    from vertexai import Client
+    from tools.retrieve_mission_memory import retrieve_mission_memory
+
+    client = Client(project=PROJECT_ID, location=LOCATION)
+    mission_data = retrieve_mission_memory(
+        engine_name=AGENT_ENGINE_NAME,
+        mission_id="abcdefg-1234",
+        client=client
+    )
+    # mission_data is a dict keyed by kind (e.g. 'final_plan', 'mission_overview')
+    full_plan = mission_data["final_plan"]["content"]
+    # ...
+
+"""
+
+from __future__ import annotations
+
+import json
+from typing import Any, Dict, List, Optional, Iterable
+
+try:
+    from vertexai import Client  # type: ignore
+except ImportError:
+    Client = Any  # pragma: no cover
+
+__all__ = ["retrieve_mission_memory"]
+
+
+def _assemble_chunks(items: Iterable[Dict[str, Any]]) -> Any:
+    """
+    Given an iterable of memory entries (dictionaries) that represent parts
+    of a single logical fact, concatenate the ``content_json_chunk`` fields in
+    order of ``chunk_index``, parse the resulting JSON and return the
+    reconstructed Python object.  If the concatenated string cannot be
+    deserialised, return the raw string.
+    """
+    items_sorted = sorted(items, key=lambda d: d.get("chunk_index", 0))
+    combined_str = "".join(d.get("content_json_chunk", "") for d in items_sorted)
+    try:
+        return json.loads(combined_str)
+    except json.JSONDecodeError:
+        return combined_str
+
+
+def retrieve_mission_memory(
+    *,
+    engine_name: str,
+    mission_id: str,
+    client: Client,
+    view: Optional[str] = None,
+) -> Dict[str, Any]:
+    """
+    Retrieve and reassemble all memory records for a given mission.
+
+    Parameters
+    ----------
+    engine_name: str
+        Fully qualified name of the Agent Engine (e.g. ``projects/.../locations/.../reasoningEngines/...``).
+
+    mission_id: str
+        The identifier of the mission whose memories should be retrieved.
+
+    client: vertexai.Client
+        An initialised Vertex AI client.  Used to call ``retrieve_memories``.
+
+    view: str, optional
+        If provided, restricts retrieval to memories with this ``view`` scope
+        (e.g. "overview", "plan", "aggregator", "critic", "transcript").
+
+    Returns
+    -------
+    Dict[str, Any]
+        A dictionary keyed by ``kind`` where each value is a reconstructed
+        memory object.  For kinds that were split into multiple parts, the
+        returned value is a dict with ``content`` holding the full Python
+        object and any replicated metadata (e.g. ``final_score``, ``verdict``).
+        For kinds that were stored in a single record, the original fact
+        dictionary is returned.
+
+    Notes
+    -----
+    This helper assumes that long facts are stored using the convention
+    ``{kind}_part`` with ``chunk_index`` and ``chunk_total`` keys, and that
+    the payload is serialised as JSON in the ``content_json_chunk`` field.
+    """
+    if not engine_name:
+        raise ValueError("engine_name must be provided")
+    if not mission_id:
+        raise ValueError("mission_id must be provided")
+    if client is None:
+        raise ValueError("client must be provided")
+
+    scope: Dict[str, Any] = {"mission_id": mission_id}
+    if view:
+        scope["view"] = view
+
+    # Retrieve all memories matching the mission and optional view
+    memories_iter = client.agent_engines.retrieve_memories(
+        name=engine_name,
+        scope=scope,
+    )
+    memories: List[Any] = list(memories_iter)
+
+    # Group by base kind (strip off '_part' suffix if present)
+    grouped: Dict[str, List[Dict[str, Any]]] = {}
+    for m in memories:
+        try:
+            fact_dict = json.loads(m.memory.fact)
+        except Exception:
+            # fall back to raw string in case of unexpected format
+            fact_dict = {"kind": "unknown", "content": m.memory.fact}
+        kind = str(fact_dict.get("kind", ""))
+        base_kind = kind[:-5] if kind.endswith("_part") else kind
+        grouped.setdefault(base_kind, []).append(fact_dict)
+
+    # Reconstruct each kind
+    result: Dict[str, Any] = {}
+    for kind_key, items in grouped.items():
+        # Determine if this kind was split
+        if any("content_json_chunk" in it for it in items):
+            # Assemble the content
+            full_content = _assemble_chunks(items)
+            # Collect replicated metadata (first occurrence wins)
+            metadata: Dict[str, Any] = {
+                key: it[key]
+                for it in items
+                for key in ("final_score", "verdict", "score", "weaknesses", "tags", "timestamp", "mission_type")
+                if key in it and key not in result.get(kind_key, {})
+            }
+            assembled = {"kind": kind_key, "mission_id": mission_id, "content": full_content}
+            assembled.update(metadata)
+            result[kind_key] = assembled
+        else:
+            # Single record: return as-is
+            # Use the first entry (in case multiple matches exist)
+            result[kind_key] = items[0]
+    return result
 
 
 --- FILE: run_debate.ipynb ---
