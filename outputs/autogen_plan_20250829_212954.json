@@ -1,0 +1,305 @@
+{
+  "mission": "Zbuduj adaptacyjny system ML z continuous learning",
+  "final_plan": {
+    "entry_point": "Load_Initial_Data",
+    "nodes": [
+      {
+        "name": "Load_Initial_Data",
+        "implementation": "load_data"
+      },
+      {
+        "name": "Clean_Initial_Data",
+        "implementation": "clean_data"
+      },
+      {
+        "name": "Validate_Data_Quality",
+        "implementation": "validate_data"
+      },
+      {
+        "name": "Discover_Causal_Structure",
+        "implementation": "discover_causality"
+      },
+      {
+        "name": "Train_Causal_Model",
+        "implementation": "train_model"
+      },
+      {
+        "name": "Train_Standard_Model",
+        "implementation": "train_model"
+      },
+      {
+        "name": "Validate_Model",
+        "implementation": "validate_model"
+      },
+      {
+        "name": "Optimize_Pipeline",
+        "implementation": "optimize_performance"
+      },
+      {
+        "name": "Generate_Deployment_Report",
+        "implementation": "generate_report"
+      },
+      {
+        "name": "Notify_Ready",
+        "implementation": "notify_user"
+      },
+      {
+        "name": "Load_Stream_Data",
+        "implementation": "load_data"
+      },
+      {
+        "name": "Clean_Stream_Data",
+        "implementation": "clean_data"
+      },
+      {
+        "name": "Assess_Drift_Severity",
+        "implementation": "validate_data"
+      },
+      {
+        "name": "Generate_Drift_Report",
+        "implementation": "generate_report"
+      },
+      {
+        "name": "Notify_Drift",
+        "implementation": "notify_user"
+      },
+      {
+        "name": "Rediscover_Causality",
+        "implementation": "discover_causality"
+      },
+      {
+        "name": "Train_Adaptive_Model",
+        "implementation": "train_model"
+      },
+      {
+        "name": "Validate_Adaptation",
+        "implementation": "validate_model"
+      },
+      {
+        "name": "Optimize_Adapted",
+        "implementation": "optimize_performance"
+      },
+      {
+        "name": "Notify_Adaptation_Done",
+        "implementation": "notify_user"
+      },
+      {
+        "name": "Notify_Stable",
+        "implementation": "notify_user"
+      },
+      {
+        "name": "Error_Handler",
+        "implementation": "error_handler"
+      },
+      {
+        "name": "Rollback",
+        "implementation": "rollback"
+      },
+      {
+        "name": "Notify_Failure",
+        "implementation": "notify_user"
+      },
+      {
+        "name": "Notify_Causality_Degraded",
+        "implementation": "notify_user"
+      }
+    ],
+    "edges": [
+      {
+        "from": "Load_Initial_Data",
+        "to": "Clean_Initial_Data",
+        "condition": "on_success"
+      },
+      {
+        "from": "Load_Initial_Data",
+        "to": "Error_Handler",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Clean_Initial_Data",
+        "to": "Validate_Data_Quality",
+        "condition": "on_success"
+      },
+      {
+        "from": "Clean_Initial_Data",
+        "to": "Error_Handler",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Validate_Data_Quality",
+        "to": "Discover_Causal_Structure",
+        "condition": "validated"
+      },
+      {
+        "from": "Validate_Data_Quality",
+        "to": "Error_Handler",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Discover_Causal_Structure",
+        "to": "Train_Causal_Model",
+        "condition": "on_success"
+      },
+      {
+        "from": "Discover_Causal_Structure",
+        "to": "Notify_Causality_Degraded",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Notify_Causality_Degraded",
+        "to": "Train_Standard_Model",
+        "condition": "on_success"
+      },
+      {
+        "from": "Train_Causal_Model",
+        "to": "Validate_Model",
+        "condition": "on_success"
+      },
+      {
+        "from": "Train_Standard_Model",
+        "to": "Validate_Model",
+        "condition": "on_success"
+      },
+      {
+        "from": "Train_Causal_Model",
+        "to": "Error_Handler",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Train_Standard_Model",
+        "to": "Error_Handler",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Validate_Model",
+        "to": "Optimize_Pipeline",
+        "condition": "validated"
+      },
+      {
+        "from": "Validate_Model",
+        "to": "Error_Handler",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Optimize_Pipeline",
+        "to": "Generate_Deployment_Report",
+        "condition": "on_success"
+      },
+      {
+        "from": "Optimize_Pipeline",
+        "to": "Generate_Deployment_Report",
+        "condition": "needs_optimization"
+      },
+      {
+        "from": "Generate_Deployment_Report",
+        "to": "Notify_Ready",
+        "condition": "on_success"
+      },
+      {
+        "from": "Notify_Ready",
+        "to": "Load_Stream_Data",
+        "condition": "on_success"
+      },
+      {
+        "from": "Load_Stream_Data",
+        "to": "Clean_Stream_Data",
+        "condition": "on_success"
+      },
+      {
+        "from": "Load_Stream_Data",
+        "to": "Load_Stream_Data",
+        "condition": "retry"
+      },
+      {
+        "from": "Clean_Stream_Data",
+        "to": "Assess_Drift_Severity",
+        "condition": "on_success"
+      },
+      {
+        "from": "Assess_Drift_Severity",
+        "to": "Generate_Drift_Report",
+        "condition": "validated"
+      },
+      {
+        "from": "Assess_Drift_Severity",
+        "to": "Notify_Stable",
+        "condition": "on_success"
+      },
+      {
+        "from": "Generate_Drift_Report",
+        "to": "Notify_Drift",
+        "condition": "on_success"
+      },
+      {
+        "from": "Notify_Drift",
+        "to": "Rediscover_Causality",
+        "condition": "on_success"
+      },
+      {
+        "from": "Rediscover_Causality",
+        "to": "Train_Adaptive_Model",
+        "condition": "on_success"
+      },
+      {
+        "from": "Rediscover_Causality",
+        "to": "Train_Adaptive_Model",
+        "condition": "partial_success"
+      },
+      {
+        "from": "Train_Adaptive_Model",
+        "to": "Validate_Adaptation",
+        "condition": "on_success"
+      },
+      {
+        "from": "Train_Adaptive_Model",
+        "to": "Rollback",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Validate_Adaptation",
+        "to": "Optimize_Adapted",
+        "condition": "validated"
+      },
+      {
+        "from": "Validate_Adaptation",
+        "to": "Rollback",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Optimize_Adapted",
+        "to": "Notify_Adaptation_Done",
+        "condition": "on_success"
+      },
+      {
+        "from": "Notify_Adaptation_Done",
+        "to": "Load_Stream_Data",
+        "condition": "on_success"
+      },
+      {
+        "from": "Notify_Stable",
+        "to": "Load_Stream_Data",
+        "condition": "on_success"
+      },
+      {
+        "from": "Error_Handler",
+        "to": "Rollback",
+        "condition": "on_success"
+      },
+      {
+        "from": "Rollback",
+        "to": "Notify_Failure",
+        "condition": "on_success"
+      },
+      {
+        "from": "Rollback",
+        "to": "Notify_Failure",
+        "condition": "on_failure"
+      }
+    ]
+  },
+  "metadata": {
+    "iterations": 0,
+    "timestamp": "2025-08-29T21:29:54.873397",
+    "autogen_debate": true
+  }
+}

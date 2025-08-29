@@ -1,0 +1,22 @@
+{
+  "missions": [
+    {
+      "mission_id": "mission_20250829_212413_92ed8ebc",
+      "file_path": "memory/missions/mission_20250829_212413_92ed8ebc.json",
+      "timestamp": "2025-08-29T21:24:13.347167",
+      "mission_prompt": "Stwórz prosty pipeline do analizy danych CSV",
+      "mission_type": "data_processing",
+      "final_score": 94.7,
+      "tags": [
+        "data",
+        "optimized",
+        "robust"
+      ],
+      "outcome": "Success"
+    }
+  ],
+  "metadata": {
+    "last_updated": "2025-08-29T21:24:13.352105",
+    "total_missions": 1
+  }
+}

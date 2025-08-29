@@ -15,8 +15,35 @@ from sklearn.metrics.pairwise import cosine_similarity
 # Lokalny logger procesu
 from process_logger import log as process_log
 
+
+import re, unicodedata
+
+def _slugify(text: str, maxlen: int = 60) -> str:
+    text = unicodedata.normalize("NFKD", text).encode("ascii","ignore").decode()
+    text = re.sub(r"[^a-zA-Z0-9]+","-", text).strip("-").lower()
+    return text[:maxlen] or "mission"
+
+def _gcs_upload_json(bucket_name: str, blob_name: str, obj: dict):
+    """Wrzuca JSON do GCS pod gs://{bucket_name}/{blob_name}"""
+    try:
+        from google.cloud import storage
+    except ImportError:
+        raise RuntimeError(
+            "Brak pakietu google-cloud-storage. Zainstaluj: pip install google-cloud-storage"
+        )
+    client = storage.Client()
+    bucket = client.bucket(bucket_name)
+    blob = bucket.blob(blob_name)
+    blob.cache_control = "no-cache"
+    blob.upload_from_string(
+        data=json.dumps(obj, ensure_ascii=False, indent=2),
+        content_type="application/json",
+    )
+
+
 class ContextMemory:
-    def __init__(self, max_episodes: int = 100):
+    def __init__(self, max_episodes: int = 100,gcs_bucket: str | None = None,
+             gcs_prefix: str = ""):
         # Existing
         self.episodes = deque(maxlen=max_episodes)
         self.learned_patterns = {}
@@ -27,9 +54,16 @@ class ContextMemory:
         self.mission_index = {}  # Szybkie wyszukiwanie po ID
         
         self._load_persistent_memory()
+        self.gcs_bucket = gcs_bucket
+        self.gcs_prefix = (gcs_prefix or "").strip().strip("/")
+        self.use_gcs = bool(self.gcs_bucket)
     
     
-    
+    def _gcs_path(self, relative: str) -> str:
+        """Buduje pełną ścieżkę do pliku w GCS z uwzględnieniem prefiksu"""
+        if self.gcs_prefix:
+            return f"{self.gcs_prefix}/{relative}"
+        return relative
     
     def _learn_from_success(self, mission_record: Dict):
         """Ekstraktuje i zapisuje PRAWDZIWE wzorce z udanej misji"""
@@ -133,34 +167,33 @@ class ContextMemory:
 
         return report
     
-    
-    
+    #------
     def save_complete_mission(self, 
-                            mission: str,
-                            final_plan: Dict,
-                            all_messages: List[Dict],
-                            orchestrator_state: Dict) -> str:
+                        mission: str,
+                        final_plan: Dict,
+                        all_messages: List[Dict],
+                        orchestrator_state: Dict) -> str:
         """
-        Zapisuje KOMPLETNY rekord misji z wszystkimi danymi
+        Zapisuje KOMPLETNY rekord misji do OSOBNEGO pliku JSON
         """
         from datetime import datetime
         import hashlib
-        
+
         # Generuj unikalne ID
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         mission_hash = hashlib.md5(mission.encode()).hexdigest()[:8]
         mission_id = f"mission_{timestamp}_{mission_hash}"
-        
+
         # Ekstraktuj kluczowe informacje z transcript
         iterations_data = self._extract_iterations_from_transcript(all_messages)
-        
+
         # Klasyfikuj misję i tagi
         mission_type = self._classify_mission(mission)
         tags = self._extract_tags(mission, final_plan)
-        
+
         # Znajdź krytyczne momenty w debacie
         critical_moments = self._identify_critical_moments(all_messages)
-        
+
         # Przygotuj pełny rekord
         mission_record = {
             # === METADATA ===
@@ -169,38 +202,38 @@ class ContextMemory:
             "mission_prompt": mission,
             "mission_type": mission_type,
             "tags": tags,
-            
+
             # === OUTCOME ===
             "outcome": "Success" if final_plan else "Failed",
             "total_iterations": orchestrator_state.get("iteration_count", 0),
             "total_messages": len(all_messages),
             "time_taken_seconds": orchestrator_state.get("execution_time", 0),
-            
+
             # === FINAL ARTIFACTS ===
             "final_plan": final_plan,
             "final_score": self._extract_final_score(all_messages),
-            
+
             # === ITERATION DETAILS ===
             "iterations": iterations_data,
-            
+
             # === KEY INSIGHTS ===
             "critique_evolution": self._track_critique_evolution(iterations_data),
             "aggregator_reasoning": self._extract_aggregator_reasoning(all_messages),
             "proposer_contributions": self._analyze_proposer_contributions(all_messages),
-            
+
             # === LEARNING DATA ===
             "llm_generated_summary": self._generate_mission_summary(all_messages, final_plan),
             "identified_patterns": self._extract_patterns_from_debate(all_messages),
             "success_factors": self._identify_success_factors(final_plan, iterations_data),
             "failure_points": self._identify_failure_points(iterations_data),
-            
+
             # === CRITICAL MOMENTS ===
             "critical_moments": critical_moments,
             "turning_points": self._identify_turning_points(iterations_data),
-            
+
             # === FULL TRANSCRIPT ===
-            "full_transcript": all_messages,  # Kompletny zapis
-            
+            "full_transcript": all_messages,
+
             # === METRICS ===
             "performance_metrics": {
                 "token_usage": orchestrator_state.get("total_tokens", 0),
@@ -208,25 +241,271 @@ class ContextMemory:
                 "convergence_rate": self._calculate_convergence_rate(iterations_data)
             }
         }
-        
-        # Zapisz do pamięci
+
+        # NOWA CZĘŚĆ - Zapisz do osobnego pliku
+        # --- Zapis misji: GCS jeśli skonfigurowany, inaczej lokalnie ---
+        if getattr(self, "use_gcs", False) and getattr(self, "gcs_bucket", None):
+            # Czytelna nazwa: YYYY/MM/DD/{YYYYMMDD_HHMMSS}-{slug}-{hash}.json
+            slug = _slugify(mission)  # helper poza klasą
+            ts_date, ts_time = timestamp.split("_")  # np. 20250829, 212413
+            y, m, d = ts_date[:4], ts_date[4:6], ts_date[6:8]
+            mission_blob_rel = f"missions/{y}/{m}/{d}/{ts_date}_{ts_time}-{slug}-{mission_hash}.json"
+            mission_blob = self._gcs_path(mission_blob_rel)  # helper w klasie
+
+            try:
+                _gcs_upload_json(self.gcs_bucket, mission_blob, mission_record)  # helper poza klasą
+                process_log(f"[MEMORY] Saved mission to GCS: gs://{self.gcs_bucket}/{mission_blob}")
+            except Exception as e:
+                process_log(f"[MEMORY ERROR] Failed to save mission to GCS: {e}")
+
+            # Lekki indeks: 1 plik per misja (łatwe listowanie prefixem)
+            index_entry = {
+                "mission_id": mission_id,
+                "gcs_path": f"gs://{self.gcs_bucket}/{mission_blob}",
+                "timestamp": mission_record.get("timestamp"),
+                "mission_prompt": mission_record.get("mission_prompt", "")[:100],
+                "mission_type": mission_record.get("mission_type"),
+                "final_score": mission_record.get("final_score"),
+                "tags": mission_record.get("tags", []),
+                "outcome": mission_record.get("outcome"),
+            }
+            index_blob = self._gcs_path(f"index/{mission_id}.json")
+            try:
+                _gcs_upload_json(self.gcs_bucket, index_blob, index_entry)
+            except Exception as e:
+                process_log(f"[MEMORY ERROR] Failed to save index to GCS: {e}")
+
+        else:
+            # dotychczasowy zapis lokalny + lokalny indeks
+            mission_dir = "memory/missions"
+            os.makedirs(mission_dir, exist_ok=True)
+            mission_file = os.path.join(mission_dir, f"{mission_id}.json")
+
+            try:
+                with open(mission_file, "w", encoding="utf-8") as f:
+                    json.dump(mission_record, f, ensure_ascii=False, indent=2)
+                process_log(f"[MEMORY] Saved mission to file: {mission_file}")
+            except Exception as e:
+                process_log(f"[MEMORY ERROR] Failed to save mission file: {e}")
+
+            self._update_mission_index(mission_id, mission_file, mission_record)
+
+        # Nadal zapisz do pamięci runtime jeśli potrzebne
         self.full_mission_records.append(mission_record)
         self.mission_index[mission_id] = len(self.full_mission_records) - 1
-        
-        if final_plan:  # Jeśli misja się udała
+
+        if final_plan:
             self._learn_from_success(mission_record)
-        
-        
-        
+
+        # Aktualizuj wzorce czasowe co 5 misji
         if len(self.full_mission_records) % 5 == 0:
             patterns = self.analyze_temporal_patterns()
             process_log(f"[MEMORY] Temporal patterns update: {len(patterns['by_weekday'])} weekdays analyzed")
-        
-        # Persist immediately
-        self._persist_full_memory()
-        
+
+        # Persist tylko patterns i strategies
+        self._persist_lightweight_memory()
+
         process_log(f"[MEMORY] Saved complete mission: {mission_id}")
         return mission_id
+    
+    
+    
+    def _update_mission_index(self, mission_id: str, file_path: str, record: Dict):
+        """Aktualizuje lekki indeks wszystkich misji"""
+        index_file = "memory/mission_index.json"
+
+        try:
+            if os.path.exists(index_file):
+                with open(index_file, "r", encoding="utf-8") as f:
+                    index = json.load(f)
+            else:
+                index = {"missions": [], "metadata": {}}
+        except:
+            index = {"missions": [], "metadata": {}}
+
+        # Dodaj wpis do indeksu
+        index_entry = {
+            "mission_id": mission_id,
+            "file_path": file_path,
+            "timestamp": record.get("timestamp"),
+            "mission_prompt": record.get("mission_prompt", "")[:100],
+            "mission_type": record.get("mission_type"),
+            "final_score": record.get("final_score"),
+            "tags": record.get("tags", []),
+            "outcome": record.get("outcome")
+        }
+
+        index["missions"].append(index_entry)
+        index["metadata"]["last_updated"] = datetime.now().isoformat()
+        index["metadata"]["total_missions"] = len(index["missions"])
+
+        with open(index_file, "w", encoding="utf-8") as f:
+            json.dump(index, f, ensure_ascii=False, indent=2)
+
+    def _persist_lightweight_memory(self):
+        """Zapisuje tylko patterns i strategies (bez pełnych rekordów misji)"""
+        data = {
+            "patterns": self.learned_patterns,
+            "strategies": self.successful_strategies,
+            "metadata": {
+                "last_updated": datetime.now().isoformat(),
+                "mission_count": len(self.full_mission_records)
+            }
+        }
+
+        if self.use_gcs:
+            try:
+                blob = self._gcs_path("learned_strategies.json")
+                _gcs_upload_json(self.gcs_bucket, blob, data)
+                process_log(f"[MEMORY] Saved lightweight memory to GCS: gs://{self.gcs_bucket}/{blob}")
+                return
+            except Exception as e:
+                process_log(f"[MEMORY ERROR] Failed to save lightweight memory to GCS: {e}")
+
+        # fallback/local
+        os.makedirs("memory", exist_ok=True)
+        memory_file = "memory/learned_strategies.json"
+        try:
+            with open(memory_file, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            print(f"⚠ Nie udało się zapisać pamięci: {e}")
+
+    def load_specific_mission(self, mission_id: str) -> Optional[Dict]:
+        """Ładuje konkretną misję z pliku"""
+        mission_file = f"memory/missions/{mission_id}.json"
+
+        if os.path.exists(mission_file):
+            try:
+                with open(mission_file, "r", encoding="utf-8") as f:
+                    return json.load(f)
+            except Exception as e:
+                process_log(f"[MEMORY ERROR] Cannot load mission {mission_id}: {e}")
+
+        return None
+
+    def search_missions(self, query: str, limit: int = 10) -> List[Dict]:
+        """Przeszukuje indeks misji bez ładowania wszystkich plików"""
+        index_file = "memory/mission_index.json"
+
+        if not os.path.exists(index_file):
+            return []
+
+        with open(index_file, "r", encoding="utf-8") as f:
+            index = json.load(f)
+
+        results = []
+        query_lower = query.lower()
+
+        for entry in index["missions"]:
+            # Proste wyszukiwanie tekstowe
+            if (query_lower in entry.get("mission_prompt", "").lower() or
+                query_lower in entry.get("mission_type", "").lower() or
+                any(query_lower in tag.lower() for tag in entry.get("tags", []))):
+
+                results.append(entry)
+                if len(results) >= limit:
+                    break
+
+        return results
+    
+    
+    
+    #------
+    
+    
+#     def save_complete_mission(self, 
+#                             mission: str,
+#                             final_plan: Dict,
+#                             all_messages: List[Dict],
+#                             orchestrator_state: Dict) -> str:
+#         """
+#         Zapisuje KOMPLETNY rekord misji z wszystkimi danymi
+#         """
+#         from datetime import datetime
+#         import hashlib
+        
+#         # Generuj unikalne ID
+#         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+#         mission_hash = hashlib.md5(mission.encode()).hexdigest()[:8]
+#         mission_id = f"mission_{timestamp}_{mission_hash}"
+        
+#         # Ekstraktuj kluczowe informacje z transcript
+#         iterations_data = self._extract_iterations_from_transcript(all_messages)
+        
+#         # Klasyfikuj misję i tagi
+#         mission_type = self._classify_mission(mission)
+#         tags = self._extract_tags(mission, final_plan)
+        
+#         # Znajdź krytyczne momenty w debacie
+#         critical_moments = self._identify_critical_moments(all_messages)
+        
+#         # Przygotuj pełny rekord
+#         mission_record = {
+#             # === METADATA ===
+#             "memory_id": mission_id,
+#             "timestamp": datetime.now().isoformat(),
+#             "mission_prompt": mission,
+#             "mission_type": mission_type,
+#             "tags": tags,
+            
+#             # === OUTCOME ===
+#             "outcome": "Success" if final_plan else "Failed",
+#             "total_iterations": orchestrator_state.get("iteration_count", 0),
+#             "total_messages": len(all_messages),
+#             "time_taken_seconds": orchestrator_state.get("execution_time", 0),
+            
+#             # === FINAL ARTIFACTS ===
+#             "final_plan": final_plan,
+#             "final_score": self._extract_final_score(all_messages),
+            
+#             # === ITERATION DETAILS ===
+#             "iterations": iterations_data,
+            
+#             # === KEY INSIGHTS ===
+#             "critique_evolution": self._track_critique_evolution(iterations_data),
+#             "aggregator_reasoning": self._extract_aggregator_reasoning(all_messages),
+#             "proposer_contributions": self._analyze_proposer_contributions(all_messages),
+            
+#             # === LEARNING DATA ===
+#             "llm_generated_summary": self._generate_mission_summary(all_messages, final_plan),
+#             "identified_patterns": self._extract_patterns_from_debate(all_messages),
+#             "success_factors": self._identify_success_factors(final_plan, iterations_data),
+#             "failure_points": self._identify_failure_points(iterations_data),
+            
+#             # === CRITICAL MOMENTS ===
+#             "critical_moments": critical_moments,
+#             "turning_points": self._identify_turning_points(iterations_data),
+            
+#             # === FULL TRANSCRIPT ===
+#             "full_transcript": all_messages,  # Kompletny zapis
+            
+#             # === METRICS ===
+#             "performance_metrics": {
+#                 "token_usage": orchestrator_state.get("total_tokens", 0),
+#                 "api_calls": orchestrator_state.get("api_calls", 0),
+#                 "convergence_rate": self._calculate_convergence_rate(iterations_data)
+#             }
+#         }
+        
+#         # Zapisz do pamięci
+#         self.full_mission_records.append(mission_record)
+#         self.mission_index[mission_id] = len(self.full_mission_records) - 1
+        
+#         if final_plan:  # Jeśli misja się udała
+#             self._learn_from_success(mission_record)
+        
+        
+        
+#         if len(self.full_mission_records) % 5 == 0:
+#             patterns = self.analyze_temporal_patterns()
+#             process_log(f"[MEMORY] Temporal patterns update: {len(patterns['by_weekday'])} weekdays analyzed")
+        
+#         # Persist immediately
+#         self._persist_full_memory()
+        
+#         process_log(f"[MEMORY] Saved complete mission: {mission_id}")
+#         return mission_id
     
     def _extract_iterations_from_transcript(self, messages: List[Dict]) -> List[Dict]:
         """Ekstraktuje dane każdej iteracji z transkryptu"""
@@ -264,32 +543,7 @@ class ContextMemory:
         
         return iterations
     
-#     def _generate_mission_summary(self, messages: List[Dict], final_plan: Dict) -> str:
-#         """Generuje podsumowanie misji (możesz tu użyć LLM)"""
-#         # Prosta heurystyka - w przyszłości możesz wywołać LLM
-#         summary_parts = []
-        
-#         # Analiza iteracji
-#         iteration_count = sum(1 for m in messages if "critic" in m.get("name", "").lower())
-#         summary_parts.append(f"Misja wymagała {iteration_count} iteracji.")
-        
-#         # Kluczowe poprawki
-#         weaknesses_mentioned = set()
-#         for msg in messages:
-#             if "weakness" in msg.get("content", "").lower():
-#                 # Ekstraktuj weakness (uproszczenie)
-#                 weaknesses_mentioned.add("obsługa błędów")
-        
-#         if weaknesses_mentioned:
-#             summary_parts.append(f"Główne wyzwania: {', '.join(weaknesses_mentioned)}.")
-        
-#         # Finalny sukces
-#         if final_plan:
-#             node_count = len(final_plan.get("nodes", []))
-#             summary_parts.append(f"Finalny plan zawiera {node_count} węzłów.")
-        
-#         return " ".join(summary_parts)
-    
+
     
     def _generate_mission_summary(self, messages: List[Dict], final_plan: Dict) -> str:
         """Generuje BOGATE podsumowanie misji"""
@@ -381,51 +635,95 @@ class ContextMemory:
         return list(set(tags))  # Unique tags
     
     
+    #------------
     def _load_persistent_memory(self):
-        """
-        Ładuje pamięć z pliku JSON
-        """
+        """Ładuje pamięć - patterns z głównego pliku, misje z indeksu"""
         json_file = "memory/learned_strategies.json"
 
+        # Załaduj patterns i strategies
         if os.path.exists(json_file):
             try:
                 with open(json_file, "r", encoding="utf-8") as f:
                     data = json.load(f)
                 self.learned_patterns = data.get("patterns", {})
                 self.successful_strategies = data.get("strategies", [])
-
-                # Załaduj też nowe full_mission_records jeśli istnieją
-                if "full_mission_records" in data:
-                    self.full_mission_records = data["full_mission_records"]
-                    # Odbuduj index
-                    for i, record in enumerate(self.full_mission_records):
-                        self.mission_index[record["memory_id"]] = i
-
-                print(f"✔ Załadowano pamięć: {len(self.successful_strategies)} strategies, {len(self.full_mission_records)} full records")
             except Exception as e:
                 print(f"⚠ Nie udało się załadować pamięci: {e}")
+
+        # Załaduj listę misji z indeksu
+        index_file = "memory/mission_index.json"
+        if os.path.exists(index_file):
+            try:
+                with open(index_file, "r", encoding="utf-8") as f:
+                    index = json.load(f)
+
+                # Załaduj ostatnie 10 misji do pamięci runtime
+                recent_missions = index["missions"][-10:] if "missions" in index else []
+                for entry in recent_missions:
+                    if "file_path" in entry and os.path.exists(entry["file_path"]):
+                        with open(entry["file_path"], "r", encoding="utf-8") as f:
+                            record = json.load(f)
+                            self.full_mission_records.append(record)
+                            self.mission_index[entry["mission_id"]] = len(self.full_mission_records) - 1
+
+                print(f"✔ Załadowano {len(self.full_mission_records)} ostatnich misji")
+            except Exception as e:
+                print(f"⚠ Problem z indeksem misji: {e}")
         else:
-            print("📝 Tworzę nową pamięć (brak istniejącego pliku)")
-            os.makedirs("memory", exist_ok=True)
+            print("🔍 Tworzę nową pamięć (brak istniejącego indeksu)")
 
-    def _persist_memory(self):
-        """
-        Zapisuje pamięć do pliku JSON
-        """
-        os.makedirs("memory", exist_ok=True)
-        memory_file = "memory/learned_strategies.json"
+        os.makedirs("memory/missions", exist_ok=True)
+    
+    #------------
+    
+    
+    
+    
+#     def _load_persistent_memory(self):
+#         """
+#         Ładuje pamięć z pliku JSON
+#         """
+#         json_file = "memory/learned_strategies.json"
 
-        data = {
-            "patterns": self.learned_patterns,
-            "strategies": self.successful_strategies,
-            "full_mission_records": self.full_mission_records  # NOWE!
-        }
+#         if os.path.exists(json_file):
+#             try:
+#                 with open(json_file, "r", encoding="utf-8") as f:
+#                     data = json.load(f)
+#                 self.learned_patterns = data.get("patterns", {})
+#                 self.successful_strategies = data.get("strategies", [])
 
-        try:
-            with open(memory_file, "w", encoding="utf-8") as f:
-                json.dump(data, f, ensure_ascii=False, indent=2)
-        except Exception as e:
-            print(f"⚠ Nie udało się zapisać pamięci: {e}")
+#                 # Załaduj też nowe full_mission_records jeśli istnieją
+#                 if "full_mission_records" in data:
+#                     self.full_mission_records = data["full_mission_records"]
+#                     # Odbuduj index
+#                     for i, record in enumerate(self.full_mission_records):
+#                         self.mission_index[record["memory_id"]] = i
+
+#                 print(f"✔ Załadowano pamięć: {len(self.successful_strategies)} strategies, {len(self.full_mission_records)} full records")
+#             except Exception as e:
+#                 print(f"⚠ Nie udało się załadować pamięci: {e}")
+#         else:
+#             print("📝 Tworzę nową pamięć (brak istniejącego pliku)")
+#             os.makedirs("memory", exist_ok=True)
+
+#     def _persist_memory(self):
+#         """
+#         Zapisuje pamięć do pliku JSON
+#         """
+#         os.makedirs("memory", exist_ok=True)
+#         memory_file = "memory/learned_strategies.json"
+
+#         data = {
+#             "patterns": self.learned_patterns,
+#             "strategies": self.successful_strategies,
+#             "full_mission_records": self.full_mission_records  # NOWE!
+#         }
+
+#         try:
+#             with open(memory_file, "w", encoding="utf-8") as f:
+#                 json.dump(data, f, ensure_ascii=False, indent=2)
+#         except Exception as e:
+#             print(f"⚠ Nie udało się zapisać pamięci: {e}")
 
             
             
@@ -433,7 +731,8 @@ class ContextMemory:
             
     def _persist_full_memory(self):
         """Alias dla _persist_memory"""
-        self._persist_memory()
+        # self._persist_memory()
+        self._persist_lightweight_memory()
 
 
         
@@ -502,7 +801,7 @@ class ContextMemory:
         }
 
         self.successful_strategies.append(strategy)
-        self._persist_memory()  # Zapisz od razu
+        self._persist_lightweight_memory()  # Zapisz od razu
 
         # Loguj dodanie udanego planu
         process_log(

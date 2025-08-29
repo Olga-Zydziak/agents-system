@@ -30,7 +30,11 @@ class AutoGenMOAOrchestrator:
     def __init__(self, mission: str, node_library: Dict[str, Any], config_file: str = "agents_config.json"):
         self.mission = mission
         self.node_library = node_library
-        self.memory = ContextMemory(max_episodes=50)
+        self.memory = ContextMemory(
+        max_episodes=50,
+        gcs_bucket="debate_rag",   # ten sam bucket co w Memory_bank.ipynb
+        gcs_prefix=""                   # opcjonalnie; usuń lub zostaw ""
+        )
         # Parser oparty na Pydantic – oczekuje czystego JSON zgodnego ze schematem
         self.parser = StructuredResponseParser()
         

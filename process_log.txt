@@ -75,3 +75,73 @@
 [2025-08-25 13:21:01] [MEMORY] Learned from success: success_pattern_causal_analysis, occurrences=1, avg_score=94.50
 [2025-08-25 13:21:01] [MEMORY] Saved complete mission: mission_20250825_132101_a5cf18ab
 [2025-08-25 13:21:01] [ORCHESTRATOR] Mission completed and saved as: mission_20250825_132101_a5cf18ab
+[2025-08-29 20:57:31] [CFG] enable_sanity_ping=False
+[2025-08-29 20:57:31] [INIT] UserProxy initialized
+[2025-08-29 20:57:31] [INIT] Proposer initialized: Causal_Analyst
+[2025-08-29 20:57:31] [INIT] Proposer initialized: Creative_Planner
+[2025-08-29 20:57:31] [INIT] Aggregator initialized
+[2025-08-29 20:57:31] [INIT] Critic initialized
+[2025-08-29 20:57:31] Initialized 2 proposers, 1 aggregator, 1 critic using AutoGen
+[2025-08-29 20:57:31] === AutoGen MOA Orchestrator initialized for mission: Stwórz prosty pipeline do analizy danych CSV... ===
+[2025-08-29 20:57:31] [SUCCESS] Debata zakończona przez StopIteration - plan zatwierdzony
+[2025-08-29 20:57:31] [SUCCESS] Krytyk zatwierdził plan. Rozpoczynam parsowanie...
+[2025-08-29 20:57:31] [PARSER] Znaleziono klucze: ['critique_summary', 'quality_metrics', 'plan_approved', 'decision_marker']
+[2025-08-29 20:57:31] [SUCCESS] Znaleziono plan pod kluczem: 'plan_approved'
+[2025-08-29 20:57:31] [ERROR] Nie udało się sparsować odpowiedzi krytyka: 'ContextMemory' object has no attribute '_persist_memory'
+[2025-08-29 20:57:31] [FAILSAFE] Saved failure report: reports/failure_report_20250829_205731.json
+[2025-08-29 21:24:13] [CFG] enable_sanity_ping=False
+[2025-08-29 21:24:13] [INIT] UserProxy initialized
+[2025-08-29 21:24:13] [INIT] Proposer initialized: Causal_Analyst
+[2025-08-29 21:24:13] [INIT] Proposer initialized: Creative_Planner
+[2025-08-29 21:24:13] [INIT] Aggregator initialized
+[2025-08-29 21:24:13] [INIT] Critic initialized
+[2025-08-29 21:24:13] Initialized 2 proposers, 1 aggregator, 1 critic using AutoGen
+[2025-08-29 21:24:13] === AutoGen MOA Orchestrator initialized for mission: Stwórz prosty pipeline do analizy danych CSV... ===
+[2025-08-29 21:24:13] [SUCCESS] Debata zakończona przez StopIteration - plan zatwierdzony
+[2025-08-29 21:24:13] [SUCCESS] Krytyk zatwierdził plan. Rozpoczynam parsowanie...
+[2025-08-29 21:24:13] [PARSER] Znaleziono klucze: ['critique_summary', 'quality_metrics', 'plan_approved', 'decision_marker']
+[2025-08-29 21:24:13] [SUCCESS] Znaleziono plan pod kluczem: 'plan_approved'
+[2025-08-29 21:24:13] [MEMORY] Added successful plan for mission_type=data_processing, nodes=12
+[2025-08-29 21:24:13] Successful plan saved to outputs/autogen_plan_20250829_212413.json
+[2025-08-29 21:24:13] [MEMORY] Saved mission to file: memory/missions/mission_20250829_212413_92ed8ebc.json
+[2025-08-29 21:24:13] [MEMORY] Learned from success: success_pattern_data_processing, occurrences=1, avg_score=94.70
+[2025-08-29 21:24:13] [MEMORY] Saved complete mission: mission_20250829_212413_92ed8ebc
+[2025-08-29 21:24:13] [ORCHESTRATOR] Mission completed and saved as: mission_20250829_212413_92ed8ebc
+[2025-08-29 21:26:26] [CFG] enable_sanity_ping=False
+[2025-08-29 21:26:26] [INIT] UserProxy initialized
+[2025-08-29 21:26:26] [INIT] Proposer initialized: Causal_Analyst
+[2025-08-29 21:26:26] [INIT] Proposer initialized: Creative_Planner
+[2025-08-29 21:26:26] [INIT] Aggregator initialized
+[2025-08-29 21:26:26] [INIT] Critic initialized
+[2025-08-29 21:26:26] Initialized 2 proposers, 1 aggregator, 1 critic using AutoGen
+[2025-08-29 21:26:26] === AutoGen MOA Orchestrator initialized for mission: Zbuduj adaptacyjny system ML z continuous learning... ===
+[2025-08-29 21:29:54] [SUCCESS] Debata zakończona przez StopIteration - plan zatwierdzony
+[2025-08-29 21:29:54] [SUCCESS] Krytyk zatwierdził plan. Rozpoczynam parsowanie...
+[2025-08-29 21:29:54] [PARSER] Znaleziono klucze: ['critique_summary', 'quality_metrics', 'plan_approved', 'decision_marker']
+[2025-08-29 21:29:54] [SUCCESS] Znaleziono plan pod kluczem: 'plan_approved'
+[2025-08-29 21:29:54] [MEMORY] Added successful plan for mission_type=general, nodes=25
+[2025-08-29 21:29:54] Successful plan saved to outputs/autogen_plan_20250829_212954.json
+[2025-08-29 21:29:54] [MEMORY] Saved mission to file: memory/missions/mission_20250829_212954_1e55a591.json
+[2025-08-29 21:29:54] [MEMORY] Learned from success: success_pattern_general, occurrences=1, avg_score=94.90
+[2025-08-29 21:29:54] [MEMORY] Saved complete mission: mission_20250829_212954_1e55a591
+[2025-08-29 21:29:54] [ORCHESTRATOR] Mission completed and saved as: mission_20250829_212954_1e55a591
+[2025-08-29 23:32:10] [CFG] enable_sanity_ping=False
+[2025-08-29 23:32:10] [INIT] UserProxy initialized
+[2025-08-29 23:32:10] [INIT] Proposer initialized: Causal_Analyst
+[2025-08-29 23:32:11] [INIT] Proposer initialized: Creative_Planner
+[2025-08-29 23:32:11] [INIT] Aggregator initialized
+[2025-08-29 23:32:11] [INIT] Critic initialized
+[2025-08-29 23:32:11] Initialized 2 proposers, 1 aggregator, 1 critic using AutoGen
+[2025-08-29 23:32:11] === AutoGen MOA Orchestrator initialized for mission: Stwórz prosty pipeline do analizy danych CSV... ===
+[2025-08-29 23:32:11] [SUCCESS] Debata zakończona przez StopIteration - plan zatwierdzony
+[2025-08-29 23:32:11] [SUCCESS] Krytyk zatwierdził plan. Rozpoczynam parsowanie...
+[2025-08-29 23:32:11] [PARSER] Znaleziono klucze: ['critique_summary', 'quality_metrics', 'plan_approved', 'decision_marker']
+[2025-08-29 23:32:11] [SUCCESS] Znaleziono plan pod kluczem: 'plan_approved'
+[2025-08-29 23:32:11] [MEMORY] Saved lightweight memory to GCS: gs://debate_rag/learned_strategies.json
+[2025-08-29 23:32:11] [MEMORY] Added successful plan for mission_type=data_processing, nodes=12
+[2025-08-29 23:32:11] Successful plan saved to outputs/autogen_plan_20250829_233211.json
+[2025-08-29 23:32:11] [MEMORY] Saved mission to GCS: gs://debate_rag/missions/2025/08/29/20250829_233211-stworz-prosty-pipeline-do-analizy-danych-csv-92ed8ebc.json
+[2025-08-29 23:32:11] [MEMORY] Learned from success: success_pattern_data_processing, occurrences=2, avg_score=94.70
+[2025-08-29 23:32:11] [MEMORY] Saved lightweight memory to GCS: gs://debate_rag/learned_strategies.json
+[2025-08-29 23:32:11] [MEMORY] Saved complete mission: mission_20250829_233211_92ed8ebc
+[2025-08-29 23:32:11] [ORCHESTRATOR] Mission completed and saved as: mission_20250829_233211_92ed8ebc
