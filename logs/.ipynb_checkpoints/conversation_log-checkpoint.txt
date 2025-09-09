@@ -1,6 +1,0 @@
-2025-08-19T11:02:47.662444 | Initialized 2 proposers, 1 aggregator, 1 critic using AutoGen
-2025-08-19T11:02:47.662678 | === AutoGen MOA Orchestrator initialized for mission: Stwórz prosty pipeline do analizy danych CSV... ===
-2025-08-19T11:07:58.211011 | Initialized 2 proposers, 1 aggregator, 1 critic using AutoGen
-2025-08-19T11:07:58.211137 | === AutoGen MOA Orchestrator initialized for mission: Stwórz prosty pipeline do analizy danych CSV... ===
-2025-08-19T11:07:58.212486 | Retrieve context for mission='Stwórz prosty pipeline do analizy danych CSV', suggestions=[]
-2025-08-19T11:10:04.602417 | Final plan extracted: False

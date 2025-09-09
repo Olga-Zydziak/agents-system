@@ -105,6 +105,44 @@ class AutoGenMOAOrchestrator:
             process_log(f"[SECRETS] Failed to read {secret_id}@{project_id}/{version}: {type(e).__name__}: {e}")
             return None
     
+    
+    #pamiec:
+    
+    def _build_memoryanalyst_message(self) -> str:
+        ctx_local = self.memory.get_relevant_context(self.mission) if self.memory else {}
+        get_v = getattr(self.memory, "get_vertex_context", None)
+        ctx_vertex = get_v(self.mission) if callable(get_v) else {}
+
+
+        tips = []
+        tips += ctx_local.get("recommended_strategies", []) or []
+        tips += ctx_vertex.get("recommended_strategies", []) or []
+
+
+        seen, dedup = set(), []
+        for t in tips:
+            if t not in seen:
+                seen.add(t)
+                dedup.append(t)
+        tips = dedup[:8]
+
+
+        examples = (ctx_vertex.get("examples") or [])[:3]
+        lines = ["# MemoryAnalyst Summary"]
+        if tips:
+            lines.append("## Recommended strategies:")
+            lines += [f"- {t}" for t in tips]
+        if examples:
+            lines.append("\n## Example plans:")
+            for e in examples:
+                mid = e.get("mission_id") or "unknown"
+                puri = e.get("plan_uri") or ""
+                lines.append(f"- {mid}: {puri}")
+
+
+        return "\n".join(lines) if len(lines) > 1 else "# MemoryAnalyst Summary\n(no relevant memory found)"
+    
+    
     #Raport:
     def _ensure_dir(self, path: str):
         os.makedirs(path, exist_ok=True)

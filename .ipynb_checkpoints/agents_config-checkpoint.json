@@ -7,7 +7,9 @@
       "model": {
         "provider": "google",
         "model_name": "gemini-2.5-pro",
-        "temperature": 0.1
+        "temperature": 0.1,
+        "project_id": "dark-data-discovery",
+         "location": "us-central1"
       }
     },
     {
@@ -17,12 +19,7 @@
       "model": {
         "provider": "anthropic",
         "model_name": "claude-sonnet-4-20250514",
-        "secret_manager": {
-          "project_id": "dark-data-discovery",
-          "secret_id": "ANTHROPIC_API_KEY",
-          "version": "latest"
-        },
-        "temperature": 0.7
+        "temperature": 0.5
       }
     },
     {
@@ -32,11 +29,6 @@
       "model": {
         "provider": "anthropic",
         "model_name": "claude-opus-4-1-20250805",
-        "secret_manager": {
-          "project_id": "dark-data-discovery",
-          "secret_id": "ANTHROPIC_API_KEY",
-          "version": "latest"
-        },
         "temperature": 0.2
       }
     },
@@ -47,8 +39,12 @@
       "model": {
         "provider": "google",
         "model_name": "gemini-2.5-pro",
-        "temperature": 0.3
+        "temperature": 0.1,
+        "project_id": "dark-data-discovery",
+         "location": "us-central1"
       }
     }
+    
+    
   ]
 }

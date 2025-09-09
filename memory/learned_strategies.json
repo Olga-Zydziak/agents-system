@@ -37,7 +37,7 @@
       ]
     },
     "success_pattern_data_processing": {
-      "occurrences": 8,
+      "occurrences": 9,
       "examples": [
         {
           "mission_prompt": "Stwórz prosty pipeline do analizy danych CSV",
@@ -112,16 +112,25 @@
             "performance_optimization"
           ],
           "score": 85.0
+        },
+        {
+          "mission_prompt": "Stwórz prosty pipeline do analizy danych CSV",
+          "success_factors": [
+            "comprehensive_error_handling",
+            "data_validation",
+            "performance_optimization"
+          ],
+          "score": 85.0
         }
       ],
       "common_elements": {
-        "comprehensive_error_handling": 8,
+        "comprehensive_error_handling": 9,
         "rollback_mechanism": 1,
-        "data_validation": 8,
-        "performance_optimization": 8,
+        "data_validation": 9,
+        "performance_optimization": 9,
         "adaptive_routing": 1
       },
-      "avg_score": 86.2125,
+      "avg_score": 86.07777777777778,
       "best_practices": [
         {
           "mission_id": "mission_20250829_212413_92ed8ebc",
@@ -510,10 +519,23 @@
       "success_factors": [],
       "performance_metrics": {},
       "timestamp": "2025-09-08T22:16:17.957482"
+    },
+    {
+      "mission_type": "data_processing",
+      "plan_structure": {
+        "num_nodes": 13,
+        "num_edges": 17,
+        "has_error_handling": true,
+        "has_validation": true,
+        "graph_complexity": 0.46153846153846156
+      },
+      "success_factors": [],
+      "performance_metrics": {},
+      "timestamp": "2025-09-09T10:37:32.671206"
     }
   ],
   "metadata": {
-    "last_updated": "2025-09-08T22:16:17.973455",
+    "last_updated": "2025-09-09T10:37:32.689121",
     "mission_count": 11
   }
 }
