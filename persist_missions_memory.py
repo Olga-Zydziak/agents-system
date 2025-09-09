@@ -50,7 +50,8 @@ try:
     import vertexai  # type: ignore
 except ImportError as e:  # pragma: no cover
     raise RuntimeError(
-        "vertexai package is required for persist_missions_to_vertex_memory" ) from e
+        "vertexai package is required for persist_missions_to_vertex_memory"
+    ) from e
 
 __all__ = ["persist_missions_to_vertex_memory"]
 
@@ -65,7 +66,9 @@ def _now() -> str:
     return datetime.utcnow().isoformat() + "Z"
 
 
-def _merge_dicts(base: Dict[str, Any], extra: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+def _merge_dicts(
+    base: Dict[str, Any], extra: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
     """
     Helper to merge two dictionaries.  ``extra`` entries override those in
     ``base``.  None values are skipped.
@@ -85,7 +88,9 @@ def persist_missions_to_vertex_memory(
     client: "vertexai.Client",
     include_transcript: bool = True,
     max_transcript_chunk_chars: int = 15000,
-    make_scope: Optional[Callable[[Dict[str, Any], Dict[str, Any]], Dict[str, Any]]] = None,
+    make_scope: Optional[
+        Callable[[Dict[str, Any], Dict[str, Any]], Dict[str, Any]]
+    ] = None,
 ) -> None:
     """
     Persist missions and their associated debate artefacts into a Vertex AI Agent
@@ -150,7 +155,9 @@ def persist_missions_to_vertex_memory(
     if not engine_name:
         raise ValueError("engine_name must be provided and non-empty")
     if client is None:
-        raise ValueError("A vertexai.Client instance must be provided via the 'client' parameter")
+        raise ValueError(
+            "A vertexai.Client instance must be provided via the 'client' parameter"
+        )
 
     # Limit for the fact field.  The Vertex AI Agent Engine requires the fact
     # string to be under 2KiB (roughly 2048 characters).  We leave
@@ -305,7 +312,9 @@ def persist_missions_to_vertex_memory(
             "tags": tags,
             "timestamp": timestamp,
         }
-        _create_memory_fact(kind="mission_overview", fact_dict=overview_fact, view="overview")
+        _create_memory_fact(
+            kind="mission_overview", fact_dict=overview_fact, view="overview"
+        )
 
         # 2. Final plan (if present)
         if final_plan:

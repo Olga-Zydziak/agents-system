@@ -109,7 +109,7 @@ class StructuredResponseParser:
 
         # Jeśli nic nie pasuje, zwróć oryginalne dane
         return data
-    
+
     def parse_critic_response(self, text: str):
         """
         Parsuje odpowiedź krytyka - zwraca CAŁY JSON
@@ -120,13 +120,21 @@ class StructuredResponseParser:
         if not text:
             return None
 
+        
+        #poprawka
+        if isinstance(text, dict):
+            process_log("[PARSER] Otrzymano dict - zwracam bez zmian")
+            return text
+        
+        #koniec poprawki
+        
         try:
             # Usuń markdown code blocks
             clean_text = text.strip()
 
             # Usuń ```json i ```
-            clean_text = re.sub(r'```json\s*', '', clean_text)
-            clean_text = re.sub(r'```\s*', '', clean_text)
+            clean_text = re.sub(r"```json\s*", "", clean_text)
+            clean_text = re.sub(r"```\s*", "", clean_text)
 
             # Usuń PLAN_ZATWIERDZONY z końca
             if "PLAN_ZATWIERDZONY" in clean_text:
@@ -148,11 +156,11 @@ class StructuredResponseParser:
             # Plan B - znajdź JSON manualnie
             try:
                 # Znajdź od pierwszego { do ostatniego }
-                start = text.find('{')
-                end = text.rfind('}')
+                start = text.find("{")
+                end = text.rfind("}")
 
                 if start >= 0 and end > start:
-                    json_str = text[start:end+1]
+                    json_str = text[start : end + 1]
                     return json.loads(json_str)
             except:
                 pass

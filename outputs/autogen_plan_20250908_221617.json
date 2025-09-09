@@ -1,0 +1,195 @@
+{
+  "mission": "zaprojektuj przepływ ODPORNY NA BLEDY do zrobienia składu książki w InDesign",
+  "final_plan": {
+    "entry_point": "Load_Manuscript",
+    "nodes": [
+      {
+        "name": "Load_Manuscript",
+        "implementation": "load_data",
+        "description": "Wczytuje plik manuskryptu oraz powiązane zasoby."
+      },
+      {
+        "name": "Clean_Text",
+        "implementation": "clean_data",
+        "description": "Usuwa zbędne formatowanie i ujednolica style."
+      },
+      {
+        "name": "Validate_Content",
+        "implementation": "validate_data",
+        "description": "Sprawdza kompletność danych wejściowych."
+      },
+      {
+        "name": "Analyze_Causality",
+        "implementation": "discover_causality",
+        "description": "Analizuje strukturę tekstu w poszukiwaniu potencjalnych problemów ze składem."
+      },
+      {
+        "name": "Apply_Template",
+        "implementation": "train_model",
+        "description": "Aplikuje szablon InDesign i style do tekstu."
+      },
+      {
+        "name": "Validate_Layout",
+        "implementation": "validate_model",
+        "description": "Weryfikuje wynik składu pod kątem błędów technicznych (np. nadmiarowy tekst)."
+      },
+      {
+        "name": "Optimize_Layout",
+        "implementation": "optimize_performance",
+        "description": "Automatycznie koryguje wykryte błędy składu."
+      },
+      {
+        "name": "Generate_PDF",
+        "implementation": "generate_report",
+        "description": "Generuje finalny plik PDF."
+      },
+      {
+        "name": "Handle_Error",
+        "implementation": "error_handler",
+        "description": "Centralny punkt obsługi błędów krytycznych."
+      },
+      {
+        "name": "Rollback",
+        "implementation": "rollback",
+        "description": "Wycofuje zmiany do stanu sprzed błędu."
+      },
+      {
+        "name": "Notify_Success",
+        "implementation": "notify_user",
+        "description": "Powiadamia użytkownika o pomyślnym zakończeniu procesu."
+      },
+      {
+        "name": "Notify_Failure",
+        "implementation": "notify_user",
+        "description": "Powiadamia użytkownika o krytycznej awarii."
+      },
+      {
+        "name": "Notify_Causality_Issue",
+        "implementation": "notify_user",
+        "description": "Powiadamia o niepowodzeniu niekrytycznej analizy przyczynowej."
+      },
+      {
+        "name": "Notify_Optimization_Incomplete",
+        "implementation": "notify_user",
+        "description": "Powiadamia o częściowym sukcesie optymalizacji układu."
+      }
+    ],
+    "edges": [
+      {
+        "from": "Load_Manuscript",
+        "to": "Clean_Text",
+        "condition": "on_success"
+      },
+      {
+        "from": "Load_Manuscript",
+        "to": "Handle_Error",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Clean_Text",
+        "to": "Validate_Content",
+        "condition": "on_success"
+      },
+      {
+        "from": "Clean_Text",
+        "to": "Handle_Error",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Validate_Content",
+        "to": "Analyze_Causality",
+        "condition": "validated"
+      },
+      {
+        "from": "Validate_Content",
+        "to": "Handle_Error",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Analyze_Causality",
+        "to": "Apply_Template",
+        "condition": "on_success"
+      },
+      {
+        "from": "Analyze_Causality",
+        "to": "Notify_Causality_Issue",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Notify_Causality_Issue",
+        "to": "Apply_Template",
+        "condition": "on_success"
+      },
+      {
+        "from": "Apply_Template",
+        "to": "Validate_Layout",
+        "condition": "on_success"
+      },
+      {
+        "from": "Apply_Template",
+        "to": "Handle_Error",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Validate_Layout",
+        "to": "Generate_PDF",
+        "condition": "validated"
+      },
+      {
+        "from": "Validate_Layout",
+        "to": "Optimize_Layout",
+        "condition": "needs_optimization"
+      },
+      {
+        "from": "Validate_Layout",
+        "to": "Handle_Error",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Optimize_Layout",
+        "to": "Validate_Layout",
+        "condition": "on_success"
+      },
+      {
+        "from": "Optimize_Layout",
+        "to": "Notify_Optimization_Incomplete",
+        "condition": "partial_success"
+      },
+      {
+        "from": "Optimize_Layout",
+        "to": "Handle_Error",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Notify_Optimization_Incomplete",
+        "to": "Generate_PDF",
+        "condition": "on_success"
+      },
+      {
+        "from": "Generate_PDF",
+        "to": "Notify_Success",
+        "condition": "on_success"
+      },
+      {
+        "from": "Generate_PDF",
+        "to": "Handle_Error",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Handle_Error",
+        "to": "Notify_Failure",
+        "condition": "on_success"
+      },
+      {
+        "from": "Notify_Failure",
+        "to": "Rollback",
+        "condition": "on_success"
+      }
+    ]
+  },
+  "metadata": {
+    "iterations": 0,
+    "timestamp": "2025-09-08T22:16:17.959383",
+    "autogen_debate": true
+  }
+}

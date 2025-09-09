@@ -1,0 +1,1661 @@
+{
+  "memory_id": "mission_20250908_221617_2182fc58",
+  "timestamp": "2025-09-08T22:16:17.965281",
+  "mission_prompt": "zaprojektuj przepływ ODPORNY NA BLEDY do zrobienia składu książki w InDesign",
+  "mission_type": "general",
+  "tags": [
+    "robust",
+    "optimized"
+  ],
+  "outcome": "Success",
+  "total_iterations": 0,
+  "total_messages": 5,
+  "time_taken_seconds": 0,
+  "final_plan": {
+    "entry_point": "Load_Manuscript",
+    "nodes": [
+      {
+        "name": "Load_Manuscript",
+        "implementation": "load_data",
+        "description": "Wczytuje plik manuskryptu oraz powiązane zasoby."
+      },
+      {
+        "name": "Clean_Text",
+        "implementation": "clean_data",
+        "description": "Usuwa zbędne formatowanie i ujednolica style."
+      },
+      {
+        "name": "Validate_Content",
+        "implementation": "validate_data",
+        "description": "Sprawdza kompletność danych wejściowych."
+      },
+      {
+        "name": "Analyze_Causality",
+        "implementation": "discover_causality",
+        "description": "Analizuje strukturę tekstu w poszukiwaniu potencjalnych problemów ze składem."
+      },
+      {
+        "name": "Apply_Template",
+        "implementation": "train_model",
+        "description": "Aplikuje szablon InDesign i style do tekstu."
+      },
+      {
+        "name": "Validate_Layout",
+        "implementation": "validate_model",
+        "description": "Weryfikuje wynik składu pod kątem błędów technicznych (np. nadmiarowy tekst)."
+      },
+      {
+        "name": "Optimize_Layout",
+        "implementation": "optimize_performance",
+        "description": "Automatycznie koryguje wykryte błędy składu."
+      },
+      {
+        "name": "Generate_PDF",
+        "implementation": "generate_report",
+        "description": "Generuje finalny plik PDF."
+      },
+      {
+        "name": "Handle_Error",
+        "implementation": "error_handler",
+        "description": "Centralny punkt obsługi błędów krytycznych."
+      },
+      {
+        "name": "Rollback",
+        "implementation": "rollback",
+        "description": "Wycofuje zmiany do stanu sprzed błędu."
+      },
+      {
+        "name": "Notify_Success",
+        "implementation": "notify_user",
+        "description": "Powiadamia użytkownika o pomyślnym zakończeniu procesu."
+      },
+      {
+        "name": "Notify_Failure",
+        "implementation": "notify_user",
+        "description": "Powiadamia użytkownika o krytycznej awarii."
+      },
+      {
+        "name": "Notify_Causality_Issue",
+        "implementation": "notify_user",
+        "description": "Powiadamia o niepowodzeniu niekrytycznej analizy przyczynowej."
+      },
+      {
+        "name": "Notify_Optimization_Incomplete",
+        "implementation": "notify_user",
+        "description": "Powiadamia o częściowym sukcesie optymalizacji układu."
+      }
+    ],
+    "edges": [
+      {
+        "from": "Load_Manuscript",
+        "to": "Clean_Text",
+        "condition": "on_success"
+      },
+      {
+        "from": "Load_Manuscript",
+        "to": "Handle_Error",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Clean_Text",
+        "to": "Validate_Content",
+        "condition": "on_success"
+      },
+      {
+        "from": "Clean_Text",
+        "to": "Handle_Error",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Validate_Content",
+        "to": "Analyze_Causality",
+        "condition": "validated"
+      },
+      {
+        "from": "Validate_Content",
+        "to": "Handle_Error",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Analyze_Causality",
+        "to": "Apply_Template",
+        "condition": "on_success"
+      },
+      {
+        "from": "Analyze_Causality",
+        "to": "Notify_Causality_Issue",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Notify_Causality_Issue",
+        "to": "Apply_Template",
+        "condition": "on_success"
+      },
+      {
+        "from": "Apply_Template",
+        "to": "Validate_Layout",
+        "condition": "on_success"
+      },
+      {
+        "from": "Apply_Template",
+        "to": "Handle_Error",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Validate_Layout",
+        "to": "Generate_PDF",
+        "condition": "validated"
+      },
+      {
+        "from": "Validate_Layout",
+        "to": "Optimize_Layout",
+        "condition": "needs_optimization"
+      },
+      {
+        "from": "Validate_Layout",
+        "to": "Handle_Error",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Optimize_Layout",
+        "to": "Validate_Layout",
+        "condition": "on_success"
+      },
+      {
+        "from": "Optimize_Layout",
+        "to": "Notify_Optimization_Incomplete",
+        "condition": "partial_success"
+      },
+      {
+        "from": "Optimize_Layout",
+        "to": "Handle_Error",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Notify_Optimization_Incomplete",
+        "to": "Generate_PDF",
+        "condition": "on_success"
+      },
+      {
+        "from": "Generate_PDF",
+        "to": "Notify_Success",
+        "condition": "on_success"
+      },
+      {
+        "from": "Generate_PDF",
+        "to": "Handle_Error",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Handle_Error",
+        "to": "Notify_Failure",
+        "condition": "on_success"
+      },
+      {
+        "from": "Notify_Failure",
+        "to": "Rollback",
+        "condition": "on_success"
+      }
+    ]
+  },
+  "final_score": 93.75,
+  "iterations": [
+    {
+      "proposers": [
+        {
+          "agent": "Causal_Analyst",
+          "content": {
+            "thought_process": [
+              "Krok 1: Dekompozycja misji - głównym celem jest stworzenie odpornego na błędy przepływu do składu książki w InDesign, z wykorzystaniem podanej biblioteki węzłów.",
+              "Krok 2: Mapowanie procesu składu na dostępne węzły - proces kreatywny (skład) został przełożony na metaforyczny potok przetwarzania danych. Np. 'wczytanie manuskryptu' to 'load_data', 'zastosowanie szablonu' to 'train_model', a 'korekta łamania' to 'optimize_performance'.",
+              "Krok 3: Projektowanie odporności na błędy - każdy krytyczny krok w procesie otrzymał ścieżkę awaryjną ('on_failure') prowadzącą do centralnego węzła obsługi błędów ('Handle_Critical_Error').",
+              "Krok 4: Innowacja z analizą przyczynową - wykorzystanie węzła 'discover_causality' do analizy struktury tekstu w celu przewidywania potencjalnych problemów z układem (np. korelacja długości rozdziału z trudnościami w łamaniu). Ten krok jest zaprojektowany jako niekrytyczny dla przepływu.",
+              "Krok 5: Stworzenie pętli optymalizacyjnej - zaprojektowano pętlę 'Validate_Layout' -> 'Optimize_Layout' -> 'Validate_Layout' w celu automatycznej korekty błędów składu, takich jak nadmiarowy tekst (overset text).",
+              "Krok 6: Strukturyzacja wyjścia - zdefiniowanie wszystkich węzłów, połączeń i metadanych zgodnie z wymaganym formatem JSON, w tym szczegółowe uzasadnienie w 'cognitive_trace'."
+            ],
+            "plan": {
+              "entry_point": "Load_Manuscript",
+              "nodes": [
+                {
+                  "name": "Load_Manuscript",
+                  "implementation": "load_data",
+                  "description": "Wczytuje plik manuskryptu (np. .docx) oraz powiązane zasoby (obrazy, czcionki)."
+                },
+                {
+                  "name": "Clean_Manuscript",
+                  "implementation": "clean_data",
+                  "description": "Usuwa zbędne formatowanie, ujednolica style i naprawia typowe błędy w tekście."
+                },
+                {
+                  "name": "Validate_Content",
+                  "implementation": "validate_data",
+                  "description": "Sprawdza kompletność danych: czy wszystkie rozdziały są obecne, czy istnieją odwołania do brakujących obrazów."
+                },
+                {
+                  "name": "Analyze_Structure_Causality",
+                  "implementation": "discover_causality",
+                  "description": "Analizuje strukturę tekstu w poszukiwaniu relacji przyczynowych, które mogą wpłynąć na skład (np. gęstość tabel -> ryzyko przełamania strony)."
+                },
+                {
+                  "name": "Apply_Layout_Template",
+                  "implementation": "train_model",
+                  "description": "Metaforycznie 'uczy model' poprzez zastosowanie predefiniowanego szablonu InDesign i stylów akapitowych/znakowych do tekstu."
+                },
+                {
+                  "name": "Validate_Layout",
+                  "implementation": "validate_model",
+                  "description": "Weryfikuje wynik składu pod kątem błędów technicznych: nadmiarowy tekst (overset), niska rozdzielczość obrazów, brakujące glify."
+                },
+                {
+                  "name": "Optimize_Layout",
+                  "implementation": "optimize_performance",
+                  "description": "Automatycznie koryguje błędy wykryte w walidacji, np. przez dostosowanie kerningu, trackingu lub przepływu tekstu."
+                },
+                {
+                  "name": "Generate_Final_PDF",
+                  "implementation": "generate_report",
+                  "description": "Generuje finalny plik PDF gotowy do druku lub dystrybucji cyfrowej."
+                },
+                {
+                  "name": "Handle_Critical_Error",
+                  "implementation": "error_handler",
+                  "description": "Centralny węzeł do obsługi krytycznych błędów, który inicjuje powiadomienie i rollback."
+                },
+                {
+                  "name": "Notify_User_Of_Error",
+                  "implementation": "notify_user",
+                  "description": "Powiadamia użytkownika o wystąpieniu błędu i jego naturze."
+                },
+                {
+                  "name": "Notify_User_Of_Success",
+                  "implementation": "notify_user",
+                  "description": "Powiadamia użytkownika o pomyślnym zakończeniu procesu."
+                },
+                {
+                  "name": "Notify_Causality_Failure",
+                  "implementation": "notify_user",
+                  "description": "Powiadamia użytkownika o niepowodzeniu niekrytycznego kroku analizy przyczynowej."
+                },
+                {
+                  "name": "Rollback_Changes",
+                  "implementation": "rollback",
+                  "description": "Wycofuje zmiany w systemie plików do stanu sprzed wystąpienia błędu."
+                }
+              ],
+              "edges": [
+                {
+                  "from": "Load_Manuscript",
+                  "to": "Clean_Manuscript",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Load_Manuscript",
+                  "to": "Handle_Critical_Error",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Clean_Manuscript",
+                  "to": "Validate_Content",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Clean_Manuscript",
+                  "to": "Handle_Critical_Error",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Validate_Content",
+                  "to": "Analyze_Structure_Causality",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Validate_Content",
+                  "to": "Handle_Critical_Error",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Analyze_Structure_Causality",
+                  "to": "Apply_Layout_Template",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Analyze_Structure_Causality",
+                  "to": "Notify_Causality_Failure",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Notify_Causality_Failure",
+                  "to": "Apply_Layout_Template",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Apply_Layout_Template",
+                  "to": "Validate_Layout",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Apply_Layout_Template",
+                  "to": "Handle_Critical_Error",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Validate_Layout",
+                  "to": "Generate_Final_PDF",
+                  "condition": "validated"
+                },
+                {
+                  "from": "Validate_Layout",
+                  "to": "Optimize_Layout",
+                  "condition": "needs_optimization"
+                },
+                {
+                  "from": "Validate_Layout",
+                  "to": "Handle_Critical_Error",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Optimize_Layout",
+                  "to": "Validate_Layout",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Optimize_Layout",
+                  "to": "Handle_Critical_Error",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Generate_Final_PDF",
+                  "to": "Notify_User_Of_Success",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Generate_Final_PDF",
+                  "to": "Handle_Critical_Error",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Handle_Critical_Error",
+                  "to": "Notify_User_Of_Error",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Notify_User_Of_Error",
+                  "to": "Rollback_Changes",
+                  "condition": "on_success"
+                }
+              ]
+            },
+            "confidence": 0.9,
+            "key_innovations": [
+              "Zastosowanie węzła 'discover_causality' do proaktywnej analizy struktury manuskryptu w celu przewidywania problemów ze składem, co jest unikalnym podejściem w automatyzacji DTP.",
+              "Stworzenie zamkniętej pętli optymalizacyjnej (Walidacja -> Optymalizacja -> Walidacja) w celu autonomicznego korygowania błędów składu.",
+              "Metaforyczne odwzorowanie kreatywnego procesu składu książki na ustrukturyzowany, odporny na błędy potok znany z inżynierii danych i ML."
+            ],
+            "risk_mitigation": {
+              "Niewystarczająca jakość automatycznej optymalizacji": "Pętla optymalizacyjna powinna mieć zaimplementowany licznik iteracji. Po przekroczeniu progu (np. 3 próby) proces przechodzi do 'Handle_Critical_Error' i powiadamia o konieczności interwencji manualnej.",
+              "Brak użytecznych wniosków z analizy przyczynowej": "Węzeł 'Analyze_Structure_Causality' został celowo umieszczony poza ścieżką krytyczną. Jego ewentualne niepowodzenie generuje jedynie powiadomienie i nie przerywa całego procesu składu.",
+              "Złożoność implementacji węzłów (np. sterowanie InDesign)": "Plan definiuje logiczną strukturę przepływu. Ryzyko implementacyjne jest mitygowane przez podział na atomowe, testowalne węzły. Każdy węzeł (np. 'Optimize_Layout') powinien być osobnym, dobrze zdefiniowanym skryptem lub modułem."
+            },
+            "cognitive_trace": {
+              "trigger_words": [
+                "ODPORNY NA BLEDY",
+                "składu książki w InDesign",
+                "PLAN",
+                "JSON"
+              ],
+              "reasoning_chain": [
+                "Deconstruct prompt: The main goal is a fault-tolerant workflow for InDesign typesetting.",
+                "Analyze node library: The library is for data/ML pipelines, not creative software.",
+                "Map InDesign tasks to nodes: Create a metaphorical mapping, e.g., 'load_data' becomes loading the manuscript, 'train_model' becomes applying a template.",
+                "Address the 'fault-tolerant' requirement: Design explicit failure paths for every critical step, converging on a central 'error_handler' node.",
+                "Incorporate 'Causal Analyst' role: Find a meaningful use for 'discover_causality' by analyzing manuscript structure to predict layout issues. Make this step non-critical to maintain robustness.",
+                "Design an iterative correction loop: Create a 'validate' -> 'optimize' -> 'validate' cycle for automatic layout fixes.",
+                "Structure the final JSON: Build the complete object with all required keys, including nodes, edges, and detailed metadata."
+              ],
+              "confidence_per_decision": {
+                "node_selection": 0.85,
+                "edge_conditions": 0.95,
+                "overall_structure": 0.9
+              },
+              "alternatives_considered": {
+                "rejected_nodes": [],
+                "rejected_patterns": [
+                  "A simple linear workflow was rejected because it cannot be 'fault-tolerant' and does not model the iterative nature of layout optimization.",
+                  "Placing 'discover_causality' on the critical path was rejected because its potential failure would unnecessarily halt the entire process."
+                ]
+              },
+              "key_influences": {
+                "from_prompt": "The phrase 'ODPORNY NA BLEDY' (FAULT-TOLERANT) was the primary driver for the entire graph structure, mandating failure paths for every step.",
+                "from_context": "The provided node library was a significant constraint, forcing the metaphorical mapping of a creative task onto a data processing framework.",
+                "from_role": "My role as 'Causal Analyst' directly inspired the inclusion and specific application of the 'discover_causality' node as a key innovation."
+              },
+              "uncertainty_points": [
+                "The primary uncertainty lies in the practical implementation of the abstract nodes. The plan's success depends on how effectively scripts can be written to make these nodes control InDesign, especially for complex tasks like 'Optimize_Layout'."
+              ],
+              "word_choices": {
+                "Node Names": "Chose descriptive names like 'Apply_Layout_Template' instead of the generic 'train_model' to make the plan's intent clearer within the context of the mission.",
+                "Edge Conditions": "Used specific conditions like 'needs_optimization' and 'validated' for the layout validation step to provide more semantic meaning than generic 'on_success'/'on_failure' conditions."
+              }
+            }
+          },
+          "key_ideas": [
+            "clean_data",
+            "error_handler",
+            "load_data",
+            "optimize",
+            "rollback",
+            "validate_data"
+          ]
+        },
+        {
+          "agent": "Creative_Planner",
+          "content": {
+            "thought_process": [
+              "Krok 1: Analiza misji - potrzebuję przepływu odpornego na błędy do składu książki w InDesign, wykorzystując tylko dostępne węzły z biblioteki.",
+              "Krok 2: Kreatywne mapowanie - zastosowałem SCAMPER do przekształcenia węzłów data/ML na operacje składu: 'load_data' staje się wczytywaniem manuskryptu, 'train_model' to tworzenie szablonu układu.",
+              "Krok 3: Innowacyjny twist - wprowadzenie podwójnej walidacji (treści i układu) z autonomiczną pętlą optymalizacji jako kluczowa innowacja w automatyzacji DTP.",
+              "Krok 4: Odporność przez redundancję - każdy krytyczny węzeł ma ścieżkę awaryjną, a system ma mechanizm rollback'u z powiadomieniami na każdym poziomie błędu.",
+              "Krok 5: Alternatywne podejścia - rozważałem 3 wzorce: liniowy (odrzucony - brak odporności), hub-and-spoke (odrzucony - zbyt skomplikowany), pipeline z pętlami (wybrany - optymalny balans)."
+            ],
+            "plan": {
+              "entry_point": "Load_Manuscript_Data",
+              "nodes": [
+                {
+                  "name": "Load_Manuscript_Data",
+                  "implementation": "load_data"
+                },
+                {
+                  "name": "Clean_Manuscript_Text",
+                  "implementation": "clean_data"
+                },
+                {
+                  "name": "Validate_Content_Structure",
+                  "implementation": "validate_data"
+                },
+                {
+                  "name": "Discover_Layout_Causality",
+                  "implementation": "discover_causality"
+                },
+                {
+                  "name": "Train_Layout_Model",
+                  "implementation": "train_model"
+                },
+                {
+                  "name": "Validate_Layout_Model",
+                  "implementation": "validate_model"
+                },
+                {
+                  "name": "Optimize_Layout_Performance",
+                  "implementation": "optimize_performance"
+                },
+                {
+                  "name": "Generate_Final_Report",
+                  "implementation": "generate_report"
+                },
+                {
+                  "name": "Handle_Errors",
+                  "implementation": "error_handler"
+                },
+                {
+                  "name": "Rollback_System",
+                  "implementation": "rollback"
+                },
+                {
+                  "name": "Notify_Success",
+                  "implementation": "notify_user"
+                },
+                {
+                  "name": "Notify_Failure",
+                  "implementation": "notify_user"
+                },
+                {
+                  "name": "Notify_Partial_Success",
+                  "implementation": "notify_user"
+                }
+              ],
+              "edges": [
+                {
+                  "from": "Load_Manuscript_Data",
+                  "to": "Clean_Manuscript_Text",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Load_Manuscript_Data",
+                  "to": "Handle_Errors",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Clean_Manuscript_Text",
+                  "to": "Validate_Content_Structure",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Clean_Manuscript_Text",
+                  "to": "Handle_Errors",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Validate_Content_Structure",
+                  "to": "Discover_Layout_Causality",
+                  "condition": "validated"
+                },
+                {
+                  "from": "Validate_Content_Structure",
+                  "to": "Handle_Errors",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Discover_Layout_Causality",
+                  "to": "Train_Layout_Model",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Discover_Layout_Causality",
+                  "to": "Train_Layout_Model",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Train_Layout_Model",
+                  "to": "Validate_Layout_Model",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Train_Layout_Model",
+                  "to": "Handle_Errors",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Validate_Layout_Model",
+                  "to": "Generate_Final_Report",
+                  "condition": "validated"
+                },
+                {
+                  "from": "Validate_Layout_Model",
+                  "to": "Optimize_Layout_Performance",
+                  "condition": "needs_optimization"
+                },
+                {
+                  "from": "Validate_Layout_Model",
+                  "to": "Handle_Errors",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Optimize_Layout_Performance",
+                  "to": "Validate_Layout_Model",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Optimize_Layout_Performance",
+                  "to": "Notify_Partial_Success",
+                  "condition": "partial_success"
+                },
+                {
+                  "from": "Optimize_Layout_Performance",
+                  "to": "Handle_Errors",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Generate_Final_Report",
+                  "to": "Notify_Success",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Generate_Final_Report",
+                  "to": "Handle_Errors",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Handle_Errors",
+                  "to": "Notify_Failure",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Handle_Errors",
+                  "to": "Rollback_System",
+                  "condition": "retry"
+                },
+                {
+                  "from": "Notify_Failure",
+                  "to": "Rollback_System",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Rollback_System",
+                  "to": "Load_Manuscript_Data",
+                  "condition": "retry"
+                },
+                {
+                  "from": "Notify_Partial_Success",
+                  "to": "Generate_Final_Report",
+                  "condition": "on_success"
+                }
+              ]
+            },
+            "confidence": 0.87,
+            "key_innovations": [
+              "Podwójna walidacja z autonomiczną pętlą optymalizacji - system automatycznie koryguje błędy składu przez iteracyjny cykl walidacja->optymalizacja->walidacja",
+              "Przyczynowa analiza struktury manuskryptu - wykorzystanie discover_causality do przewidywania problemów layoutu na podstawie struktury tekstu (długość akapitów, gęstość obrazów)",
+              "Graceful degradation - system kontynuuje działanie nawet przy niepowodzeniu analizy przyczynowej, zapewniając odporność na błędy krytycznych i niekrytycznych komponentów"
+            ],
+            "risk_mitigation": {
+              "Nieskończona pętla optymalizacji": "Implementacja licznika iteracji w węźle Optimize_Layout_Performance z maksymalnym limitem 5 prób przed przekierowaniem do Handle_Errors",
+              "Błąd w analizie przyczynowej blokuje proces": "Węzeł Discover_Layout_Causality ma ścieżki 'on_success' i 'on_failure' prowadzące do tego samego następnego węzła, eliminując punkt awarii",
+              "Utrata danych podczas rollback": "Rollback_System wykonuje backup przed każdą operacją wycofywania zmian, z możliwością restore w przypadku niepowodzenia",
+              "Przeciążenie użytkownika powiadomieniami": "System wysyła powiadomienia tylko w kluczowych momentach: sukces finalny, błąd krytyczny, częściowy sukces wymagający uwagi"
+            },
+            "cognitive_trace": {
+              "trigger_words": [
+                "ODPORNY NA BLEDY",
+                "składu książki",
+                "InDesign",
+                "przepływ",
+                "JSON"
+              ],
+              "reasoning_chain": [
+                "Zidentyfikowałem główne wyzwanie: mapowanie kreatywnego procesu składu na strukturalny workflow data pipeline",
+                "Zastosowałem SCAMPER: Substitute (węzły data->layout operations), Combine (validation+optimization loop), Adapt (causality analysis dla layout prediction)",
+                "Zaprojektowałem odporność przez redundantne ścieżki: każdy krytyczny węzeł ma alternative path to error handler",
+                "Stworzyłem innowacyjną pętlę samooptymalizacji z mechanizmem escape (partial_success condition)",
+                "Zdefiniowałem preconditions i postconditions dla każdego krytycznego przejścia"
+              ],
+              "confidence_per_decision": {
+                "node_selection": 0.9,
+                "edge_conditions": 0.85,
+                "overall_structure": 0.87
+              },
+              "alternatives_considered": {
+                "rejected_nodes": [
+                  "Dodatkowy węzeł backup - uznany za redundantny z rollback",
+                  "Osobny węzeł dla retry logic - włączony w edge conditions"
+                ],
+                "rejected_patterns": [
+                  "Hub-and-spoke - zbyt skomplikowany",
+                  "Prostą linear pipeline - brak odporności na błędy",
+                  "Event-driven pattern - przekracza możliwości dostępnych węzłów"
+                ]
+              },
+              "key_influences": {
+                "from_prompt": "Wymaganie 'ODPORNY NA BLEDY' zdominowało projektowanie architektury - każdy węzeł musi mieć failure path",
+                "from_context": "Ograniczenia biblioteki węzłów wymusiły kreatywne mapowanie operacji InDesign na abstrakcje data processing",
+                "from_role": "Rola Creative Planner skłoniła do eksploracji niestandardowych kombinacji węzłów i wprowadzenia innowacyjnej pętli optymalizacji"
+              },
+              "uncertainty_points": [
+                "Skuteczność mapowania train_model na proces tworzenia layout template - wymaga dokładnej implementacji",
+                "Optymalna liczba iteracji w pętli optymalizacyjnej - może wymagać dostrojenia w praktyce"
+              ],
+              "word_choices": {
+                "Nazwy węzłów": "Wybrano opisowe nazwy łączące kontekst InDesign z implementacją (np. Train_Layout_Model zamiast tylko Train_Model)",
+                "Edge conditions": "Użyto semantycznych warunków jak 'validated', 'needs_optimization' dla lepszej czytelności logiki biznesowej"
+              }
+            }
+          },
+          "key_ideas": [
+            "clean_data",
+            "error_handler",
+            "load_data",
+            "optimize",
+            "retry",
+            "rollback",
+            "validate_data"
+          ]
+        }
+      ],
+      "aggregator": {
+        "content": {
+          "thought_process": [
+            "Łączę dwie propozycje planu składu książki w InDesign - obie wykorzystują kreatywne mapowanie węzłów data/ML na operacje DTP",
+            "Propozycja 1 (Causal Analyst) ma silniejszą analizę przyczynową i lepsze powiadomienia, Propozycja 2 (Creative Planner) ma bardziej zwartą strukturę z partial_success",
+            "Ujednolicam nazewnictwo węzłów, zachowując najlepsze elementy: podwójną walidację, pętlę optymalizacji, analizę przyczynową jako opcjonalną",
+            "Rozwiązuję konflikt w obsłudze błędów analizy przyczynowej - obie propozycje traktują to jako niekrytyczne, ale P1 ma dedykowane powiadomienie",
+            "Syntetyzuję ścieżki awaryjne: zachowuję centralne Handle_Errors z P2, ale dodaję szczegółowe powiadomienia z P1"
+          ],
+          "final_plan": {
+            "entry_point": "Load_Manuscript",
+            "nodes": [
+              {
+                "name": "Load_Manuscript",
+                "implementation": "load_data"
+              },
+              {
+                "name": "Clean_Text",
+                "implementation": "clean_data"
+              },
+              {
+                "name": "Validate_Content",
+                "implementation": "validate_data"
+              },
+              {
+                "name": "Analyze_Causality",
+                "implementation": "discover_causality"
+              },
+              {
+                "name": "Apply_Template",
+                "implementation": "train_model"
+              },
+              {
+                "name": "Validate_Layout",
+                "implementation": "validate_model"
+              },
+              {
+                "name": "Optimize_Layout",
+                "implementation": "optimize_performance"
+              },
+              {
+                "name": "Generate_PDF",
+                "implementation": "generate_report"
+              },
+              {
+                "name": "Handle_Error",
+                "implementation": "error_handler"
+              },
+              {
+                "name": "Rollback",
+                "implementation": "rollback"
+              },
+              {
+                "name": "Notify_Success",
+                "implementation": "notify_user"
+              },
+              {
+                "name": "Notify_Failure",
+                "implementation": "notify_user"
+              },
+              {
+                "name": "Notify_Partial",
+                "implementation": "notify_user"
+              }
+            ],
+            "edges": [
+              {
+                "from": "Load_Manuscript",
+                "to": "Clean_Text",
+                "condition": "on_success"
+              },
+              {
+                "from": "Load_Manuscript",
+                "to": "Handle_Error",
+                "condition": "on_failure"
+              },
+              {
+                "from": "Clean_Text",
+                "to": "Validate_Content",
+                "condition": "on_success"
+              },
+              {
+                "from": "Clean_Text",
+                "to": "Handle_Error",
+                "condition": "on_failure"
+              },
+              {
+                "from": "Validate_Content",
+                "to": "Analyze_Causality",
+                "condition": "validated"
+              },
+              {
+                "from": "Validate_Content",
+                "to": "Handle_Error",
+                "condition": "on_failure"
+              },
+              {
+                "from": "Analyze_Causality",
+                "to": "Apply_Template",
+                "condition": "on_success"
+              },
+              {
+                "from": "Analyze_Causality",
+                "to": "Notify_Partial",
+                "condition": "on_failure"
+              },
+              {
+                "from": "Notify_Partial",
+                "to": "Apply_Template",
+                "condition": "on_success"
+              },
+              {
+                "from": "Apply_Template",
+                "to": "Validate_Layout",
+                "condition": "on_success"
+              },
+              {
+                "from": "Apply_Template",
+                "to": "Handle_Error",
+                "condition": "on_failure"
+              },
+              {
+                "from": "Validate_Layout",
+                "to": "Generate_PDF",
+                "condition": "validated"
+              },
+              {
+                "from": "Validate_Layout",
+                "to": "Optimize_Layout",
+                "condition": "needs_optimization"
+              },
+              {
+                "from": "Validate_Layout",
+                "to": "Handle_Error",
+                "condition": "on_failure"
+              },
+              {
+                "from": "Optimize_Layout",
+                "to": "Validate_Layout",
+                "condition": "on_success"
+              },
+              {
+                "from": "Optimize_Layout",
+                "to": "Notify_Partial",
+                "condition": "partial_success"
+              },
+              {
+                "from": "Optimize_Layout",
+                "to": "Handle_Error",
+                "condition": "on_failure"
+              },
+              {
+                "from": "Generate_PDF",
+                "to": "Notify_Success",
+                "condition": "on_success"
+              },
+              {
+                "from": "Generate_PDF",
+                "to": "Handle_Error",
+                "condition": "on_failure"
+              },
+              {
+                "from": "Handle_Error",
+                "to": "Notify_Failure",
+                "condition": "on_success"
+              },
+              {
+                "from": "Notify_Failure",
+                "to": "Rollback",
+                "condition": "on_success"
+              },
+              {
+                "from": "Rollback",
+                "to": "Load_Manuscript",
+                "condition": "retry"
+              }
+            ]
+          },
+          "synthesis_reasoning": "Połączyłem najsilniejsze elementy obu propozycji: analizę przyczynową struktury tekstu do przewidywania problemów layoutu, podwójną walidację (treści i układu) z autonomiczną pętlą optymalizacji, oraz odporność przez redundantne ścieżki awaryjne. System może kontynuować działanie nawet przy niepowodzeniu analizy przyczynowej, ma mechanizm partial_success dla złożonych optymalizacji, oraz kompletny system rollback z retry.",
+          "component_sources": {
+            "Causal Analyst": [
+              "Analyze_Causality",
+              "podwójna walidacja",
+              "szczegółowe powiadomienia"
+            ],
+            "Creative Planner": [
+              "partial_success path",
+              "zwarta struktura węzłów",
+              "retry mechanism"
+            ]
+          },
+          "confidence_score": 0.92
+        },
+        "synthesis": "Połączyłem najsilniejsze elementy obu propozycji: analizę przyczynową struktury tekstu do przewidywania problemów layoutu, podwójną walidację (treści i układu) z autonomiczną pętlą optymalizacji, oraz odporność przez redundantne ścieżki awaryjne. System może kontynuować działanie nawet przy niepowodzeniu analizy przyczynowej, ma mechanizm partial_success dla złożonych optymalizacji, oraz kompletny system rollback z retry."
+      },
+      "critic": {
+        "content": "{\n  \"critique_summary\": {\n    \"verdict\": \"ZATWIERDZONY\",\n    \"statement\": \"Plan został zatwierdzony po wprowadzeniu krytycznych poprawek logicznych. Usunięto niebezpieczną pętlę ponawiania oraz rozdzielono niejednoznaczny węzeł powiadomień, co znacząco podniosło odporność i jednoznaczność przepływu. W obecnej formie plan jest solidny, innowacyjny i w pełni zgodny z misją.\",\n    \"key_strengths\": [\n      \"Wyjątkowa odporność na błędy dzięki dedykowanym ścieżkom awaryjnym dla każdego kroku.\",\n      \"Innowacyjna pętla samonaprawcza (Walidacja-Optymalizacja) z mechanizmem wyjścia dla częściowego sukcesu.\",\n      \"Logiczne oddzielenie ścieżki krytycznej od niekrytycznej analizy przyczynowej (graceful degradation).\",\n      \"Kompletny cykl życia procesu, od wczytania danych po rollback w przypadku krytycznej awarii.\"\n    ],\n    \"identified_weaknesses\": [\n      {\n        \"weakness\": \"Niejednoznaczny węzeł powiadomień ('Notify_Partial')\",\n        \"severity\": \"High\",\n        \"description\": \"Oryginalny plan używał jednego węzła powiadomień dla dwóch różnych scenariuszy (błąd analizy i częściowy sukces optymalizacji), co prowadziło do niepoprawnego przepływu sterowania. Zostało to naprawione przez rozdzielenie go na dwa dedykowane węzły: 'Notify_Causality_Issue' i 'Notify_Optimization_Incomplete'.\"\n      },\n      {\n        \"weakness\": \"Ryzyko nieskończonej pętli przy ponawianiu\",\n        \"severity\": \"Critical\",\n        \"description\": \"Oryginalne połączenie 'Rollback' -> 'Load_Manuscript' tworzyło bezwarunkową pętlę ponawiania, która mogła zablokować system w przypadku trwałego błędu na wejściu. Połączenie zostało usunięte; proces powinien zakończyć się po rollbacku, a ponowienie powinno być decyzją zewnętrzną.\"\n      }\n    ]\n  },\n  \"quality_metrics\": {\n    \"Complexity_Score_C\": 12.0,\n    \"Robustness_Score_R\": 95,\n    \"Innovation_Score_I\": 90,\n    \"Completeness_Score\": 100,\n    \"Overall_Quality_Q\": 93.75\n  },\n  \"plan_approved\": {\n    \"entry_point\": \"Load_Manuscript\",\n    \"nodes\": [\n      {\n        \"name\": \"Load_Manuscript\",\n        \"implementation\": \"load_data\",\n        \"description\": \"Wczytuje plik manuskryptu oraz powiązane zasoby.\"\n      },\n      {\n        \"name\": \"Clean_Text\",\n        \"implementation\": \"clean_data\",\n        \"description\": \"Usuwa zbędne formatowanie i ujednolica style.\"\n      },\n      {\n        \"name\": \"Validate_Content\",\n        \"implementation\": \"validate_data\",\n        \"description\": \"Sprawdza kompletność danych wejściowych.\"\n      },\n      {\n        \"name\": \"Analyze_Causality\",\n        \"implementation\": \"discover_causality\",\n        \"description\": \"Analizuje strukturę tekstu w poszukiwaniu potencjalnych problemów ze składem.\"\n      },\n      {\n        \"name\": \"Apply_Template\",\n        \"implementation\": \"train_model\",\n        \"description\": \"Aplikuje szablon InDesign i style do tekstu.\"\n      },\n      {\n        \"name\": \"Validate_Layout\",\n        \"implementation\": \"validate_model\",\n        \"description\": \"Weryfikuje wynik składu pod kątem błędów technicznych (np. nadmiarowy tekst).\"\n      },\n      {\n        \"name\": \"Optimize_Layout\",\n        \"implementation\": \"optimize_performance\",\n        \"description\": \"Automatycznie koryguje wykryte błędy składu.\"\n      },\n      {\n        \"name\": \"Generate_PDF\",\n        \"implementation\": \"generate_report\",\n        \"description\": \"Generuje finalny plik PDF.\"\n      },\n      {\n        \"name\": \"Handle_Error\",\n        \"implementation\": \"error_handler\",\n        \"description\": \"Centralny punkt obsługi błędów krytycznych.\"\n      },\n      {\n        \"name\": \"Rollback\",\n        \"implementation\": \"rollback\",\n        \"description\": \"Wycofuje zmiany do stanu sprzed błędu.\"\n      },\n      {\n        \"name\": \"Notify_Success\",\n        \"implementation\": \"notify_user\",\n        \"description\": \"Powiadamia użytkownika o pomyślnym zakończeniu procesu.\"\n      },\n      {\n        \"name\": \"Notify_Failure\",\n        \"implementation\": \"notify_user\",\n        \"description\": \"Powiadamia użytkownika o krytycznej awarii.\"\n      },\n      {\n        \"name\": \"Notify_Causality_Issue\",\n        \"implementation\": \"notify_user\",\n        \"description\": \"Powiadamia o niepowodzeniu niekrytycznej analizy przyczynowej.\"\n      },\n      {\n        \"name\": \"Notify_Optimization_Incomplete\",\n        \"implementation\": \"notify_user\",\n        \"description\": \"Powiadamia o częściowym sukcesie optymalizacji układu.\"\n      }\n    ],\n    \"edges\": [\n      {\n        \"from\": \"Load_Manuscript\",\n        \"to\": \"Clean_Text\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Load_Manuscript\",\n        \"to\": \"Handle_Error\",\n        \"condition\": \"on_failure\"\n      },\n      {\n        \"from\": \"Clean_Text\",\n        \"to\": \"Validate_Content\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Clean_Text\",\n        \"to\": \"Handle_Error\",\n        \"condition\": \"on_failure\"\n      },\n      {\n        \"from\": \"Validate_Content\",\n        \"to\": \"Analyze_Causality\",\n        \"condition\": \"validated\"\n      },\n      {\n        \"from\": \"Validate_Content\",\n        \"to\": \"Handle_Error\",\n        \"condition\": \"on_failure\"\n      },\n      {\n        \"from\": \"Analyze_Causality\",\n        \"to\": \"Apply_Template\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Analyze_Causality\",\n        \"to\": \"Notify_Causality_Issue\",\n        \"condition\": \"on_failure\"\n      },\n      {\n        \"from\": \"Notify_Causality_Issue\",\n        \"to\": \"Apply_Template\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Apply_Template\",\n        \"to\": \"Validate_Layout\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Apply_Template\",\n        \"to\": \"Handle_Error\",\n        \"condition\": \"on_failure\"\n      },\n      {\n        \"from\": \"Validate_Layout\",\n        \"to\": \"Generate_PDF\",\n        \"condition\": \"validated\"\n      },\n      {\n        \"from\": \"Validate_Layout\",\n        \"to\": \"Optimize_Layout\",\n        \"condition\": \"needs_optimization\"\n      },\n      {\n        \"from\": \"Validate_Layout\",\n        \"to\": \"Handle_Error\",\n        \"condition\": \"on_failure\"\n      },\n      {\n        \"from\": \"Optimize_Layout\",\n        \"to\": \"Validate_Layout\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Optimize_Layout\",\n        \"to\": \"Notify_Optimization_Incomplete\",\n        \"condition\": \"partial_success\"\n      },\n      {\n        \"from\": \"Optimize_Layout\",\n        \"to\": \"Handle_Error\",\n        \"condition\": \"on_failure\"\n      },\n      {\n        \"from\": \"Notify_Optimization_Incomplete\",\n        \"to\": \"Generate_PDF\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Generate_PDF\",\n        \"to\": \"Notify_Success\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Generate_PDF\",\n        \"to\": \"Handle_Error\",\n        \"condition\": \"on_failure\"\n      },\n      {\n        \"from\": \"Handle_Error\",\n        \"to\": \"Notify_Failure\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Notify_Failure\",\n        \"to\": \"Rollback\",\n        \"condition\": \"on_success\"\n      }\n    ]\n  },\n  \"decision_marker\": \"PLAN_ZATWIERDZONY\",\n  \"cognitive_trace\": {\n    \"trigger_words\": [\n      \"ODPORNY NA BLEDY\",\n      \"składu książki w InDesign\",\n      \"PLAN\",\n      \"JSON\"\n    ],\n    \"reasoning_chain\": [\n      \"Deconstruction of the mission: The primary goal is a fault-tolerant workflow for InDesign typesetting.\",\n      \"Structural and Semantic Validation: Checked the aggregated plan against the node library, logical consistency, and mission requirements.\",\n      \"Identification of Critical Flaws: Discovered a dangerous, unconditional retry loop (`Rollback` -> `Load_Manuscript`) and a logically ambiguous `Notify_Partial` node that handled two different contexts with a single incorrect downstream path.\",\n      \"Design of Corrections: Proposed removing the retry loop to prevent infinite cycles. Proposed splitting the ambiguous notification node into two specific nodes (`Notify_Causality_Issue`, `Notify_Optimization_Incomplete`) to ensure correct and unambiguous process flow for each scenario.\",\n      \"Synthesis of Final Plan: Constructed a new, corrected plan incorporating these fixes, resulting in a more robust and logically sound architecture.\",\n      \"Final Review: Verified that the corrected plan meets all mission criteria and is free of the identified weaknesses.\"\n    ],\n    \"confidence_per_decision\": {\n      \"node_selection\": 0.95,\n      \"edge_conditions\": 0.98,\n      \"overall_structure\": 0.95\n    },\n    \"alternatives_considered\": {\n      \"rejected_nodes\": [],\n      \"rejected_patterns\": [\n        \"Keeping the single `Notify_Partial` node was rejected because it created an unavoidable logical flaw where the process would loop back incorrectly in one of the two cases.\",\n        \"Keeping the `Rollback` -> `retry` edge was rejected as it violated the principle of failing safely, creating a high risk of an infinite loop for persistent input errors.\"\n      ]\n    },\n    \"key_influences\": {\n      \"from_prompt\": \"The 'ODPORNY NA BLEDY' (FAULT-TOLERANT) requirement was the primary driver for the strict validation and correction of logical flaws.\",\n      \"from_context\": \"The aggregated plan provided a strong but flawed foundation. The context was about refining and hardening this plan, not creating one from scratch.\",\n      \"from_role\": \"My role as 'Quality Critic — Adversarial Validator' mandated that I not only identify but also correct critical weaknesses before approval, acting as the final quality gate.\"\n    },\n    \"uncertainty_points\": [\n      \"The main remaining uncertainty is external to the plan's logic: the actual implementation complexity and effectiveness of the nodes, particularly `Optimize_Layout`, which abstracts a highly complex task.\"\n    ],\n    \"word_choices\": {\n      \"verdict\": \"Chose 'ZATWIERDZONY' as the plan is now approved after corrections.\",\n      \"weakness description\": \"Used precise language like 'niejednoznaczny węzeł' (ambiguous node) and 'nieskończona pętla' (infinite loop) to clearly articulate the corrected flaws.\",\n      \"new node names\": \"Created explicit names like 'Notify_Causality_Issue' and 'Notify_Optimization_Incomplete' to make their function self-evident in the corrected graph.\"\n    }\n  }\n}\nPLAN_ZATWIERDZONY",
+        "verdict": "ZATWIERDZONY",
+        "score": 93.75,
+        "weaknesses": []
+      }
+    }
+  ],
+  "critique_evolution": [
+    {
+      "iteration": 0,
+      "score": 93.75,
+      "verdict": "ZATWIERDZONY",
+      "main_issues": []
+    }
+  ],
+  "aggregator_reasoning": "",
+  "proposer_contributions": {
+    "Causal_Analyst": [
+      "clean_data",
+      "error_handler",
+      "load_data",
+      "optimize",
+      "rollback",
+      "validate_data"
+    ],
+    "Creative_Planner": [
+      "clean_data",
+      "error_handler",
+      "load_data",
+      "optimize",
+      "retry",
+      "rollback",
+      "validate_data"
+    ]
+  },
+  "llm_generated_summary": "Misja zakończona w 1 iteracji. Zastosowano: optimization, rollback mechanism. Struktura: 14 węzłów, 10 ścieżek sukcesu, 8 ścieżek obsługi błędów. Kluczowe komponenty: error_handler, optimize_performance, rollback, validate_data. Plan zatwierdzony przez krytyka bez zastrzeżeń.",
+  "identified_patterns": [
+    "Częste odniesienia do obsługi błędów",
+    "Rollback jako kluczowy element",
+    "Focus na optymalizację"
+  ],
+  "success_factors": [
+    "Comprehensive error handling",
+    "Data validation steps"
+  ],
+  "failure_points": [],
+  "critical_moments": [
+    {
+      "index": 2,
+      "type": "verdict",
+      "agent": "Creative_Planner",
+      "summary": "Decyzja krytyka"
+    },
+    {
+      "index": 4,
+      "type": "verdict",
+      "agent": "Quality_Critic",
+      "summary": "Decyzja krytyka"
+    }
+  ],
+  "turning_points": [
+    {
+      "iteration": 0,
+      "score_jump": 93.75,
+      "reason": "Significant improvement"
+    }
+  ],
+  "full_transcript": [
+    {
+      "content": "## MISJA\nzaprojektuj przepływ ODPORNY NA BLEDY do zrobienia składu książki w InDesign\n\nZaproponuj kompletny PLAN w formacie JSON {entry_point, nodes[], edges[]}.\nRola: Proposerzy proponują swoje wersje planu. Następnie Aggregator scala je w jedną, spójną propozycję. Na końcu, Quality_Critic oceni finalny, zagregowany plan.",
+      "role": "user",
+      "name": "Orchestrator"
+    },
+    {
+      "content": {
+        "thought_process": [
+          "Krok 1: Dekompozycja misji - głównym celem jest stworzenie odpornego na błędy przepływu do składu książki w InDesign, z wykorzystaniem podanej biblioteki węzłów.",
+          "Krok 2: Mapowanie procesu składu na dostępne węzły - proces kreatywny (skład) został przełożony na metaforyczny potok przetwarzania danych. Np. 'wczytanie manuskryptu' to 'load_data', 'zastosowanie szablonu' to 'train_model', a 'korekta łamania' to 'optimize_performance'.",
+          "Krok 3: Projektowanie odporności na błędy - każdy krytyczny krok w procesie otrzymał ścieżkę awaryjną ('on_failure') prowadzącą do centralnego węzła obsługi błędów ('Handle_Critical_Error').",
+          "Krok 4: Innowacja z analizą przyczynową - wykorzystanie węzła 'discover_causality' do analizy struktury tekstu w celu przewidywania potencjalnych problemów z układem (np. korelacja długości rozdziału z trudnościami w łamaniu). Ten krok jest zaprojektowany jako niekrytyczny dla przepływu.",
+          "Krok 5: Stworzenie pętli optymalizacyjnej - zaprojektowano pętlę 'Validate_Layout' -> 'Optimize_Layout' -> 'Validate_Layout' w celu automatycznej korekty błędów składu, takich jak nadmiarowy tekst (overset text).",
+          "Krok 6: Strukturyzacja wyjścia - zdefiniowanie wszystkich węzłów, połączeń i metadanych zgodnie z wymaganym formatem JSON, w tym szczegółowe uzasadnienie w 'cognitive_trace'."
+        ],
+        "plan": {
+          "entry_point": "Load_Manuscript",
+          "nodes": [
+            {
+              "name": "Load_Manuscript",
+              "implementation": "load_data",
+              "description": "Wczytuje plik manuskryptu (np. .docx) oraz powiązane zasoby (obrazy, czcionki)."
+            },
+            {
+              "name": "Clean_Manuscript",
+              "implementation": "clean_data",
+              "description": "Usuwa zbędne formatowanie, ujednolica style i naprawia typowe błędy w tekście."
+            },
+            {
+              "name": "Validate_Content",
+              "implementation": "validate_data",
+              "description": "Sprawdza kompletność danych: czy wszystkie rozdziały są obecne, czy istnieją odwołania do brakujących obrazów."
+            },
+            {
+              "name": "Analyze_Structure_Causality",
+              "implementation": "discover_causality",
+              "description": "Analizuje strukturę tekstu w poszukiwaniu relacji przyczynowych, które mogą wpłynąć na skład (np. gęstość tabel -> ryzyko przełamania strony)."
+            },
+            {
+              "name": "Apply_Layout_Template",
+              "implementation": "train_model",
+              "description": "Metaforycznie 'uczy model' poprzez zastosowanie predefiniowanego szablonu InDesign i stylów akapitowych/znakowych do tekstu."
+            },
+            {
+              "name": "Validate_Layout",
+              "implementation": "validate_model",
+              "description": "Weryfikuje wynik składu pod kątem błędów technicznych: nadmiarowy tekst (overset), niska rozdzielczość obrazów, brakujące glify."
+            },
+            {
+              "name": "Optimize_Layout",
+              "implementation": "optimize_performance",
+              "description": "Automatycznie koryguje błędy wykryte w walidacji, np. przez dostosowanie kerningu, trackingu lub przepływu tekstu."
+            },
+            {
+              "name": "Generate_Final_PDF",
+              "implementation": "generate_report",
+              "description": "Generuje finalny plik PDF gotowy do druku lub dystrybucji cyfrowej."
+            },
+            {
+              "name": "Handle_Critical_Error",
+              "implementation": "error_handler",
+              "description": "Centralny węzeł do obsługi krytycznych błędów, który inicjuje powiadomienie i rollback."
+            },
+            {
+              "name": "Notify_User_Of_Error",
+              "implementation": "notify_user",
+              "description": "Powiadamia użytkownika o wystąpieniu błędu i jego naturze."
+            },
+            {
+              "name": "Notify_User_Of_Success",
+              "implementation": "notify_user",
+              "description": "Powiadamia użytkownika o pomyślnym zakończeniu procesu."
+            },
+            {
+              "name": "Notify_Causality_Failure",
+              "implementation": "notify_user",
+              "description": "Powiadamia użytkownika o niepowodzeniu niekrytycznego kroku analizy przyczynowej."
+            },
+            {
+              "name": "Rollback_Changes",
+              "implementation": "rollback",
+              "description": "Wycofuje zmiany w systemie plików do stanu sprzed wystąpienia błędu."
+            }
+          ],
+          "edges": [
+            {
+              "from": "Load_Manuscript",
+              "to": "Clean_Manuscript",
+              "condition": "on_success"
+            },
+            {
+              "from": "Load_Manuscript",
+              "to": "Handle_Critical_Error",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Clean_Manuscript",
+              "to": "Validate_Content",
+              "condition": "on_success"
+            },
+            {
+              "from": "Clean_Manuscript",
+              "to": "Handle_Critical_Error",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Validate_Content",
+              "to": "Analyze_Structure_Causality",
+              "condition": "on_success"
+            },
+            {
+              "from": "Validate_Content",
+              "to": "Handle_Critical_Error",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Analyze_Structure_Causality",
+              "to": "Apply_Layout_Template",
+              "condition": "on_success"
+            },
+            {
+              "from": "Analyze_Structure_Causality",
+              "to": "Notify_Causality_Failure",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Notify_Causality_Failure",
+              "to": "Apply_Layout_Template",
+              "condition": "on_success"
+            },
+            {
+              "from": "Apply_Layout_Template",
+              "to": "Validate_Layout",
+              "condition": "on_success"
+            },
+            {
+              "from": "Apply_Layout_Template",
+              "to": "Handle_Critical_Error",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Validate_Layout",
+              "to": "Generate_Final_PDF",
+              "condition": "validated"
+            },
+            {
+              "from": "Validate_Layout",
+              "to": "Optimize_Layout",
+              "condition": "needs_optimization"
+            },
+            {
+              "from": "Validate_Layout",
+              "to": "Handle_Critical_Error",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Optimize_Layout",
+              "to": "Validate_Layout",
+              "condition": "on_success"
+            },
+            {
+              "from": "Optimize_Layout",
+              "to": "Handle_Critical_Error",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Generate_Final_PDF",
+              "to": "Notify_User_Of_Success",
+              "condition": "on_success"
+            },
+            {
+              "from": "Generate_Final_PDF",
+              "to": "Handle_Critical_Error",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Handle_Critical_Error",
+              "to": "Notify_User_Of_Error",
+              "condition": "on_success"
+            },
+            {
+              "from": "Notify_User_Of_Error",
+              "to": "Rollback_Changes",
+              "condition": "on_success"
+            }
+          ]
+        },
+        "confidence": 0.9,
+        "key_innovations": [
+          "Zastosowanie węzła 'discover_causality' do proaktywnej analizy struktury manuskryptu w celu przewidywania problemów ze składem, co jest unikalnym podejściem w automatyzacji DTP.",
+          "Stworzenie zamkniętej pętli optymalizacyjnej (Walidacja -> Optymalizacja -> Walidacja) w celu autonomicznego korygowania błędów składu.",
+          "Metaforyczne odwzorowanie kreatywnego procesu składu książki na ustrukturyzowany, odporny na błędy potok znany z inżynierii danych i ML."
+        ],
+        "risk_mitigation": {
+          "Niewystarczająca jakość automatycznej optymalizacji": "Pętla optymalizacyjna powinna mieć zaimplementowany licznik iteracji. Po przekroczeniu progu (np. 3 próby) proces przechodzi do 'Handle_Critical_Error' i powiadamia o konieczności interwencji manualnej.",
+          "Brak użytecznych wniosków z analizy przyczynowej": "Węzeł 'Analyze_Structure_Causality' został celowo umieszczony poza ścieżką krytyczną. Jego ewentualne niepowodzenie generuje jedynie powiadomienie i nie przerywa całego procesu składu.",
+          "Złożoność implementacji węzłów (np. sterowanie InDesign)": "Plan definiuje logiczną strukturę przepływu. Ryzyko implementacyjne jest mitygowane przez podział na atomowe, testowalne węzły. Każdy węzeł (np. 'Optimize_Layout') powinien być osobnym, dobrze zdefiniowanym skryptem lub modułem."
+        },
+        "cognitive_trace": {
+          "trigger_words": [
+            "ODPORNY NA BLEDY",
+            "składu książki w InDesign",
+            "PLAN",
+            "JSON"
+          ],
+          "reasoning_chain": [
+            "Deconstruct prompt: The main goal is a fault-tolerant workflow for InDesign typesetting.",
+            "Analyze node library: The library is for data/ML pipelines, not creative software.",
+            "Map InDesign tasks to nodes: Create a metaphorical mapping, e.g., 'load_data' becomes loading the manuscript, 'train_model' becomes applying a template.",
+            "Address the 'fault-tolerant' requirement: Design explicit failure paths for every critical step, converging on a central 'error_handler' node.",
+            "Incorporate 'Causal Analyst' role: Find a meaningful use for 'discover_causality' by analyzing manuscript structure to predict layout issues. Make this step non-critical to maintain robustness.",
+            "Design an iterative correction loop: Create a 'validate' -> 'optimize' -> 'validate' cycle for automatic layout fixes.",
+            "Structure the final JSON: Build the complete object with all required keys, including nodes, edges, and detailed metadata."
+          ],
+          "confidence_per_decision": {
+            "node_selection": 0.85,
+            "edge_conditions": 0.95,
+            "overall_structure": 0.9
+          },
+          "alternatives_considered": {
+            "rejected_nodes": [],
+            "rejected_patterns": [
+              "A simple linear workflow was rejected because it cannot be 'fault-tolerant' and does not model the iterative nature of layout optimization.",
+              "Placing 'discover_causality' on the critical path was rejected because its potential failure would unnecessarily halt the entire process."
+            ]
+          },
+          "key_influences": {
+            "from_prompt": "The phrase 'ODPORNY NA BLEDY' (FAULT-TOLERANT) was the primary driver for the entire graph structure, mandating failure paths for every step.",
+            "from_context": "The provided node library was a significant constraint, forcing the metaphorical mapping of a creative task onto a data processing framework.",
+            "from_role": "My role as 'Causal Analyst' directly inspired the inclusion and specific application of the 'discover_causality' node as a key innovation."
+          },
+          "uncertainty_points": [
+            "The primary uncertainty lies in the practical implementation of the abstract nodes. The plan's success depends on how effectively scripts can be written to make these nodes control InDesign, especially for complex tasks like 'Optimize_Layout'."
+          ],
+          "word_choices": {
+            "Node Names": "Chose descriptive names like 'Apply_Layout_Template' instead of the generic 'train_model' to make the plan's intent clearer within the context of the mission.",
+            "Edge Conditions": "Used specific conditions like 'needs_optimization' and 'validated' for the layout validation step to provide more semantic meaning than generic 'on_success'/'on_failure' conditions."
+          }
+        }
+      },
+      "role": "user",
+      "name": "Causal_Analyst"
+    },
+    {
+      "content": {
+        "thought_process": [
+          "Krok 1: Analiza misji - potrzebuję przepływu odpornego na błędy do składu książki w InDesign, wykorzystując tylko dostępne węzły z biblioteki.",
+          "Krok 2: Kreatywne mapowanie - zastosowałem SCAMPER do przekształcenia węzłów data/ML na operacje składu: 'load_data' staje się wczytywaniem manuskryptu, 'train_model' to tworzenie szablonu układu.",
+          "Krok 3: Innowacyjny twist - wprowadzenie podwójnej walidacji (treści i układu) z autonomiczną pętlą optymalizacji jako kluczowa innowacja w automatyzacji DTP.",
+          "Krok 4: Odporność przez redundancję - każdy krytyczny węzeł ma ścieżkę awaryjną, a system ma mechanizm rollback'u z powiadomieniami na każdym poziomie błędu.",
+          "Krok 5: Alternatywne podejścia - rozważałem 3 wzorce: liniowy (odrzucony - brak odporności), hub-and-spoke (odrzucony - zbyt skomplikowany), pipeline z pętlami (wybrany - optymalny balans)."
+        ],
+        "plan": {
+          "entry_point": "Load_Manuscript_Data",
+          "nodes": [
+            {
+              "name": "Load_Manuscript_Data",
+              "implementation": "load_data"
+            },
+            {
+              "name": "Clean_Manuscript_Text",
+              "implementation": "clean_data"
+            },
+            {
+              "name": "Validate_Content_Structure",
+              "implementation": "validate_data"
+            },
+            {
+              "name": "Discover_Layout_Causality",
+              "implementation": "discover_causality"
+            },
+            {
+              "name": "Train_Layout_Model",
+              "implementation": "train_model"
+            },
+            {
+              "name": "Validate_Layout_Model",
+              "implementation": "validate_model"
+            },
+            {
+              "name": "Optimize_Layout_Performance",
+              "implementation": "optimize_performance"
+            },
+            {
+              "name": "Generate_Final_Report",
+              "implementation": "generate_report"
+            },
+            {
+              "name": "Handle_Errors",
+              "implementation": "error_handler"
+            },
+            {
+              "name": "Rollback_System",
+              "implementation": "rollback"
+            },
+            {
+              "name": "Notify_Success",
+              "implementation": "notify_user"
+            },
+            {
+              "name": "Notify_Failure",
+              "implementation": "notify_user"
+            },
+            {
+              "name": "Notify_Partial_Success",
+              "implementation": "notify_user"
+            }
+          ],
+          "edges": [
+            {
+              "from": "Load_Manuscript_Data",
+              "to": "Clean_Manuscript_Text",
+              "condition": "on_success"
+            },
+            {
+              "from": "Load_Manuscript_Data",
+              "to": "Handle_Errors",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Clean_Manuscript_Text",
+              "to": "Validate_Content_Structure",
+              "condition": "on_success"
+            },
+            {
+              "from": "Clean_Manuscript_Text",
+              "to": "Handle_Errors",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Validate_Content_Structure",
+              "to": "Discover_Layout_Causality",
+              "condition": "validated"
+            },
+            {
+              "from": "Validate_Content_Structure",
+              "to": "Handle_Errors",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Discover_Layout_Causality",
+              "to": "Train_Layout_Model",
+              "condition": "on_success"
+            },
+            {
+              "from": "Discover_Layout_Causality",
+              "to": "Train_Layout_Model",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Train_Layout_Model",
+              "to": "Validate_Layout_Model",
+              "condition": "on_success"
+            },
+            {
+              "from": "Train_Layout_Model",
+              "to": "Handle_Errors",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Validate_Layout_Model",
+              "to": "Generate_Final_Report",
+              "condition": "validated"
+            },
+            {
+              "from": "Validate_Layout_Model",
+              "to": "Optimize_Layout_Performance",
+              "condition": "needs_optimization"
+            },
+            {
+              "from": "Validate_Layout_Model",
+              "to": "Handle_Errors",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Optimize_Layout_Performance",
+              "to": "Validate_Layout_Model",
+              "condition": "on_success"
+            },
+            {
+              "from": "Optimize_Layout_Performance",
+              "to": "Notify_Partial_Success",
+              "condition": "partial_success"
+            },
+            {
+              "from": "Optimize_Layout_Performance",
+              "to": "Handle_Errors",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Generate_Final_Report",
+              "to": "Notify_Success",
+              "condition": "on_success"
+            },
+            {
+              "from": "Generate_Final_Report",
+              "to": "Handle_Errors",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Handle_Errors",
+              "to": "Notify_Failure",
+              "condition": "on_success"
+            },
+            {
+              "from": "Handle_Errors",
+              "to": "Rollback_System",
+              "condition": "retry"
+            },
+            {
+              "from": "Notify_Failure",
+              "to": "Rollback_System",
+              "condition": "on_success"
+            },
+            {
+              "from": "Rollback_System",
+              "to": "Load_Manuscript_Data",
+              "condition": "retry"
+            },
+            {
+              "from": "Notify_Partial_Success",
+              "to": "Generate_Final_Report",
+              "condition": "on_success"
+            }
+          ]
+        },
+        "confidence": 0.87,
+        "key_innovations": [
+          "Podwójna walidacja z autonomiczną pętlą optymalizacji - system automatycznie koryguje błędy składu przez iteracyjny cykl walidacja->optymalizacja->walidacja",
+          "Przyczynowa analiza struktury manuskryptu - wykorzystanie discover_causality do przewidywania problemów layoutu na podstawie struktury tekstu (długość akapitów, gęstość obrazów)",
+          "Graceful degradation - system kontynuuje działanie nawet przy niepowodzeniu analizy przyczynowej, zapewniając odporność na błędy krytycznych i niekrytycznych komponentów"
+        ],
+        "risk_mitigation": {
+          "Nieskończona pętla optymalizacji": "Implementacja licznika iteracji w węźle Optimize_Layout_Performance z maksymalnym limitem 5 prób przed przekierowaniem do Handle_Errors",
+          "Błąd w analizie przyczynowej blokuje proces": "Węzeł Discover_Layout_Causality ma ścieżki 'on_success' i 'on_failure' prowadzące do tego samego następnego węzła, eliminując punkt awarii",
+          "Utrata danych podczas rollback": "Rollback_System wykonuje backup przed każdą operacją wycofywania zmian, z możliwością restore w przypadku niepowodzenia",
+          "Przeciążenie użytkownika powiadomieniami": "System wysyła powiadomienia tylko w kluczowych momentach: sukces finalny, błąd krytyczny, częściowy sukces wymagający uwagi"
+        },
+        "cognitive_trace": {
+          "trigger_words": [
+            "ODPORNY NA BLEDY",
+            "składu książki",
+            "InDesign",
+            "przepływ",
+            "JSON"
+          ],
+          "reasoning_chain": [
+            "Zidentyfikowałem główne wyzwanie: mapowanie kreatywnego procesu składu na strukturalny workflow data pipeline",
+            "Zastosowałem SCAMPER: Substitute (węzły data->layout operations), Combine (validation+optimization loop), Adapt (causality analysis dla layout prediction)",
+            "Zaprojektowałem odporność przez redundantne ścieżki: każdy krytyczny węzeł ma alternative path to error handler",
+            "Stworzyłem innowacyjną pętlę samooptymalizacji z mechanizmem escape (partial_success condition)",
+            "Zdefiniowałem preconditions i postconditions dla każdego krytycznego przejścia"
+          ],
+          "confidence_per_decision": {
+            "node_selection": 0.9,
+            "edge_conditions": 0.85,
+            "overall_structure": 0.87
+          },
+          "alternatives_considered": {
+            "rejected_nodes": [
+              "Dodatkowy węzeł backup - uznany za redundantny z rollback",
+              "Osobny węzeł dla retry logic - włączony w edge conditions"
+            ],
+            "rejected_patterns": [
+              "Hub-and-spoke - zbyt skomplikowany",
+              "Prostą linear pipeline - brak odporności na błędy",
+              "Event-driven pattern - przekracza możliwości dostępnych węzłów"
+            ]
+          },
+          "key_influences": {
+            "from_prompt": "Wymaganie 'ODPORNY NA BLEDY' zdominowało projektowanie architektury - każdy węzeł musi mieć failure path",
+            "from_context": "Ograniczenia biblioteki węzłów wymusiły kreatywne mapowanie operacji InDesign na abstrakcje data processing",
+            "from_role": "Rola Creative Planner skłoniła do eksploracji niestandardowych kombinacji węzłów i wprowadzenia innowacyjnej pętli optymalizacji"
+          },
+          "uncertainty_points": [
+            "Skuteczność mapowania train_model na proces tworzenia layout template - wymaga dokładnej implementacji",
+            "Optymalna liczba iteracji w pętli optymalizacyjnej - może wymagać dostrojenia w praktyce"
+          ],
+          "word_choices": {
+            "Nazwy węzłów": "Wybrano opisowe nazwy łączące kontekst InDesign z implementacją (np. Train_Layout_Model zamiast tylko Train_Model)",
+            "Edge conditions": "Użyto semantycznych warunków jak 'validated', 'needs_optimization' dla lepszej czytelności logiki biznesowej"
+          }
+        }
+      },
+      "role": "user",
+      "name": "Creative_Planner"
+    },
+    {
+      "content": {
+        "thought_process": [
+          "Łączę dwie propozycje planu składu książki w InDesign - obie wykorzystują kreatywne mapowanie węzłów data/ML na operacje DTP",
+          "Propozycja 1 (Causal Analyst) ma silniejszą analizę przyczynową i lepsze powiadomienia, Propozycja 2 (Creative Planner) ma bardziej zwartą strukturę z partial_success",
+          "Ujednolicam nazewnictwo węzłów, zachowując najlepsze elementy: podwójną walidację, pętlę optymalizacji, analizę przyczynową jako opcjonalną",
+          "Rozwiązuję konflikt w obsłudze błędów analizy przyczynowej - obie propozycje traktują to jako niekrytyczne, ale P1 ma dedykowane powiadomienie",
+          "Syntetyzuję ścieżki awaryjne: zachowuję centralne Handle_Errors z P2, ale dodaję szczegółowe powiadomienia z P1"
+        ],
+        "final_plan": {
+          "entry_point": "Load_Manuscript",
+          "nodes": [
+            {
+              "name": "Load_Manuscript",
+              "implementation": "load_data"
+            },
+            {
+              "name": "Clean_Text",
+              "implementation": "clean_data"
+            },
+            {
+              "name": "Validate_Content",
+              "implementation": "validate_data"
+            },
+            {
+              "name": "Analyze_Causality",
+              "implementation": "discover_causality"
+            },
+            {
+              "name": "Apply_Template",
+              "implementation": "train_model"
+            },
+            {
+              "name": "Validate_Layout",
+              "implementation": "validate_model"
+            },
+            {
+              "name": "Optimize_Layout",
+              "implementation": "optimize_performance"
+            },
+            {
+              "name": "Generate_PDF",
+              "implementation": "generate_report"
+            },
+            {
+              "name": "Handle_Error",
+              "implementation": "error_handler"
+            },
+            {
+              "name": "Rollback",
+              "implementation": "rollback"
+            },
+            {
+              "name": "Notify_Success",
+              "implementation": "notify_user"
+            },
+            {
+              "name": "Notify_Failure",
+              "implementation": "notify_user"
+            },
+            {
+              "name": "Notify_Partial",
+              "implementation": "notify_user"
+            }
+          ],
+          "edges": [
+            {
+              "from": "Load_Manuscript",
+              "to": "Clean_Text",
+              "condition": "on_success"
+            },
+            {
+              "from": "Load_Manuscript",
+              "to": "Handle_Error",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Clean_Text",
+              "to": "Validate_Content",
+              "condition": "on_success"
+            },
+            {
+              "from": "Clean_Text",
+              "to": "Handle_Error",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Validate_Content",
+              "to": "Analyze_Causality",
+              "condition": "validated"
+            },
+            {
+              "from": "Validate_Content",
+              "to": "Handle_Error",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Analyze_Causality",
+              "to": "Apply_Template",
+              "condition": "on_success"
+            },
+            {
+              "from": "Analyze_Causality",
+              "to": "Notify_Partial",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Notify_Partial",
+              "to": "Apply_Template",
+              "condition": "on_success"
+            },
+            {
+              "from": "Apply_Template",
+              "to": "Validate_Layout",
+              "condition": "on_success"
+            },
+            {
+              "from": "Apply_Template",
+              "to": "Handle_Error",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Validate_Layout",
+              "to": "Generate_PDF",
+              "condition": "validated"
+            },
+            {
+              "from": "Validate_Layout",
+              "to": "Optimize_Layout",
+              "condition": "needs_optimization"
+            },
+            {
+              "from": "Validate_Layout",
+              "to": "Handle_Error",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Optimize_Layout",
+              "to": "Validate_Layout",
+              "condition": "on_success"
+            },
+            {
+              "from": "Optimize_Layout",
+              "to": "Notify_Partial",
+              "condition": "partial_success"
+            },
+            {
+              "from": "Optimize_Layout",
+              "to": "Handle_Error",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Generate_PDF",
+              "to": "Notify_Success",
+              "condition": "on_success"
+            },
+            {
+              "from": "Generate_PDF",
+              "to": "Handle_Error",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Handle_Error",
+              "to": "Notify_Failure",
+              "condition": "on_success"
+            },
+            {
+              "from": "Notify_Failure",
+              "to": "Rollback",
+              "condition": "on_success"
+            },
+            {
+              "from": "Rollback",
+              "to": "Load_Manuscript",
+              "condition": "retry"
+            }
+          ]
+        },
+        "synthesis_reasoning": "Połączyłem najsilniejsze elementy obu propozycji: analizę przyczynową struktury tekstu do przewidywania problemów layoutu, podwójną walidację (treści i układu) z autonomiczną pętlą optymalizacji, oraz odporność przez redundantne ścieżki awaryjne. System może kontynuować działanie nawet przy niepowodzeniu analizy przyczynowej, ma mechanizm partial_success dla złożonych optymalizacji, oraz kompletny system rollback z retry.",
+        "component_sources": {
+          "Causal Analyst": [
+            "Analyze_Causality",
+            "podwójna walidacja",
+            "szczegółowe powiadomienia"
+          ],
+          "Creative Planner": [
+            "partial_success path",
+            "zwarta struktura węzłów",
+            "retry mechanism"
+          ]
+        },
+        "confidence_score": 0.92
+      },
+      "role": "user",
+      "name": "Master_Aggregator"
+    },
+    {
+      "content": "{\n  \"critique_summary\": {\n    \"verdict\": \"ZATWIERDZONY\",\n    \"statement\": \"Plan został zatwierdzony po wprowadzeniu krytycznych poprawek logicznych. Usunięto niebezpieczną pętlę ponawiania oraz rozdzielono niejednoznaczny węzeł powiadomień, co znacząco podniosło odporność i jednoznaczność przepływu. W obecnej formie plan jest solidny, innowacyjny i w pełni zgodny z misją.\",\n    \"key_strengths\": [\n      \"Wyjątkowa odporność na błędy dzięki dedykowanym ścieżkom awaryjnym dla każdego kroku.\",\n      \"Innowacyjna pętla samonaprawcza (Walidacja-Optymalizacja) z mechanizmem wyjścia dla częściowego sukcesu.\",\n      \"Logiczne oddzielenie ścieżki krytycznej od niekrytycznej analizy przyczynowej (graceful degradation).\",\n      \"Kompletny cykl życia procesu, od wczytania danych po rollback w przypadku krytycznej awarii.\"\n    ],\n    \"identified_weaknesses\": [\n      {\n        \"weakness\": \"Niejednoznaczny węzeł powiadomień ('Notify_Partial')\",\n        \"severity\": \"High\",\n        \"description\": \"Oryginalny plan używał jednego węzła powiadomień dla dwóch różnych scenariuszy (błąd analizy i częściowy sukces optymalizacji), co prowadziło do niepoprawnego przepływu sterowania. Zostało to naprawione przez rozdzielenie go na dwa dedykowane węzły: 'Notify_Causality_Issue' i 'Notify_Optimization_Incomplete'.\"\n      },\n      {\n        \"weakness\": \"Ryzyko nieskończonej pętli przy ponawianiu\",\n        \"severity\": \"Critical\",\n        \"description\": \"Oryginalne połączenie 'Rollback' -> 'Load_Manuscript' tworzyło bezwarunkową pętlę ponawiania, która mogła zablokować system w przypadku trwałego błędu na wejściu. Połączenie zostało usunięte; proces powinien zakończyć się po rollbacku, a ponowienie powinno być decyzją zewnętrzną.\"\n      }\n    ]\n  },\n  \"quality_metrics\": {\n    \"Complexity_Score_C\": 12.0,\n    \"Robustness_Score_R\": 95,\n    \"Innovation_Score_I\": 90,\n    \"Completeness_Score\": 100,\n    \"Overall_Quality_Q\": 93.75\n  },\n  \"plan_approved\": {\n    \"entry_point\": \"Load_Manuscript\",\n    \"nodes\": [\n      {\n        \"name\": \"Load_Manuscript\",\n        \"implementation\": \"load_data\",\n        \"description\": \"Wczytuje plik manuskryptu oraz powiązane zasoby.\"\n      },\n      {\n        \"name\": \"Clean_Text\",\n        \"implementation\": \"clean_data\",\n        \"description\": \"Usuwa zbędne formatowanie i ujednolica style.\"\n      },\n      {\n        \"name\": \"Validate_Content\",\n        \"implementation\": \"validate_data\",\n        \"description\": \"Sprawdza kompletność danych wejściowych.\"\n      },\n      {\n        \"name\": \"Analyze_Causality\",\n        \"implementation\": \"discover_causality\",\n        \"description\": \"Analizuje strukturę tekstu w poszukiwaniu potencjalnych problemów ze składem.\"\n      },\n      {\n        \"name\": \"Apply_Template\",\n        \"implementation\": \"train_model\",\n        \"description\": \"Aplikuje szablon InDesign i style do tekstu.\"\n      },\n      {\n        \"name\": \"Validate_Layout\",\n        \"implementation\": \"validate_model\",\n        \"description\": \"Weryfikuje wynik składu pod kątem błędów technicznych (np. nadmiarowy tekst).\"\n      },\n      {\n        \"name\": \"Optimize_Layout\",\n        \"implementation\": \"optimize_performance\",\n        \"description\": \"Automatycznie koryguje wykryte błędy składu.\"\n      },\n      {\n        \"name\": \"Generate_PDF\",\n        \"implementation\": \"generate_report\",\n        \"description\": \"Generuje finalny plik PDF.\"\n      },\n      {\n        \"name\": \"Handle_Error\",\n        \"implementation\": \"error_handler\",\n        \"description\": \"Centralny punkt obsługi błędów krytycznych.\"\n      },\n      {\n        \"name\": \"Rollback\",\n        \"implementation\": \"rollback\",\n        \"description\": \"Wycofuje zmiany do stanu sprzed błędu.\"\n      },\n      {\n        \"name\": \"Notify_Success\",\n        \"implementation\": \"notify_user\",\n        \"description\": \"Powiadamia użytkownika o pomyślnym zakończeniu procesu.\"\n      },\n      {\n        \"name\": \"Notify_Failure\",\n        \"implementation\": \"notify_user\",\n        \"description\": \"Powiadamia użytkownika o krytycznej awarii.\"\n      },\n      {\n        \"name\": \"Notify_Causality_Issue\",\n        \"implementation\": \"notify_user\",\n        \"description\": \"Powiadamia o niepowodzeniu niekrytycznej analizy przyczynowej.\"\n      },\n      {\n        \"name\": \"Notify_Optimization_Incomplete\",\n        \"implementation\": \"notify_user\",\n        \"description\": \"Powiadamia o częściowym sukcesie optymalizacji układu.\"\n      }\n    ],\n    \"edges\": [\n      {\n        \"from\": \"Load_Manuscript\",\n        \"to\": \"Clean_Text\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Load_Manuscript\",\n        \"to\": \"Handle_Error\",\n        \"condition\": \"on_failure\"\n      },\n      {\n        \"from\": \"Clean_Text\",\n        \"to\": \"Validate_Content\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Clean_Text\",\n        \"to\": \"Handle_Error\",\n        \"condition\": \"on_failure\"\n      },\n      {\n        \"from\": \"Validate_Content\",\n        \"to\": \"Analyze_Causality\",\n        \"condition\": \"validated\"\n      },\n      {\n        \"from\": \"Validate_Content\",\n        \"to\": \"Handle_Error\",\n        \"condition\": \"on_failure\"\n      },\n      {\n        \"from\": \"Analyze_Causality\",\n        \"to\": \"Apply_Template\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Analyze_Causality\",\n        \"to\": \"Notify_Causality_Issue\",\n        \"condition\": \"on_failure\"\n      },\n      {\n        \"from\": \"Notify_Causality_Issue\",\n        \"to\": \"Apply_Template\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Apply_Template\",\n        \"to\": \"Validate_Layout\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Apply_Template\",\n        \"to\": \"Handle_Error\",\n        \"condition\": \"on_failure\"\n      },\n      {\n        \"from\": \"Validate_Layout\",\n        \"to\": \"Generate_PDF\",\n        \"condition\": \"validated\"\n      },\n      {\n        \"from\": \"Validate_Layout\",\n        \"to\": \"Optimize_Layout\",\n        \"condition\": \"needs_optimization\"\n      },\n      {\n        \"from\": \"Validate_Layout\",\n        \"to\": \"Handle_Error\",\n        \"condition\": \"on_failure\"\n      },\n      {\n        \"from\": \"Optimize_Layout\",\n        \"to\": \"Validate_Layout\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Optimize_Layout\",\n        \"to\": \"Notify_Optimization_Incomplete\",\n        \"condition\": \"partial_success\"\n      },\n      {\n        \"from\": \"Optimize_Layout\",\n        \"to\": \"Handle_Error\",\n        \"condition\": \"on_failure\"\n      },\n      {\n        \"from\": \"Notify_Optimization_Incomplete\",\n        \"to\": \"Generate_PDF\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Generate_PDF\",\n        \"to\": \"Notify_Success\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Generate_PDF\",\n        \"to\": \"Handle_Error\",\n        \"condition\": \"on_failure\"\n      },\n      {\n        \"from\": \"Handle_Error\",\n        \"to\": \"Notify_Failure\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Notify_Failure\",\n        \"to\": \"Rollback\",\n        \"condition\": \"on_success\"\n      }\n    ]\n  },\n  \"decision_marker\": \"PLAN_ZATWIERDZONY\",\n  \"cognitive_trace\": {\n    \"trigger_words\": [\n      \"ODPORNY NA BLEDY\",\n      \"składu książki w InDesign\",\n      \"PLAN\",\n      \"JSON\"\n    ],\n    \"reasoning_chain\": [\n      \"Deconstruction of the mission: The primary goal is a fault-tolerant workflow for InDesign typesetting.\",\n      \"Structural and Semantic Validation: Checked the aggregated plan against the node library, logical consistency, and mission requirements.\",\n      \"Identification of Critical Flaws: Discovered a dangerous, unconditional retry loop (`Rollback` -> `Load_Manuscript`) and a logically ambiguous `Notify_Partial` node that handled two different contexts with a single incorrect downstream path.\",\n      \"Design of Corrections: Proposed removing the retry loop to prevent infinite cycles. Proposed splitting the ambiguous notification node into two specific nodes (`Notify_Causality_Issue`, `Notify_Optimization_Incomplete`) to ensure correct and unambiguous process flow for each scenario.\",\n      \"Synthesis of Final Plan: Constructed a new, corrected plan incorporating these fixes, resulting in a more robust and logically sound architecture.\",\n      \"Final Review: Verified that the corrected plan meets all mission criteria and is free of the identified weaknesses.\"\n    ],\n    \"confidence_per_decision\": {\n      \"node_selection\": 0.95,\n      \"edge_conditions\": 0.98,\n      \"overall_structure\": 0.95\n    },\n    \"alternatives_considered\": {\n      \"rejected_nodes\": [],\n      \"rejected_patterns\": [\n        \"Keeping the single `Notify_Partial` node was rejected because it created an unavoidable logical flaw where the process would loop back incorrectly in one of the two cases.\",\n        \"Keeping the `Rollback` -> `retry` edge was rejected as it violated the principle of failing safely, creating a high risk of an infinite loop for persistent input errors.\"\n      ]\n    },\n    \"key_influences\": {\n      \"from_prompt\": \"The 'ODPORNY NA BLEDY' (FAULT-TOLERANT) requirement was the primary driver for the strict validation and correction of logical flaws.\",\n      \"from_context\": \"The aggregated plan provided a strong but flawed foundation. The context was about refining and hardening this plan, not creating one from scratch.\",\n      \"from_role\": \"My role as 'Quality Critic — Adversarial Validator' mandated that I not only identify but also correct critical weaknesses before approval, acting as the final quality gate.\"\n    },\n    \"uncertainty_points\": [\n      \"The main remaining uncertainty is external to the plan's logic: the actual implementation complexity and effectiveness of the nodes, particularly `Optimize_Layout`, which abstracts a highly complex task.\"\n    ],\n    \"word_choices\": {\n      \"verdict\": \"Chose 'ZATWIERDZONY' as the plan is now approved after corrections.\",\n      \"weakness description\": \"Used precise language like 'niejednoznaczny węzeł' (ambiguous node) and 'nieskończona pętla' (infinite loop) to clearly articulate the corrected flaws.\",\n      \"new node names\": \"Created explicit names like 'Notify_Causality_Issue' and 'Notify_Optimization_Incomplete' to make their function self-evident in the corrected graph.\"\n    }\n  }\n}\nPLAN_ZATWIERDZONY",
+      "role": "user",
+      "name": "Quality_Critic"
+    }
+  ],
+  "performance_metrics": {
+    "token_usage": 0,
+    "api_calls": 0,
+    "convergence_rate": 1.0
+  }
+}

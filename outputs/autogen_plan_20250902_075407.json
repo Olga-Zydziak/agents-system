@@ -1,0 +1,168 @@
+{
+  "mission": "Stwórz prosty pipeline do analizy danych CSV",
+  "final_plan": {
+    "entry_point": "Load_Data",
+    "nodes": [
+      {
+        "name": "Load_Data",
+        "implementation": "load_data",
+        "params": {
+          "source_type": "csv"
+        }
+      },
+      {
+        "name": "Clean_Data",
+        "implementation": "clean_data"
+      },
+      {
+        "name": "Validate_Data",
+        "implementation": "validate_data",
+        "params": {
+          "quality_threshold": 0.85
+        }
+      },
+      {
+        "name": "Adaptive_Router",
+        "implementation": "validate_model",
+        "params": {
+          "complexity_threshold": 0.7
+        }
+      },
+      {
+        "name": "Train_Model",
+        "implementation": "train_model"
+      },
+      {
+        "name": "Discover_Causality",
+        "implementation": "discover_causality"
+      },
+      {
+        "name": "Optimize_Performance",
+        "implementation": "optimize_performance"
+      },
+      {
+        "name": "Generate_Report",
+        "implementation": "generate_report"
+      },
+      {
+        "name": "Error_Handler",
+        "implementation": "error_handler"
+      },
+      {
+        "name": "Rollback_Changes",
+        "implementation": "rollback"
+      },
+      {
+        "name": "Notify_Success",
+        "implementation": "notify_user",
+        "params": {
+          "message": "Analiza CSV zakończona sukcesem. Raport gotowy."
+        }
+      },
+      {
+        "name": "Notify_Failure",
+        "implementation": "notify_user",
+        "params": {
+          "message": "Analiza CSV napotkała błąd. Sprawdź szczegóły."
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "Load_Data",
+        "to": "Clean_Data",
+        "condition": "on_success"
+      },
+      {
+        "from": "Load_Data",
+        "to": "Error_Handler",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Clean_Data",
+        "to": "Validate_Data",
+        "condition": "on_success"
+      },
+      {
+        "from": "Clean_Data",
+        "to": "Rollback_Changes",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Validate_Data",
+        "to": "Adaptive_Router",
+        "condition": "validated"
+      },
+      {
+        "from": "Validate_Data",
+        "to": "Error_Handler",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Adaptive_Router",
+        "to": "Train_Model",
+        "condition": "on_success"
+      },
+      {
+        "from": "Adaptive_Router",
+        "to": "Discover_Causality",
+        "condition": "partial_success"
+      },
+      {
+        "from": "Train_Model",
+        "to": "Optimize_Performance",
+        "condition": "on_success"
+      },
+      {
+        "from": "Train_Model",
+        "to": "Discover_Causality",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Discover_Causality",
+        "to": "Generate_Report",
+        "condition": "on_success"
+      },
+      {
+        "from": "Discover_Causality",
+        "to": "Error_Handler",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Optimize_Performance",
+        "to": "Generate_Report",
+        "condition": "on_success"
+      },
+      {
+        "from": "Optimize_Performance",
+        "to": "Generate_Report",
+        "condition": "needs_optimization"
+      },
+      {
+        "from": "Generate_Report",
+        "to": "Notify_Success",
+        "condition": "on_success"
+      },
+      {
+        "from": "Generate_Report",
+        "to": "Error_Handler",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Error_Handler",
+        "to": "Notify_Failure",
+        "condition": "on_success"
+      },
+      {
+        "from": "Rollback_Changes",
+        "to": "Notify_Failure",
+        "condition": "on_success"
+      }
+    ]
+  },
+  "metadata": {
+    "iterations": 0,
+    "timestamp": "2025-09-02T07:54:07.439600",
+    "autogen_debate": true
+  }
+}

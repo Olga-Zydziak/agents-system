@@ -1,0 +1,5 @@
+{
+  "iteration": 0,
+  "feedback": "{\"score\": 60.55, \"verdict\": \"ODRZUCONY\", \"weaknesses\": [\"Krytyczne ryzyko p\\u0119tli niesko\\u0144czonej\", \"Niejasna i ryzykowna semantyka warunku `on_failure`\", \"Pesymistyczna i nieefektywna obs\\u0142uga `partial_success`\", \"Brak jawnego kroku wdro\\u017cenia modelu (Deployment)\"], \"iteration\": 0}",
+  "timestamp": "2025-09-08T21:40:49.302206"
+}

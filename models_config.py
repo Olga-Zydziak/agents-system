@@ -15,6 +15,7 @@ class AgentRole:
     :param expertise_areas: Lista dziedzin, w których agent się specjalizuje.
     :param thinking_style: Styl myślenia ("analytical", "creative", "critical", "systematic" itp.).
     """
+
     role_name: str
     expertise_areas: List[str]
     thinking_style: str

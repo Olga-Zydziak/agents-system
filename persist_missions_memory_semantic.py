@@ -4,28 +4,36 @@ from datetime import datetime
 from typing import Any, Dict, Optional
 from google.cloud import storage  # pip install google-cloud-storage
 
+
 def _md5(s: str) -> str:
     return hashlib.md5(s.encode("utf-8")).hexdigest()
 
+
 def _sha256_bytes(b: bytes) -> str:
     import hashlib as _h
+
     return _h.sha256(b).hexdigest()
+
 
 def _now() -> str:
     return datetime.utcnow().isoformat() + "Z"
+
 
 def _record_uid(rec: Dict[str, Any]) -> str:
     raw = json.dumps(rec, ensure_ascii=False, sort_keys=True)
     return _md5(raw)
 
+
 def _summary(text: str, n: int) -> str:
     t = (text or "").strip()
     return t[:n] + ("…" if len(t) > n else "")
+
 
 def _plan_outline(plan: Dict[str, Any], limit: int = 8) -> list[str]:
     nodes = (plan or {}).get("nodes") or []
     names = [str(n.get("name") or n.get("implementation") or "").strip() for n in nodes]
     return [x for x in names if x][:limit]
+
 
 def _counts(plan: Dict[str, Any]) -> Dict[str, int]:
     return {
@@ -33,27 +41,41 @@ def _counts(plan: Dict[str, Any]) -> Dict[str, int]:
         "edge_count": len((plan or {}).get("edges") or []),
     }
 
+
 def _collect_keywords(rec: Dict[str, Any], plan_outline: list[str]) -> str:
     kws = set()
     mt = rec.get("mission_type")
-    if mt: kws.add(str(mt))
-    for t in rec.get("tags", []): kws.add(str(t))
-    for n in plan_outline: 
-        if n: kws.add(n.lower())
+    if mt:
+        kws.add(str(mt))
+    for t in rec.get("tags", []):
+        kws.add(str(t))
+    for n in plan_outline:
+        if n:
+            kws.add(n.lower())
     return ", ".join(sorted(kws))
 
-def _upload_json(client_gcs: storage.Client, bucket: str, obj_path: str, data: Any) -> Dict[str, Any]:
+
+def _upload_json(
+    client_gcs: storage.Client, bucket: str, obj_path: str, data: Any
+) -> Dict[str, Any]:
     b = client_gcs.bucket(bucket)
     blob = b.blob(obj_path)
-    payload = json.dumps(data, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    payload = json.dumps(data, ensure_ascii=False, separators=(",", ":")).encode(
+        "utf-8"
+    )
     blob.upload_from_string(payload, content_type="application/json; charset=utf-8")
-    return {"uri": f"gs://{bucket}/{obj_path}", "sha256": _sha256_bytes(payload), "bytes": len(payload)}
+    return {
+        "uri": f"gs://{bucket}/{obj_path}",
+        "sha256": _sha256_bytes(payload),
+        "bytes": len(payload),
+    }
+
 
 def persist_missions_to_vertex_memory_semantic(
     *,
     json_path: str,
-    engine_name: str,                   # już istniejący engine (resource_name)
-    client_vertex,                      # vertexai.Client
+    engine_name: str,  # już istniejący engine (resource_name)
+    client_vertex,  # vertexai.Client
     gcs_bucket: str,
     gcs_prefix: str = "agent-memory",
 ) -> None:
@@ -88,17 +110,28 @@ def persist_missions_to_vertex_memory_semantic(
         # 3a) Upload pełnych artefaktów + manifest
         pointers: Dict[str, Dict[str, Any]] = {}
         if plan:
-            pointers["final_plan"] = _upload_json(gcs, gcs_bucket, f"{base}/final_plan.json", plan)
+            pointers["final_plan"] = _upload_json(
+                gcs, gcs_bucket, f"{base}/final_plan.json", plan
+            )
             pointers["final_plan"].update(_counts(plan))
         if critic:
-            pointers["critic"] = _upload_json(gcs, gcs_bucket, f"{base}/critic.json", critic)
+            pointers["critic"] = _upload_json(
+                gcs, gcs_bucket, f"{base}/critic.json", critic
+            )
         if agg_reason or contribs:
             pointers["aggregator"] = _upload_json(
-                gcs, gcs_bucket, f"{base}/aggregator.json",
-                {"aggregator_reasoning": agg_reason, "proposer_contributions": contribs},
+                gcs,
+                gcs_bucket,
+                f"{base}/aggregator.json",
+                {
+                    "aggregator_reasoning": agg_reason,
+                    "proposer_contributions": contribs,
+                },
             )
         if transcript:
-            pointers["transcript"] = _upload_json(gcs, gcs_bucket, f"{base}/transcript.json", transcript)
+            pointers["transcript"] = _upload_json(
+                gcs, gcs_bucket, f"{base}/transcript.json", transcript
+            )
 
         manifest = {
             "mission_id": mission_id,
@@ -127,7 +160,9 @@ def persist_missions_to_vertex_memory_semantic(
                 # minimalny „cięcie” – skróć najdłuższe pola
                 for key in ("summary", "title", "preview", "keywords"):
                     if key in fact:
-                        fact[key] = _summary(str(fact[key]), 600 if key == "summary" else 140)
+                        fact[key] = _summary(
+                            str(fact[key]), 600 if key == "summary" else 140
+                        )
                 fact_json = json.dumps(fact, ensure_ascii=False, separators=(",", ":"))
 
             client_vertex.agent_engines.create_memory(
@@ -148,7 +183,8 @@ def persist_missions_to_vertex_memory_semantic(
         _write(
             "mission_overview",
             {
-                "title": _summary(prompt.split("\n", 1)[0], 140) or f"Mission {mission_id}",
+                "title": _summary(prompt.split("\n", 1)[0], 140)
+                or f"Mission {mission_id}",
                 "summary": _summary(prompt, 700),
                 "keywords": _summary(keywords, 300),
                 "metrics": manifest["metrics"],
@@ -178,7 +214,12 @@ def persist_missions_to_vertex_memory_semantic(
                         "node_name": n.get("name") or n.get("implementation"),
                         "node_role": n.get("role"),
                         "summary": _summary(json.dumps(n, ensure_ascii=False), 600),
-                        "keywords": _summary((n.get("name") or "") + ", " + (n.get("implementation") or ""), 200),
+                        "keywords": _summary(
+                            (n.get("name") or "")
+                            + ", "
+                            + (n.get("implementation") or ""),
+                            200,
+                        ),
                         "metrics": {"importance": n.get("importance", 0)},
                     },
                     view="plan-node",
@@ -190,7 +231,11 @@ def persist_missions_to_vertex_memory_semantic(
                 {
                     "verdict": critic.get("verdict") or critic.get("decision"),
                     "score": critic.get("score"),
-                    "weaknesses_topk": (critic.get("weaknesses") or critic.get("identified_weaknesses") or [])[:5],
+                    "weaknesses_topk": (
+                        critic.get("weaknesses")
+                        or critic.get("identified_weaknesses")
+                        or []
+                    )[:5],
                     "summary": _summary(str(critic), 700),
                 },
                 view="critic",
@@ -200,8 +245,14 @@ def persist_missions_to_vertex_memory_semantic(
             _write(
                 "aggregator_summary_index",
                 {
-                    "key_reasons": (_summary(str(agg_reason), 500) if agg_reason else ""),
-                    "contributors_topk": list((contribs or {}).keys())[:5] if isinstance(contribs, dict) else [],
+                    "key_reasons": (
+                        _summary(str(agg_reason), 500) if agg_reason else ""
+                    ),
+                    "contributors_topk": (
+                        list((contribs or {}).keys())[:5]
+                        if isinstance(contribs, dict)
+                        else []
+                    ),
                     "summary": "Aggregator reasoning + proposer contributions",
                 },
                 view="aggregator",
@@ -210,7 +261,10 @@ def persist_missions_to_vertex_memory_semantic(
         if transcript:
             _write(
                 "debate_transcript_index",
-                {"summary": f"Debate transcript (~{len(transcript)} msgs)", "preview": ""},
+                {
+                    "summary": f"Debate transcript (~{len(transcript)} msgs)",
+                    "preview": "",
+                },
                 view="transcript",
             )
 

@@ -19,8 +19,12 @@ import os, json, time, traceback
 from typing import Any, Dict, Optional
 from process_logger import log as process_log
 import vertexai
-
+from process_logger import log_exception as log_exc
 from config_api import basic_config_agent
+from exporter_missions_gcs import export_local_by_filename_date
+from explainability_layer import ExplainabilityHooks
+from memory_helpers import save_mission_to_gcs
+EXPLAINABILITY = ExplainabilityHooks()
 
 class AutoGenMOAOrchestrator:
     """
@@ -30,9 +34,14 @@ class AutoGenMOAOrchestrator:
     def __init__(self, mission: str, node_library: Dict[str, Any], config_file: str = "agents_config.json"):
         self.mission = mission
         self.node_library = node_library
+        # self.memory = ContextMemory(
+        # max_episodes=50,
+        # gcs_bucket="debate_rag",   # ten sam bucket co w Memory_bank.ipynb
+        # gcs_prefix=""                   # opcjonalnie; usuń lub zostaw ""
+        # )
         self.memory = ContextMemory(
         max_episodes=50,
-        gcs_bucket="debate_rag",   # ten sam bucket co w Memory_bank.ipynb
+        gcs_bucket=None,   # ten sam bucket co w Memory_bank.ipynb
         gcs_prefix=""                   # opcjonalnie; usuń lub zostaw ""
         )
         # Parser oparty na Pydantic – oczekuje czystego JSON zgodnego ze schematem
@@ -107,6 +116,20 @@ class AutoGenMOAOrchestrator:
         """Prosta heurystyka do rozpoznawania typowych problemów LLM-a."""
         if not text:
             return None
+        
+        #poprawka:
+        if not isinstance(text, str):
+            try:
+                import json as _json
+                text = _json.dumps(text, ensure_ascii=False)
+            except Exception:
+                text = str(text)
+        
+        
+        #koniec_poprawki
+        
+        
+        
         t = text.lower()
         hints = {
             "quota/rate_limit": ["rate limit", "too many requests", "quota", "insufficient_quota"],
@@ -129,6 +152,24 @@ class AutoGenMOAOrchestrator:
         exception: Optional[BaseException] = None,
         parsed_aggregator: Optional[Dict[str, Any]] = None
     ) -> str:
+        
+        
+        #poprawka:
+        def _safe_str(x):
+            if x is None:
+                return ""
+            if isinstance(x, str):
+                return x
+            try:
+                import json as _json
+                return _json.dumps(x, ensure_ascii=False)
+            except Exception:
+                return str(x)
+        
+        
+        
+        #koniec poprawki:
+        
         """Zapisuje raport awaryjny JSON + MD i zwraca ścieżkę do pliku JSON."""
         self._ensure_dir("reports")
         ts = self._now_stamp()
@@ -145,8 +186,8 @@ class AutoGenMOAOrchestrator:
             "reason": reason,  # np. "AGGREGATOR_NO_VALID_JSON", "EXCEPTION_DURING_DEBATE"
             "aggregator_model": getattr(self, "aggregator_config", {}).get("model", {}),
             "critic_model": getattr(self, "critic_config", {}).get("model", {}),
-            "aggregator_output_excerpt": (aggregator_raw or "")[:4000],
-            "critic_output_excerpt": (critic_raw or "")[:4000],
+            "aggregator_output_excerpt": _safe_str(aggregator_raw or "")[:4000],
+            "critic_output_excerpt": _safe_str(critic_raw or "")[:4000],
             "aggregator_llm_hint": agg_hint,
             "critic_llm_hint": crit_hint,
             "parsed_aggregator": parsed_aggregator,
@@ -173,9 +214,9 @@ class AutoGenMOAOrchestrator:
             if exception:
                 f.write(f"**Exception:** `{type(exception).__name__}: {exception}`\n\n")
             f.write("## Last Aggregator Output (excerpt)\n\n")
-            f.write("```\n" + (aggregator_raw or "")[:4000] + "\n```\n\n")
+            f.write("```\n" +  _safe_str(aggregator_raw or "")[:4000] + "\n```\n\n")
             f.write("## Last Critic Output (excerpt)\n\n")
-            f.write("```\n" + (critic_raw or "")[:4000] + "\n```\n")
+            f.write("```\n" +  _safe_str(critic_raw or "")[:4000] + "\n```\n")
 
         
         process_log(f"[FAILSAFE] Saved failure report: {jpath}")
@@ -317,46 +358,6 @@ class AutoGenMOAOrchestrator:
         return role == "assistant" and content.endswith("PLAN_ZATWIERDZONY") and "critic" in name
     
     
-#     def custom_speaker_selection_logic(self, last_speaker: ConversableAgent, groupchat: GroupChat):
-#         """
-#         Zarządza cyklem debaty: Proposerzy -> Aggregator -> Krytyk.
-#         """
-#         messages = groupchat.messages
-
-#         # **POPRAWKA:** Jeśli rozmowa dopiero się zaczyna (tylko 1 wiadomość od Orchestratora),
-#         # zawsze zaczynaj od pierwszego proposera.
-#         if len(messages) <= 1:
-#             return self.proposer_agents[0]
-
-#         if last_speaker.name == "Master_Aggregator":
-#             return self.critic_agent
-
-#         if last_speaker.name == "Quality_Critic":
-#             last_message_content = messages[-1].get("content", "").upper()
-#             if "PLAN_ZATWIERDZONY" in last_message_content:
-#                 return None  # Zakończ debatę
-
-#             self.iteration_count += 1
-#             if self.iteration_count >= self.max_iterations:
-#                 process_log(f"Max iterations ({self.max_iterations}) reached. Ending debate.")
-#                 return None
-            
-#             process_log(f"--- Starting iteration {self.iteration_count + 1} ---")
-#             self._update_context_from_last_critique(messages[-1].get("content", ""))
-#             return self.proposer_agents[0]
-
-#         if last_speaker in self.proposer_agents:
-#             try:
-#                 idx = self.proposer_agents.index(last_speaker)
-#                 if idx < len(self.proposer_agents) - 1:
-#                     return self.proposer_agents[idx + 1]
-#                 else:
-#                     return self.aggregator_agent
-#             except ValueError:
-#                 return self.aggregator_agent
-        
-#         # Domyślny fallback na wszelki wypadek
-#         return self.proposer_agents[0]
 
     def custom_speaker_selection_logic(self, last_speaker, groupchat):
         """
@@ -372,6 +373,25 @@ class AutoGenMOAOrchestrator:
         last_name = (msgs[-1].get("name") or "").lower() if msgs else ""
         last_content = (msgs[-1].get("content") or "")
 
+        if last_name and last_content:
+            # Znajdź prompt który wywołał tę odpowiedź
+            # To będzie przedostatnia wiadomość lub początkowy bootstrap
+            prompt_for_last = ""
+            if len(msgs) >= 2:
+                prompt_for_last = msgs[-2].get("content", "")
+            elif len(msgs) == 1:
+                # Pierwsza odpowiedź - prompt to bootstrap z run_full_debate_cycle
+                prompt_for_last = getattr(self, '_initial_bootstrap', '')
+
+            # Zapisz wyjaśnialność
+            EXPLAINABILITY.on_response_received(
+                prompt=prompt_for_last,
+                response=last_content,
+                agent_name=last_name
+            )
+        
+        
+        
         # ❶ Po bootstrapie (ostatni był Orchestrator → wybieramy pierwszego proposera)
         if last_name == (self.user_proxy.name or "").lower() and last_content.strip():
             return self.proposer_agents[0]
@@ -409,6 +429,10 @@ class AutoGenMOAOrchestrator:
     def _save_iteration_to_memory(self, critic_response: str, iteration: int):
         """Zapisuje dane z iteracji do pamięci"""
         try:
+            
+            if not self.memory:
+                return
+            
             # Parse odpowiedzi krytyka
             parsed = self.parser.parse_critic_response(critic_response)
             if not parsed:
@@ -658,8 +682,10 @@ class AutoGenMOAOrchestrator:
         # Dodaj dynamiczny kontekst
         if self.current_context:
             context_injection = self._build_context_injection()
-            return base_prompt + "\n\n" + context_injection
+            base_prompt = base_prompt + "\n\n" + context_injection
+            # return base_prompt + "\n\n" + context_injection
         
+        base_prompt = EXPLAINABILITY.on_prompt_build(base_prompt, role.role_name)
         return base_prompt
     
     def _build_critic_prompt(self) -> str:
@@ -694,8 +720,8 @@ class AutoGenMOAOrchestrator:
         If you approve the plan, you MUST end your ENTIRE response with the exact phrase on a new line, after the JSON block:
         PLAN_ZATWIERDZONY
         """
-
-        return base_prompt + additional_instruction
+        return EXPLAINABILITY.on_prompt_build(base_prompt + additional_instruction, "Quality_Critic")
+        # return base_prompt + additional_instruction
     
     def _build_context_injection(self) -> str:
         """Buduje wstrzyknięcie kontekstu"""
@@ -746,6 +772,8 @@ class AutoGenMOAOrchestrator:
     "Na końcu, Quality_Critic oceni finalny, zagregowany plan."
         )
 
+        self._initial_bootstrap = bootstrap
+        
         # Uczestnicy – tylko agenci
         agents = [*self.proposer_agents, self.aggregator_agent, self.critic_agent]
 
@@ -777,8 +805,10 @@ class AutoGenMOAOrchestrator:
             final_plan_message_content = None
             messages = manager.groupchat.messages
             for msg in reversed(messages):
+                
+                content_str = str(msg.get("content", ""))
                 # Używamy Twojej nowej, precyzyjnej funkcji sprawdzającej
-                if "PLAN_ZATWIERDZONY" in msg.get("content", ""):
+                if "PLAN_ZATWIERDZONY" in content_str:
                     final_plan_message_content = msg.get("content")
                     break
                     
@@ -826,18 +856,45 @@ class AutoGenMOAOrchestrator:
                                 "total_tokens": getattr(self, 'token_counter', 0),
                                 "api_calls": getattr(self, 'api_call_counter', 0)
                             }
-
-                            # Zapisz KOMPLETNĄ misję
-                            mission_id = self.memory.save_complete_mission(
-                            mission=self.mission,
-                            final_plan=self.final_plan,
-                            all_messages=manager.groupchat.messages,
-                            orchestrator_state=orchestrator_state
-                            )
-
-                            process_log(f"[ORCHESTRATOR] Mission completed and saved as: {mission_id}")
-    
                             
+                            # try:
+                                # Jeśli masz obliczony final_score z jakości planu – możesz go tutaj podać, inaczej None
+                            #     mission_id = save_mission_to_gcs(
+                            #         bucket_name="memory_rag_for_agents",
+                            #         base_prefix="missions",
+                            #         mission=self.mission,
+                            #         final_plan=self.final_plan,
+                            #         all_messages=manager.groupchat.messages,
+                            #         orchestrator_state=orchestrator_state,
+                            #         approved=True,
+                            #         final_score=None,
+                            #     )
+                            #     process_log(f"[ORCHESTRATOR] Mission completed and saved as: {mission_id}")
+                            # except Exception as err:
+                            #     # jedno wywołanie loguje zarówno nagłówek, jak i pełny traceback
+                            #     log_exc("[MEMORY:GCS][ERROR] Nie udało się zapisać misji", err)
+                            
+                            if self.memory:
+                                # Zapisz KOMPLETNĄ misję
+                                mission_id = self.memory.save_complete_mission(
+                                mission=self.mission,
+                                final_plan=self.final_plan,
+                                all_messages=manager.groupchat.messages,
+                                orchestrator_state=orchestrator_state
+                                )
+
+                                process_log(f"[ORCHESTRATOR] Mission completed and saved as: {mission_id}")
+    
+                                try:
+                                    ndjson_uris = export_local_by_filename_date(
+                                        input_dir="memory/missions",                # folder z lokalnymi plikami mission_*.json
+                                        output_root_gcs="gs://external_memory/missions",
+                                        pattern="*.json",
+                                    )
+                                    process_log(f"[EXPORT] Wyeksportowano {len(ndjson_uris)} misji do GCS")
+                                except Exception as e:
+                                    # w razie błędu logujemy pełen traceback
+                                    log_exc("[EXPORT][ERROR] Eksport misji do GCS nie powiódł się", e)
                             
                             return self.final_plan
                         else:
@@ -847,8 +904,16 @@ class AutoGenMOAOrchestrator:
                         raise RuntimeError("Parser zwrócił None - nie udało się sparsować JSON")
             
                 except Exception as parse_error:
+                    #poprawka
+                    log_exc("[ERROR] Nie udało się sparsować odpowiedzi krytyka", parse_error)
+                    
+                    #koniec poprawki
+                    
+                    
                     # Sytuacja awaryjna: nie udało się sparsować odpowiedzi krytyka
-                    process_log(f"[ERROR] Nie udało się sparsować odpowiedzi krytyka: {parse_error}")
+                    # process_log(f"[ERROR] Nie udało się sparsować odpowiedzi krytyka: {parse_error}")
+                    
+                    
                     # Zapisz raport z surową odpowiedzią do analizy
                     self._write_failure_report(
                         reason="CRITIC_RESPONSE_PARSE_FAILURE",
@@ -857,8 +922,15 @@ class AutoGenMOAOrchestrator:
                         critic_raw=final_plan_message_content,
                         exception=parse_error
                     )
+                    
                     return None # Zwracamy None w przypadku błędu parsowania
+                
+                
+                explainability_report = EXPLAINABILITY.generate_final_report()
+                process_log(f"[ORCHESTRATOR] Explainability report generated: {explainability_report['debate_id']}")
             else:
+                explainability_report = EXPLAINABILITY.generate_final_report()
+                process_log(f"[ORCHESTRATOR] Explainability report generated: {explainability_report['debate_id']}")
                 # Jeśli pętla się zakończyła i nie znaleziono zatwierdzonej wiadomości
                 raise RuntimeError("Debata zakończona, ale krytyk nigdy nie zwrócił wiadomości z 'PLAN_ZATWIERDZONY'.")
 
@@ -873,6 +945,10 @@ class AutoGenMOAOrchestrator:
                            "stacktrace": tb}, f, ensure_ascii=False, indent=2)
             process_log(f"[FAILSAFE] Saved failure report: {path}")
             process_log(tb)
+            
+            explainability_report = EXPLAINABILITY.generate_final_report()
+            process_log(f"[ORCHESTRATOR] Explainability report generated: {explainability_report['debate_id']}")
+            
             return None
     
    
@@ -883,6 +959,10 @@ class AutoGenMOAOrchestrator:
     def _update_context_from_last_critique(self, critique_message: str):
         """Aktualizuje kontekst na podstawie krytyki"""
         # Parsuj krytykę
+        if not self.memory:
+            return
+        
+        
         parsed = self.parser.parse_agent_response(critique_message)
         
         if parsed:
@@ -928,16 +1008,17 @@ class AutoGenMOAOrchestrator:
         """Zapisuje udany plan do pamięci i pliku"""
         if not self.final_plan:
             return
-        
+        if self.memory:
+           
         # Zapisz do pamięci
-        self.memory.add_successful_plan(
-            plan=self.final_plan,
-            mission=self.mission,
-            metadata={
-                'iterations': self.iteration_count,
-                'agents_count': len(self.proposer_agents)
-            }
-        )
+            self.memory.add_successful_plan(
+                plan=self.final_plan,
+                mission=self.mission,
+                metadata={
+                    'iterations': self.iteration_count,
+                    'agents_count': len(self.proposer_agents)
+                }
+            )
         
         # Zapisz do pliku
         output = {

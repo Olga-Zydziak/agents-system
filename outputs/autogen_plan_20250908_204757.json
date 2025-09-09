@@ -1,0 +1,195 @@
+{
+  "mission": "Zbuduj adaptacyjny system ML z continuous learning",
+  "final_plan": {
+    "entry_point": "Load_Data",
+    "nodes": [
+      {
+        "name": "Load_Data",
+        "implementation": "load_data"
+      },
+      {
+        "name": "Clean_Data",
+        "implementation": "clean_data"
+      },
+      {
+        "name": "Validate_Data",
+        "implementation": "validate_data"
+      },
+      {
+        "name": "Check_Model_Drift",
+        "implementation": "validate_model"
+      },
+      {
+        "name": "Monitor_Performance",
+        "implementation": "optimize_performance"
+      },
+      {
+        "name": "Discover_Causality",
+        "implementation": "discover_causality"
+      },
+      {
+        "name": "Retrain_Model",
+        "implementation": "train_model"
+      },
+      {
+        "name": "Validate_New_Model",
+        "implementation": "validate_model"
+      },
+      {
+        "name": "Performance_Optimization",
+        "implementation": "optimize_performance"
+      },
+      {
+        "name": "Rollback_Changes",
+        "implementation": "rollback"
+      },
+      {
+        "name": "Notify_Deployment",
+        "implementation": "notify_user"
+      },
+      {
+        "name": "Notify_Review",
+        "implementation": "notify_user"
+      },
+      {
+        "name": "Notify_Status",
+        "implementation": "notify_user"
+      },
+      {
+        "name": "Generate_Report",
+        "implementation": "generate_report"
+      },
+      {
+        "name": "Error_Handler",
+        "implementation": "error_handler"
+      }
+    ],
+    "edges": [
+      {
+        "from": "Load_Data",
+        "to": "Clean_Data",
+        "condition": "on_success"
+      },
+      {
+        "from": "Load_Data",
+        "to": "Error_Handler",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Clean_Data",
+        "to": "Validate_Data",
+        "condition": "on_success"
+      },
+      {
+        "from": "Clean_Data",
+        "to": "Error_Handler",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Validate_Data",
+        "to": "Check_Model_Drift",
+        "condition": "validated"
+      },
+      {
+        "from": "Validate_Data",
+        "to": "Error_Handler",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Check_Model_Drift",
+        "to": "Monitor_Performance",
+        "condition": "on_success"
+      },
+      {
+        "from": "Check_Model_Drift",
+        "to": "Discover_Causality",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Monitor_Performance",
+        "to": "Performance_Optimization",
+        "condition": "needs_optimization"
+      },
+      {
+        "from": "Monitor_Performance",
+        "to": "Notify_Status",
+        "condition": "on_success"
+      },
+      {
+        "from": "Performance_Optimization",
+        "to": "Notify_Deployment",
+        "condition": "on_success"
+      },
+      {
+        "from": "Performance_Optimization",
+        "to": "Notify_Status",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Discover_Causality",
+        "to": "Retrain_Model",
+        "condition": "on_success"
+      },
+      {
+        "from": "Discover_Causality",
+        "to": "Retrain_Model",
+        "condition": "validated"
+      },
+      {
+        "from": "Retrain_Model",
+        "to": "Validate_New_Model",
+        "condition": "on_success"
+      },
+      {
+        "from": "Retrain_Model",
+        "to": "Error_Handler",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Validate_New_Model",
+        "to": "Notify_Deployment",
+        "condition": "validated"
+      },
+      {
+        "from": "Validate_New_Model",
+        "to": "Notify_Review",
+        "condition": "partial_success"
+      },
+      {
+        "from": "Validate_New_Model",
+        "to": "Rollback_Changes",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Rollback_Changes",
+        "to": "Notify_Status",
+        "condition": "on_success"
+      },
+      {
+        "from": "Error_Handler",
+        "to": "Notify_Status",
+        "condition": "on_success"
+      },
+      {
+        "from": "Notify_Deployment",
+        "to": "Generate_Report",
+        "condition": "on_success"
+      },
+      {
+        "from": "Notify_Review",
+        "to": "Generate_Report",
+        "condition": "on_success"
+      },
+      {
+        "from": "Notify_Status",
+        "to": "Generate_Report",
+        "condition": "on_success"
+      }
+    ]
+  },
+  "metadata": {
+    "iterations": 1,
+    "timestamp": "2025-09-08T20:47:57.115638",
+    "autogen_debate": true
+  }
+}

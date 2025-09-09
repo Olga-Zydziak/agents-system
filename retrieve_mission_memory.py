@@ -137,10 +137,22 @@ def retrieve_mission_memory(
             metadata: Dict[str, Any] = {
                 key: it[key]
                 for it in items
-                for key in ("final_score", "verdict", "score", "weaknesses", "tags", "timestamp", "mission_type")
+                for key in (
+                    "final_score",
+                    "verdict",
+                    "score",
+                    "weaknesses",
+                    "tags",
+                    "timestamp",
+                    "mission_type",
+                )
                 if key in it and key not in result.get(kind_key, {})
             }
-            assembled = {"kind": kind_key, "mission_id": mission_id, "content": full_content}
+            assembled = {
+                "kind": kind_key,
+                "mission_id": mission_id,
+                "content": full_content,
+            }
             assembled.update(metadata)
             result[kind_key] = assembled
         else:

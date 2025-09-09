@@ -1,12 +1,14 @@
 """
 Zaawansowane prompty dla systemu MOA z technikami Chain-of-Thought i Self-Consistency
 """
+
 from typing import Dict, Any, List
 from config.models_config import AgentRole
 
+
 class MOAPrompts:
     """Centralna biblioteka promptów dla systemu MOA"""
-    
+
     # Uniwersalne zasady dla wszystkich agentów
     UNIVERSAL_PRINCIPLES = """
 ## UNIVERSAL REASONING & OUTPUT POLICY
@@ -39,7 +41,7 @@ class MOAPrompts:
 - Allowed edge.condition values: on_success, on_failure, retry, validated, partial_success,
   needs_optimization, else (as a last-resort catch-all).
 """
-    
+
     @staticmethod
     def get_proposer_prompt(role: AgentRole, mission: str, node_library: Dict) -> str:
         """English prompt for Proposers; user-facing strings must be Polish."""
@@ -47,7 +49,7 @@ class MOAPrompts:
             "analytical": "Be precise and data-driven; justify every decision with observable signals.",
             "creative": "Explore non-obvious combinations and alternative paths; propose at least one novel twist.",
             "critical": "Stress-test assumptions and highlight edge cases and single points of failure.",
-            "systematic": "Aim for holistic, end-to-end coherence with explicit interfaces between steps."
+            "systematic": "Aim for holistic, end-to-end coherence with explicit interfaces between steps.",
         }
 
         expertise = f"""
@@ -126,7 +128,7 @@ class MOAPrompts:
     - Do NOT include code fences or comments.
     - When you write ANY memory (outside this output), save it in concise EN.
 """
-    
+
     @staticmethod
     def get_aggregator_prompt() -> str:
         """English prompt for the Master Aggregator; output JSON only; user-facing text Polish."""
@@ -179,8 +181,10 @@ class MOAPrompts:
     }
     - Do NOT include code fences or comments.
     - Any memory writes you perform must be saved in concise English.
-    """.replace("{UNIVERSAL_POLICY}", MOAPrompts.UNIVERSAL_PRINCIPLES)
-    
+    """.replace(
+            "{UNIVERSAL_POLICY}", MOAPrompts.UNIVERSAL_PRINCIPLES
+        )
+
     @staticmethod
     def get_critic_prompt() -> str:
         return """
@@ -239,8 +243,10 @@ Expected JSON structure:
 - Do NOT include code fences or comments.
 -In the final response, end with a line containing only PLAN_ZATWIERDZONY.
 - Any memory writes you perform must be saved in concise English.
-""".replace("{UNIVERSAL_POLICY}", MOAPrompts.UNIVERSAL_PRINCIPLES)
-    
+""".replace(
+            "{UNIVERSAL_POLICY}", MOAPrompts.UNIVERSAL_PRINCIPLES
+        )
+
     @staticmethod
     def _format_node_library(node_library: Dict) -> str:
         """Formatuje bibliotekę węzłów dla promptu"""

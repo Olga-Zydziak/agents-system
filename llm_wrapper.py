@@ -10,7 +10,13 @@ import json
 
 
 class LLMWrapper:
-    def __init__(self, provider: str, model_name: str, api_key_env: str = None, temperature: float = 0.5):
+    def __init__(
+        self,
+        provider: str,
+        model_name: str,
+        api_key_env: str = None,
+        temperature: float = 0.5,
+    ):
         """
         :param provider: dostawca modelu, np. "openai" lub "dummy" dla demonstracji
         :param model_name: nazwa modelu u dostawcy
@@ -36,13 +42,11 @@ class LLMWrapper:
                     "entry_point": "start",
                     "nodes": [
                         {"name": "start", "implementation": "init_task"},
-                        {"name": "finish", "implementation": "end_task"}
+                        {"name": "finish", "implementation": "end_task"},
                     ],
-                    "edges": [
-                        {"from": "start", "to": "finish"}
-                    ]
+                    "edges": [{"from": "start", "to": "finish"}],
                 },
-                "confidence": 0.85
+                "confidence": 0.85,
             }
             return json.dumps(response)
         elif self.provider == "openai":
@@ -50,20 +54,24 @@ class LLMWrapper:
             try:
                 import openai  # zaimportuj wewnątrz, aby uniknąć zależności dla dummy
             except ImportError:
-                raise RuntimeError("Biblioteka openai nie jest zainstalowana. Zainstaluj ją lub użyj provider='dummy'.")
+                raise RuntimeError(
+                    "Biblioteka openai nie jest zainstalowana. Zainstaluj ją lub użyj provider='dummy'."
+                )
             if not self.api_key:
-                raise RuntimeError("Brak klucza API. Ustaw zmienną środowiskową lub przekaż api_key_env.")
+                raise RuntimeError(
+                    "Brak klucza API. Ustaw zmienną środowiskową lub przekaż api_key_env."
+                )
             openai.api_key = self.api_key
             # Buduj listę wiadomości zgodnie z API ChatCompletion
             messages = [
                 {"role": "system", "content": "You are an advanced planning agent."},
-                {"role": "user", "content": prompt}
+                {"role": "user", "content": prompt},
             ]
             response = openai.ChatCompletion.create(
-                model=self.model_name,
-                messages=messages,
-                temperature=self.temperature
+                model=self.model_name, messages=messages, temperature=self.temperature
             )
             return response.choices[0].message["content"]
         else:
-            raise NotImplementedError(f"Provider '{self.provider}' nie jest obsługiwany.")
+            raise NotImplementedError(
+                f"Provider '{self.provider}' nie jest obsługiwany."
+            )

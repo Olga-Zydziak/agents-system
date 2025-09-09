@@ -1,0 +1,3291 @@
+{
+  "memory_id": "mission_20250908_214049_1e55a591",
+  "timestamp": "2025-09-08T21:40:49.432942",
+  "mission_prompt": "Zbuduj adaptacyjny system ML z continuous learning",
+  "mission_type": "general",
+  "tags": [
+    "optimized",
+    "robust"
+  ],
+  "outcome": "Success",
+  "total_iterations": 1,
+  "total_messages": 9,
+  "time_taken_seconds": 0,
+  "final_plan": {
+    "entry_point": "Load_Data",
+    "nodes": [
+      {
+        "name": "Load_Data",
+        "implementation": "load_data"
+      },
+      {
+        "name": "Clean_Data",
+        "implementation": "clean_data"
+      },
+      {
+        "name": "Validate_Data",
+        "implementation": "validate_data"
+      },
+      {
+        "name": "Check_Model_Drift",
+        "implementation": "validate_model"
+      },
+      {
+        "name": "Monitor_Performance",
+        "implementation": "optimize_performance"
+      },
+      {
+        "name": "Discover_Causality",
+        "implementation": "discover_causality"
+      },
+      {
+        "name": "Retrain_Model",
+        "implementation": "train_model"
+      },
+      {
+        "name": "Validate_New_Model",
+        "implementation": "validate_model"
+      },
+      {
+        "name": "Performance_Optimization",
+        "implementation": "optimize_performance"
+      },
+      {
+        "name": "Rollback_Changes",
+        "implementation": "rollback"
+      },
+      {
+        "name": "Notify_Deployment",
+        "implementation": "notify_user"
+      },
+      {
+        "name": "Notify_Review",
+        "implementation": "notify_user"
+      },
+      {
+        "name": "Notify_Status",
+        "implementation": "notify_user"
+      },
+      {
+        "name": "Generate_Report",
+        "implementation": "generate_report"
+      },
+      {
+        "name": "Error_Handler",
+        "implementation": "error_handler"
+      }
+    ],
+    "edges": [
+      {
+        "from": "Load_Data",
+        "to": "Clean_Data",
+        "condition": "on_success"
+      },
+      {
+        "from": "Load_Data",
+        "to": "Error_Handler",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Clean_Data",
+        "to": "Validate_Data",
+        "condition": "on_success"
+      },
+      {
+        "from": "Clean_Data",
+        "to": "Error_Handler",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Validate_Data",
+        "to": "Check_Model_Drift",
+        "condition": "validated"
+      },
+      {
+        "from": "Validate_Data",
+        "to": "Error_Handler",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Check_Model_Drift",
+        "to": "Monitor_Performance",
+        "condition": "on_success"
+      },
+      {
+        "from": "Check_Model_Drift",
+        "to": "Discover_Causality",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Monitor_Performance",
+        "to": "Performance_Optimization",
+        "condition": "needs_optimization"
+      },
+      {
+        "from": "Monitor_Performance",
+        "to": "Notify_Status",
+        "condition": "on_success"
+      },
+      {
+        "from": "Performance_Optimization",
+        "to": "Notify_Deployment",
+        "condition": "on_success"
+      },
+      {
+        "from": "Performance_Optimization",
+        "to": "Notify_Status",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Discover_Causality",
+        "to": "Retrain_Model",
+        "condition": "on_success"
+      },
+      {
+        "from": "Discover_Causality",
+        "to": "Retrain_Model",
+        "condition": "validated"
+      },
+      {
+        "from": "Retrain_Model",
+        "to": "Validate_New_Model",
+        "condition": "on_success"
+      },
+      {
+        "from": "Retrain_Model",
+        "to": "Error_Handler",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Validate_New_Model",
+        "to": "Notify_Deployment",
+        "condition": "validated"
+      },
+      {
+        "from": "Validate_New_Model",
+        "to": "Notify_Review",
+        "condition": "partial_success"
+      },
+      {
+        "from": "Validate_New_Model",
+        "to": "Rollback_Changes",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Rollback_Changes",
+        "to": "Notify_Status",
+        "condition": "on_success"
+      },
+      {
+        "from": "Error_Handler",
+        "to": "Notify_Status",
+        "condition": "on_success"
+      },
+      {
+        "from": "Notify_Deployment",
+        "to": "Generate_Report",
+        "condition": "on_success"
+      },
+      {
+        "from": "Notify_Review",
+        "to": "Generate_Report",
+        "condition": "on_success"
+      },
+      {
+        "from": "Notify_Status",
+        "to": "Generate_Report",
+        "condition": "on_success"
+      }
+    ]
+  },
+  "final_score": 91.37,
+  "iterations": [
+    {
+      "proposers": [
+        {
+          "agent": "Causal_Analyst",
+          "content": {
+            "thought_process": [
+              "Krok 1: Zdekomponuj misję. 'Adaptacyjny system' i 'continuous learning' implikują pętlę sprzężenia zwrotnego. Rola 'Analityka Przyczynowego' wymaga użycia węzła 'discover_causality' w kluczowym punkcie.",
+              "Krok 2: Zaprojektuj główny przepływ. System musi pobierać nowe dane, sprawdzać wydajność obecnego modelu, a następnie decydować, czy potrzebna jest adaptacja.",
+              "Krok 3: Zdefiniuj ścieżkę adaptacyjną. Jeśli wydajność modelu spada (dryft), system musi najpierw spróbować zdiagnozować przyczynę ('discover_causality'), następnie przetrenować model, zwalidować nową wersję i wdrożyć ją lub wycofać zmiany.",
+              "Krok 4: Zaimplementuj obsługę błędów. Każdy krytyczny krok (ładowanie danych, trenowanie) musi mieć ścieżkę awaryjną prowadzącą do dedykowanego 'error_handler'.",
+              "Krok 5: Zaplanuj obsługę niepowodzenia kroku przyczynowego. 'discover_causality' może zawieść. Zamiast zatrzymywać cały proces, system kontynuuje retrenowanie, ale oznacza ten fakt (używając warunku 'validated'), co sygnalizuje zwiększoną niepewność i potrzebę ludzkiej inspekcji.",
+              "Krok 6: Skonsoliduj powiadomienia i raportowanie. Użycie pojedynczych węzłów 'notify_user' i 'generate_report' na końcu różnych gałęzi upraszcza graf i czyni go bardziej czytelnym."
+            ],
+            "plan": {
+              "entry_point": "Load_Data",
+              "nodes": [
+                {
+                  "name": "Load_Data",
+                  "implementation": "load_data",
+                  "description": "Wczytuje nowe dane do oceny i potencjalnego retrenowania."
+                },
+                {
+                  "name": "Clean_Data",
+                  "implementation": "clean_data",
+                  "description": "Czyści i przygotowuje nowe dane."
+                },
+                {
+                  "name": "Validate_Data",
+                  "implementation": "validate_data",
+                  "description": "Waliduje schemat i jakość nowych danych."
+                },
+                {
+                  "name": "Check_Model_Drift",
+                  "implementation": "validate_model",
+                  "description": "Ocenia wydajność obecnego modelu na nowych danych w celu wykrycia dryftu."
+                },
+                {
+                  "name": "Discover_Causal_Shift",
+                  "implementation": "discover_causality",
+                  "description": "Analizuje dane w poszukiwaniu zmian w relacjach przyczynowych, aby wyjaśnić dryft modelu."
+                },
+                {
+                  "name": "Retrain_Model",
+                  "implementation": "train_model",
+                  "description": "Trenuje nową wersję modelu na zaktualizowanym zbiorze danych."
+                },
+                {
+                  "name": "Validate_New_Model",
+                  "implementation": "validate_model",
+                  "description": "Porównuje wydajność nowego modelu z poprzednim, aby zatwierdzić aktualizację."
+                },
+                {
+                  "name": "Rollback_Retraining",
+                  "implementation": "rollback",
+                  "description": "Wycofuje zmiany i przywraca poprzednią, stabilną wersję modelu."
+                },
+                {
+                  "name": "Notify_Team",
+                  "implementation": "notify_user",
+                  "description": "Wysyła powiadomienie do zespołu o statusie cyklu uczenia."
+                },
+                {
+                  "name": "Generate_Run_Report",
+                  "implementation": "generate_report",
+                  "description": "Generuje końcowy raport z przebiegu procesu."
+                },
+                {
+                  "name": "Handle_Process_Failure",
+                  "implementation": "error_handler",
+                  "description": "Obsługuje krytyczne błędy techniczne w procesie."
+                }
+              ],
+              "edges": [
+                {
+                  "from": "Load_Data",
+                  "to": "Clean_Data",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Load_Data",
+                  "to": "Handle_Process_Failure",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Clean_Data",
+                  "to": "Validate_Data",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Clean_Data",
+                  "to": "Handle_Process_Failure",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Validate_Data",
+                  "to": "Check_Model_Drift",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Validate_Data",
+                  "to": "Handle_Process_Failure",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Check_Model_Drift",
+                  "to": "Notify_Team",
+                  "condition": "on_success",
+                  "label": "Wydajność OK"
+                },
+                {
+                  "from": "Check_Model_Drift",
+                  "to": "Discover_Causal_Shift",
+                  "condition": "on_failure",
+                  "label": "Wykryto dryft"
+                },
+                {
+                  "from": "Discover_Causal_Shift",
+                  "to": "Retrain_Model",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Discover_Causal_Shift",
+                  "to": "Retrain_Model",
+                  "condition": "validated",
+                  "label": "Analiza przyczynowa nie powiodła się, kontynuuj z ostrożnością"
+                },
+                {
+                  "from": "Retrain_Model",
+                  "to": "Validate_New_Model",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Retrain_Model",
+                  "to": "Handle_Process_Failure",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Validate_New_Model",
+                  "to": "Notify_Team",
+                  "condition": "on_success",
+                  "label": "Nowy model lepszy"
+                },
+                {
+                  "from": "Validate_New_Model",
+                  "to": "Rollback_Retraining",
+                  "condition": "on_failure",
+                  "label": "Nowy model gorszy"
+                },
+                {
+                  "from": "Rollback_Retraining",
+                  "to": "Notify_Team",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Handle_Process_Failure",
+                  "to": "Notify_Team",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Notify_Team",
+                  "to": "Generate_Run_Report",
+                  "condition": "on_success"
+                }
+              ]
+            },
+            "confidence": 0.9,
+            "key_innovations": [
+              "Adaptacja sterowana przyczynowością: Zamiast ślepego retrenowania w odpowiedzi na dryft, system najpierw próbuje zdiagnozować jego przyczynę za pomocą analizy przyczynowej, co prowadzi do bardziej świadomych i wytłumaczalnych decyzji.",
+              "Odporność na błędy analizy: System nie zatrzymuje się w przypadku niepowodzenia odkrywania przyczynowości. Kontynuuje proces retrenowania, ale oznacza zdarzenie, co pozwala na automatyzację przy jednoczesnym zachowaniu możliwości ludzkiej interwencji."
+            ],
+            "risk_mitigation": {
+              "Ryzyko: Retrenowanie skutkuje gorszym modelem.": "Mitygacja: Krok 'Validate_New_Model' porównuje nowy model z poprzednim. Jeśli nowy model nie jest lepszy, krok 'Rollback_Retraining' przywraca poprzednią, sprawdzoną wersję.",
+              "Ryzyko: Błąd krytyczny w procesie (np. ładowanie danych).": "Mitygacja: Dedykowany węzeł 'Handle_Process_Failure' przechwytuje błędy techniczne, powiadamia zespół i generuje raport, co umożliwia szybką diagnozę i naprawę.",
+              "Ryzyko: Analiza przyczynowa ('discover_causality') zawodzi lub daje mylące wyniki.": "Mitygacja: Plan uwzględnia ścieżkę awaryjną (krawędź 'validated'), która pozwala na kontynuację procesu, ale jednocześnie sygnalizuje problem zespołowi poprzez powiadomienie i raport."
+            },
+            "cognitive_trace": {
+              "trigger_words": [
+                "adaptacyjny system",
+                "continuous learning"
+              ],
+              "reasoning_chain": [
+                "Deconstruct mission: 'adaptive' + 'continuous learning' implies a feedback loop.",
+                "Incorporate role: As 'Causal Analyst', the 'discover_causality' node is critical.",
+                "Design main flow: Ingest new data -> check current model performance.",
+                "Design adaptation branch: If performance drops (drift), trigger a response.",
+                "Detail the response: Diagnose cause ('discover_causality') -> Retrain -> Validate new model -> Deploy or Rollback.",
+                "Add robustness: Include failure paths for all critical nodes ('load_data', 'train_model').",
+                "Handle specific failure: Plan for 'discover_causality' failure by allowing the process to continue but flagging the uncertainty ('validated' edge).",
+                "Simplify graph: Consolidate notification and reporting steps to avoid visual clutter."
+              ],
+              "confidence_per_decision": {
+                "node_selection": 0.95,
+                "edge_conditions": 0.85,
+                "overall_structure": 0.9
+              },
+              "alternatives_considered": {
+                "rejected_nodes": [
+                  "optimize_performance: Odrzucono, aby uprościć początkowy plan. Optymalizacja może być traktowana jako część kroku 'Retrain_Model' lub dodana w przyszłej iteracji."
+                ],
+                "rejected_patterns": [
+                  "Prosty, liniowy graf: Odrzucono, ponieważ nie modeluje on kluczowej logiki decyzyjnej ('czy model wymaga aktualizacji?'), która jest sercem systemu adaptacyjnego.",
+                  "Oddzielne grafy dla inicjalizacji i pętli: Odrzucono na rzecz jednego, zunifikowanego planu, który jest bardziej zwięzły i pokazuje pełny cykl życia w jednym miejscu."
+                ]
+              },
+              "key_influences": {
+                "from_prompt": "Sformułowanie 'adaptacyjny system ML z continuous learning' bezpośrednio narzuciło strukturę pętli z punktem decyzyjnym.",
+                "from_context": "Dostępna biblioteka węzłów była głównym ograniczeniem, które ukształtowało możliwe do zaimplementowania kroki.",
+                "from_role": "Rola 'Analityka Przyczynowego' zmotywowała do umieszczenia węzła 'discover_causality' jako kluczowego kroku diagnostycznego po wykryciu dryftu, a nie tylko jako jednorazowej analizy wstępnej."
+              },
+              "uncertainty_points": [
+                "Największa niepewność dotyczy interpretacji warunku 'on_failure' dla węzła 'Check_Model_Drift'. Założono, że oznacza on 'wydajność modelu spadła poniżej progu' (tj. wykryto dryft), a nie błąd techniczny wykonania. To kluczowe założenie projektowe.",
+                "Zachowanie węzła 'discover_causality' w przypadku niepowodzenia jest również założeniem. Zaprojektowanie przepływu tak, aby kontynuował działanie, jest wyborem na rzecz odporności systemu."
+              ],
+              "word_choices": {
+                "Check_Model_Drift": "Wybrano zamiast generycznego 'validate_model', aby precyzyjnie opisać jego funkcję w tym konkretnym punkcie przepływu – wykrywanie pogorszenia się modelu w czasie.",
+                "Discover_Causal_Shift": "Wybrano zamiast 'discover_causality', aby podkreślić, że celem jest identyfikacja *zmian* w relacjach przyczynowych, a nie ich jednorazowe odkrycie.",
+                "validated": "Wybrano jako warunek krawędzi, aby opisać 'miękką awarię' (soft failure), gdzie proces może być kontynuowany pomimo znanego problemu, co jest bardziej odpornym podejściem niż twarde zatrzymanie."
+              }
+            }
+          },
+          "key_ideas": [
+            "clean_data",
+            "error_handler",
+            "load_data",
+            "optimize",
+            "rollback",
+            "validate_data"
+          ]
+        },
+        {
+          "agent": "Creative_Planner",
+          "content": {
+            "thought_process": [
+              "Krok 1: Analizuję misję - 'adaptacyjny system ML z continuous learning' wymaga pętli adaptacyjnej z mechanizmami samouczenia się",
+              "Krok 2: Jako Creative Planner, stosuję SCAMPER do węzłów 'train_model' (Substitute → ensemble training) i 'validate_model' (Modify → multi-metric validation)",
+              "Krok 3: Proponuję 3 mikro-podejścia: (A) Liniowe continuous learning, (B) Adaptacyjne z progami, (C) Hybrydowe z multiple feedback loops - wybieram (C) dla maksymalnej adaptacyjności",
+              "Krok 4: Projektuję główną pętlę: data → preprocessing → drift detection → causal analysis → adaptive retraining → validation → deployment/rollback",
+              "Krok 5: Dodaję innowacyjne elementy: multi-stage validation, intelligent rollback z partial success, performance optimization jako continuous process",
+              "Krok 6: Implementuję robustne ścieżki błędów dla każdego krytycznego węzła"
+            ],
+            "plan": {
+              "entry_point": "Load_New_Data",
+              "nodes": [
+                {
+                  "name": "Load_New_Data",
+                  "implementation": "load_data"
+                },
+                {
+                  "name": "Preprocess_Data",
+                  "implementation": "clean_data"
+                },
+                {
+                  "name": "Validate_Input",
+                  "implementation": "validate_data"
+                },
+                {
+                  "name": "Detect_System_Drift",
+                  "implementation": "validate_model"
+                },
+                {
+                  "name": "Analyze_Drift_Causes",
+                  "implementation": "discover_causality"
+                },
+                {
+                  "name": "Adaptive_Retrain",
+                  "implementation": "train_model"
+                },
+                {
+                  "name": "Multi_Stage_Validation",
+                  "implementation": "validate_model"
+                },
+                {
+                  "name": "Optimize_Continuously",
+                  "implementation": "optimize_performance"
+                },
+                {
+                  "name": "Smart_Rollback",
+                  "implementation": "rollback"
+                },
+                {
+                  "name": "Alert_System",
+                  "implementation": "notify_user"
+                },
+                {
+                  "name": "Learning_Report",
+                  "implementation": "generate_report"
+                },
+                {
+                  "name": "Critical_Error_Handler",
+                  "implementation": "error_handler"
+                }
+              ],
+              "edges": [
+                {
+                  "from": "Load_New_Data",
+                  "to": "Preprocess_Data",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Load_New_Data",
+                  "to": "Critical_Error_Handler",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Preprocess_Data",
+                  "to": "Validate_Input",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Preprocess_Data",
+                  "to": "Critical_Error_Handler",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Validate_Input",
+                  "to": "Detect_System_Drift",
+                  "condition": "validated"
+                },
+                {
+                  "from": "Validate_Input",
+                  "to": "Alert_System",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Detect_System_Drift",
+                  "to": "Optimize_Continuously",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Detect_System_Drift",
+                  "to": "Analyze_Drift_Causes",
+                  "condition": "needs_optimization"
+                },
+                {
+                  "from": "Analyze_Drift_Causes",
+                  "to": "Adaptive_Retrain",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Analyze_Drift_Causes",
+                  "to": "Adaptive_Retrain",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Adaptive_Retrain",
+                  "to": "Multi_Stage_Validation",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Adaptive_Retrain",
+                  "to": "Critical_Error_Handler",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Multi_Stage_Validation",
+                  "to": "Optimize_Continuously",
+                  "condition": "validated"
+                },
+                {
+                  "from": "Multi_Stage_Validation",
+                  "to": "Smart_Rollback",
+                  "condition": "partial_success"
+                },
+                {
+                  "from": "Multi_Stage_Validation",
+                  "to": "Smart_Rollback",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Smart_Rollback",
+                  "to": "Alert_System",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Optimize_Continuously",
+                  "to": "Alert_System",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Optimize_Continuously",
+                  "to": "Adaptive_Retrain",
+                  "condition": "needs_optimization"
+                },
+                {
+                  "from": "Alert_System",
+                  "to": "Learning_Report",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Critical_Error_Handler",
+                  "to": "Alert_System",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Critical_Error_Handler",
+                  "to": "Smart_Rollback",
+                  "condition": "retry"
+                }
+              ]
+            },
+            "confidence": 0.85,
+            "key_innovations": [
+              "Hybrydowa pętla adaptacyjna z wielopoziomowym systemem walidacji i continuous optimization jako oddzielnym procesem",
+              "Inteligentny rollback z obsługą partial_success - system może zachować częściowe ulepszenia nawet przy niepełnym sukcesie",
+              "Self-optimizing loop gdzie optimize_performance może wyzwalać kolejne cykle treningu bez zewnętrznej interwencji"
+            ],
+            "risk_mitigation": {
+              "Niestabilność modelu": "Multi_Stage_Validation z trzema stanami wyjścia (validated/partial_success/on_failure) + Smart_Rollback z zachowaniem użytecznych elementów",
+              "Infinite loops w optymalizacji": "Ograniczone warunki needs_optimization tylko z konkretnych węzłów + Alert_System na każdym zakończeniu cyklu",
+              "Utrata funkcjonalności": "Smart_Rollback zachowuje working baseline + Critical_Error_Handler z opcją retry dla odzyskania"
+            },
+            "cognitive_trace": {
+              "trigger_words": [
+                "adaptacyjny",
+                "continuous learning",
+                "ML"
+              ],
+              "reasoning_chain": [
+                "Identified need for feedback loops from 'continuous learning'",
+                "Applied SCAMPER to train_model and validate_model for innovation",
+                "Chose hybrid approach (C) over linear (A) or threshold-based (B) for maximum adaptability",
+                "Added optimize_performance as continuous process rather than one-time step",
+                "Designed multi-conditional validation to handle partial successes"
+              ],
+              "confidence_per_decision": {
+                "node_selection": 0.9,
+                "edge_conditions": 0.8,
+                "overall_structure": 0.85
+              },
+              "alternatives_considered": {
+                "rejected_nodes": [
+                  "Rozważałem dodanie dedykowanego węzła do A/B testing modeli, ale biblioteka nie zawiera takiej implementacji"
+                ],
+                "rejected_patterns": [
+                  "Prosty linear flow - odrzucony bo nie obsługuje continuous learning",
+                  "Pure event-driven - odrzucony bo zbyt złożony dla dostępnych węzłów"
+                ]
+              },
+              "key_influences": {
+                "from_prompt": "Fraza 'continuous learning' wymusiła projektowanie pętli sprzężenia zwrotnego",
+                "from_context": "Dostępność optimize_performance pozwoliła na innowacyjne podejście do ciągłej optymalizacji",
+                "from_role": "Rola Creative Planner skłoniła do zastosowania SCAMPER i poszukiwania niestandardowych połączeń"
+              },
+              "uncertainty_points": [
+                "Interpretacja warunków 'needs_optimization' i 'partial_success' - mogą różnić się między implementacjami",
+                "Ryzyko infinite loops między Optimize_Continuously a Adaptive_Retrain wymaga zewnętrznych limitów"
+              ],
+              "word_choices": {
+                "Adaptive_Retrain": "Podkreśla adaptacyjny charakter w przeciwieństwie do standardowego retreningu",
+                "Multi_Stage_Validation": "Sygnalizuje wielopoziomową walidację zamiast prostej weryfikacji",
+                "Smart_Rollback": "Wskazuje na inteligentne wycofywanie z zachowaniem użytecznych elementów"
+              }
+            }
+          },
+          "key_ideas": [
+            "clean_data",
+            "error_handler",
+            "load_data",
+            "optimize",
+            "retry",
+            "rollback",
+            "validate_data"
+          ]
+        }
+      ],
+      "aggregator": {
+        "content": {
+          "thought_process": [
+            "Łączę elementy analizy przyczynowej z propozycji 1 (Causal Analyst) z innowacyjnym podejściem do continuous optimization z propozycji 2 (Creative Planner)",
+            "Ujednolicam warunki krawędzi - używam 'on_failure' dla drift detection zamiast 'needs_optimization' dla spójności",
+            "Zachowuję robustność przez utrzymanie ścieżek awaryjnych dla każdego krytycznego węzła",
+            "Integruję multi-stage validation z propozycji 2 z solidną obsługą błędów z propozycji 1",
+            "Upraszczam nazewnictwo węzłów dla czytelności, zachowując kluczowe funkcjonalności obu propozycji"
+          ],
+          "final_plan": {
+            "entry_point": "Load_Data",
+            "nodes": [
+              {
+                "name": "Load_Data",
+                "implementation": "load_data"
+              },
+              {
+                "name": "Clean_Data",
+                "implementation": "clean_data"
+              },
+              {
+                "name": "Validate_Data",
+                "implementation": "validate_data"
+              },
+              {
+                "name": "Check_Model_Drift",
+                "implementation": "validate_model"
+              },
+              {
+                "name": "Discover_Causality",
+                "implementation": "discover_causality"
+              },
+              {
+                "name": "Retrain_Model",
+                "implementation": "train_model"
+              },
+              {
+                "name": "Validate_New_Model",
+                "implementation": "validate_model"
+              },
+              {
+                "name": "Optimize_Performance",
+                "implementation": "optimize_performance"
+              },
+              {
+                "name": "Rollback",
+                "implementation": "rollback"
+              },
+              {
+                "name": "Error_Handler",
+                "implementation": "error_handler"
+              },
+              {
+                "name": "Notify_User",
+                "implementation": "notify_user"
+              },
+              {
+                "name": "Generate_Report",
+                "implementation": "generate_report"
+              }
+            ],
+            "edges": [
+              {
+                "from": "Load_Data",
+                "to": "Clean_Data",
+                "condition": "on_success"
+              },
+              {
+                "from": "Load_Data",
+                "to": "Error_Handler",
+                "condition": "on_failure"
+              },
+              {
+                "from": "Clean_Data",
+                "to": "Validate_Data",
+                "condition": "on_success"
+              },
+              {
+                "from": "Clean_Data",
+                "to": "Error_Handler",
+                "condition": "on_failure"
+              },
+              {
+                "from": "Validate_Data",
+                "to": "Check_Model_Drift",
+                "condition": "validated"
+              },
+              {
+                "from": "Validate_Data",
+                "to": "Error_Handler",
+                "condition": "on_failure"
+              },
+              {
+                "from": "Check_Model_Drift",
+                "to": "Optimize_Performance",
+                "condition": "on_success"
+              },
+              {
+                "from": "Check_Model_Drift",
+                "to": "Discover_Causality",
+                "condition": "on_failure"
+              },
+              {
+                "from": "Discover_Causality",
+                "to": "Retrain_Model",
+                "condition": "on_success"
+              },
+              {
+                "from": "Discover_Causality",
+                "to": "Retrain_Model",
+                "condition": "validated"
+              },
+              {
+                "from": "Retrain_Model",
+                "to": "Validate_New_Model",
+                "condition": "on_success"
+              },
+              {
+                "from": "Retrain_Model",
+                "to": "Error_Handler",
+                "condition": "on_failure"
+              },
+              {
+                "from": "Validate_New_Model",
+                "to": "Optimize_Performance",
+                "condition": "validated"
+              },
+              {
+                "from": "Validate_New_Model",
+                "to": "Rollback",
+                "condition": "partial_success"
+              },
+              {
+                "from": "Validate_New_Model",
+                "to": "Rollback",
+                "condition": "on_failure"
+              },
+              {
+                "from": "Optimize_Performance",
+                "to": "Notify_User",
+                "condition": "on_success"
+              },
+              {
+                "from": "Optimize_Performance",
+                "to": "Retrain_Model",
+                "condition": "on_failure"
+              },
+              {
+                "from": "Rollback",
+                "to": "Notify_User",
+                "condition": "on_success"
+              },
+              {
+                "from": "Error_Handler",
+                "to": "Notify_User",
+                "condition": "on_success"
+              },
+              {
+                "from": "Error_Handler",
+                "to": "Rollback",
+                "condition": "retry"
+              },
+              {
+                "from": "Notify_User",
+                "to": "Generate_Report",
+                "condition": "on_success"
+              }
+            ]
+          },
+          "synthesis_reasoning": "Połączyłem analizę przyczynową (propozycja 1) z ciągłą optymalizacją (propozycja 2). System wykrywa dryft, diagnozuje przyczyny, adaptacyjnie się uczy i optymalizuje wydajność w pętli continuous learning. Zachowałem robustność przez kompleksową obsługę błędów i inteligentny rollback z partial_success.",
+          "component_sources": {
+            "Causal Analyst": [
+              "Discover_Causality",
+              "validated condition for causality failure"
+            ],
+            "Creative Planner": [
+              "Optimize_Performance",
+              "partial_success condition",
+              "retry mechanism"
+            ]
+          },
+          "confidence_score": 0.92
+        },
+        "synthesis": "Połączyłem analizę przyczynową (propozycja 1) z ciągłą optymalizacją (propozycja 2). System wykrywa dryft, diagnozuje przyczyny, adaptacyjnie się uczy i optymalizuje wydajność w pętli continuous learning. Zachowałem robustność przez kompleksową obsługę błędów i inteligentny rollback z partial_success."
+      },
+      "critic": {
+        "content": {
+          "critique_summary": {
+            "verdict": "ODRZUCONY",
+            "statement": "Plan zostaje odrzucony z powodu krytycznego ryzyka pętli nieskończonej oraz niejasnej semantyki kluczowych ścieżek decyzyjnych. Mimo iż plan integruje zaawansowane koncepcje, takie jak analiza przyczynowa i ciągła optymalizacja, jego obecna struktura jest niestabilna i niebezpieczna do wdrożenia.",
+            "key_strengths": [
+              "Połączenie analizy przyczynowej z pętlą uczenia, co pozwala na bardziej świadome adaptacje modelu.",
+              "Wprowadzenie węzła ciągłej optymalizacji (`Optimize_Performance`) jako proaktywnego mechanizmu poprawy.",
+              "Solidna obsługa błędów technicznych poprzez dedykowany `Error_Handler` i mechanizm `retry`.",
+              "Elastyczna obsługa niepowodzenia analizy przyczynowej (warunek `validated`), która zwiększa odporność procesu."
+            ],
+            "identified_weaknesses": [
+              {
+                "weakness": "Krytyczne ryzyko pętli nieskończonej",
+                "severity": "Critical",
+                "description": "Połączenie `Optimize_Performance` -> `Retrain_Model` warunkiem `on_failure` tworzy pętlę bez mechanizmu wyjścia. Jeśli optymalizacja będzie konsekwentnie zawodzić dla danego stanu modelu, system wejdzie w nieskończony cykl optymalizacji i retrenowania."
+              },
+              {
+                "weakness": "Niejasna i ryzykowna semantyka warunku `on_failure`",
+                "severity": "High",
+                "description": "Użycie `on_failure` jako wyzwalacza retrenowania z węzła `Optimize_Performance` jest mylące. Ten warunek powinien oznaczać błąd techniczny, a nie potrzebę optymalizacji. Oryginalna propozycja użycia `needs_optimization` była znacznie jaśniejsza i bezpieczniejsza."
+              },
+              {
+                "weakness": "Pesymistyczna i nieefektywna obsługa `partial_success`",
+                "severity": "Medium",
+                "description": "Kierowanie modelu z `Validate_New_Model` przy `partial_success` bezpośrednio do `Rollback` jest marnotrawstwem. Model częściowo udany może być wciąż lepszy od poprzedniego i powinien być kandydatem do wdrożenia z ostrzeżeniem lub do dalszej analizy, a nie natychmiast odrzucany."
+              },
+              {
+                "weakness": "Brak jawnego kroku wdrożenia modelu (Deployment)",
+                "severity": "Medium",
+                "description": "W planie brakuje explicite węzła `deploy_model`. Nie jest jasne, co dzieje się z nowym, pomyślnie zwalidowanym modelem, co czyni cykl niekompletnym z perspektywy operacyjnej."
+              }
+            ]
+          },
+          "quality_metrics": {
+            "Complexity_Score_C": 7.8,
+            "Robustness_Score_R": 35,
+            "Innovation_Score_I": 90,
+            "Completeness_Score": 70,
+            "Overall_Quality_Q": 60.55
+          },
+          "cognitive_trace": {
+            "trigger_words": [
+              "adaptacyjny system",
+              "continuous learning",
+              "discover_causality",
+              "optimize_performance",
+              "partial_success",
+              "on_failure"
+            ],
+            "reasoning_chain": [
+              "Deconstruct mission: 'adaptive' and 'continuous learning' require a robust feedback loop.",
+              "Analyze aggregated plan structure: Identify the main paths for 'no drift', 'drift detected', and 'error'.",
+              "Trace the loop involving `Optimize_Performance` and `Retrain_Model`.",
+              "Identify the edge `Optimize_Performance` -> `Retrain_Model` with condition `on_failure` as a potential infinite loop. This is a critical flaw.",
+              "Analyze the semantic meaning of edge conditions. The aggregator's choice of `on_failure` over the proposer's `needs_optimization` is a degradation in clarity and safety.",
+              "Evaluate the handling of `partial_success` from `Validate_New_Model`. Routing to `Rollback` is a pessimistic and potentially wasteful choice.",
+              "Check for completeness. The absence of an explicit `deploy_model` step is a significant omission for a production system.",
+              "Based on the critical flaw (infinite loop) and other high/medium severity weaknesses, the decision must be to reject the plan.",
+              "Formulate actionable feedback focusing on fixing the loop, clarifying semantics, and improving the logic for partial success and deployment."
+            ],
+            "confidence_per_decision": {
+              "node_selection": 0.9,
+              "edge_conditions": 0.5,
+              "overall_structure": 0.4
+            },
+            "alternatives_considered": {
+              "rejected_nodes": [
+                "A/B_Test_Node: Considered adding this to handle `partial_success`, but it's not in the assumed node library. The alternative is routing to a notification/manual review path."
+              ],
+              "rejected_patterns": [
+                "Approving with conditions: Rejected this idea because the risk of an infinite loop is too critical to allow the plan to pass, even with caveats. A hard rejection forces a structural fix."
+              ]
+            },
+            "key_influences": {
+              "from_prompt": "The mission 'adaptacyjny system' implies a need for stability and robustness, which the current plan lacks.",
+              "from_context": "The aggregated plan combined two strong but conflicting ideas (`on_failure` vs. `needs_optimization`) in a way that created a new vulnerability.",
+              "from_role": "As a 'Quality Critic' and 'Adversarial Validator', my primary duty is to find and flag critical flaws like infinite loops and semantic ambiguities that could lead to system failure. This role mandates a rejection in this case."
+            },
+            "uncertainty_points": [
+              "The exact implementation of `Optimize_Performance` is unknown. However, designing a graph that relies on it *not* failing in a specific way to avoid an infinite loop is fundamentally flawed design, regardless of implementation details."
+            ],
+            "word_choices": {
+              "verdict: ODRZUCONY": "Chosen to be an unambiguous, decisive rejection based on the identified critical flaw.",
+              "Krytyczne ryzyko pętli nieskończonej": "Used to highlight the most severe problem in the plan, leaving no room for misinterpretation.",
+              "Pesymistyczna obsługa": "Chosen to describe the `partial_success` logic as it conveys the idea of a missed opportunity rather than just a technical error."
+            }
+          }
+        },
+        "verdict": "ODRZUCONY",
+        "score": 0.0,
+        "weaknesses": [
+          "Krytyczne ryzyko pętli nieskończonej",
+          "Niejasna i ryzykowna semantyka warunku `on_failure`",
+          "Pesymistyczna i nieefektywna obsługa `partial_success`",
+          "Brak jawnego kroku wdrożenia modelu (Deployment)"
+        ]
+      }
+    },
+    {
+      "proposers": [
+        {
+          "agent": "Causal_Analyst",
+          "content": {
+            "thought_process": [
+              "Krok 1: Analiza krytyki. Poprzedni plan został odrzucony z powodu ryzyka pętli nieskończonej, niejasnej semantyki krawędzi (`on_failure` vs `needs_optimization`), marnotrawnej obsługi `partial_success` i braku kroku wdrożenia. Moim celem jest naprawienie tych błędów.",
+              "Krok 2: Eliminacja pętli nieskończonej. Rozdzielam pętlę retrenowania od pętli optymalizacji. `Optimize_Performance` jest teraz uruchamiane proaktywnie, gdy model działa dobrze (`on_success` z `Check_Model_Drift`). Jego ewentualna awaria (`on_failure`) prowadzi do powiadomienia, a nie do ponownego trenowania, co eliminuje ryzyko pętli.",
+              "Krok 3: Uściślenie semantyki. Używam `on_failure` z węzła `Check_Model_Drift` jako jasnego sygnału 'wykryto dryft', co jest głównym wyzwalaczem dla pętli adaptacyjnej. To jest świadome założenie projektowe, które czyni logikę jednoznaczną.",
+              "Krok 4: Poprawa obsługi `partial_success`. Zamiast natychmiastowego `Rollback`, ścieżka `partial_success` z `Validate_New_Model` prowadzi teraz do dedykowanego powiadomienia (`Notify_Manual_Review`), co pozwala na zachowanie modelu-kandydata do oceny przez człowieka, bez odrzucania potencjalnie wartościowej pracy.",
+              "Krok 5: Dodanie kroku wdrożenia. Chociaż w bibliotece brakuje węzła `deploy_model`, jawnie reprezentuję ten krok poprzez nazwanie węzła powiadomienia `Notify_Deployment_Success`. Sukces w tej ścieżce oznacza, że nowy model staje się modelem produkcyjnym.",
+              "Krok 6: Zachowanie roli Analityka Przyczynowego. Węzeł `Discover_Causality` pozostaje kluczowym elementem diagnostycznym po wykryciu dryftu, zapewniając, że adaptacja jest oparta na zrozumieniu przyczyn, a nie tylko na ślepym retrenowaniu."
+            ],
+            "plan": {
+              "entry_point": "Load_Data",
+              "nodes": [
+                {
+                  "name": "Load_Data",
+                  "implementation": "load_data",
+                  "description": "Wczytuje nowe dane do oceny i potencjalnego retrenowania."
+                },
+                {
+                  "name": "Clean_Data",
+                  "implementation": "clean_data",
+                  "description": "Czyści i przygotowuje nowe dane."
+                },
+                {
+                  "name": "Validate_Data",
+                  "implementation": "validate_data",
+                  "description": "Waliduje schemat i jakość nowych danych."
+                },
+                {
+                  "name": "Check_Model_Drift",
+                  "implementation": "validate_model",
+                  "description": "Ocenia wydajność obecnego modelu. 'on_success' = brak dryftu, 'on_failure' = wykryto dryft."
+                },
+                {
+                  "name": "Proactive_Optimize",
+                  "implementation": "optimize_performance",
+                  "description": "Proaktywnie optymalizuje dobrze działający model."
+                },
+                {
+                  "name": "Discover_Causality",
+                  "implementation": "discover_causality",
+                  "description": "Analizuje przyczyny wykrytego dryftu modelu."
+                },
+                {
+                  "name": "Retrain_Model",
+                  "implementation": "train_model",
+                  "description": "Trenuje nową wersję modelu w odpowiedzi na dryft."
+                },
+                {
+                  "name": "Validate_New_Model",
+                  "implementation": "validate_model",
+                  "description": "Waliduje nowy model względem poprzedniego i progów biznesowych."
+                },
+                {
+                  "name": "Rollback_Changes",
+                  "implementation": "rollback",
+                  "description": "Wycofuje zmiany i przywraca poprzednią wersję modelu."
+                },
+                {
+                  "name": "Notify_Deployment_Success",
+                  "implementation": "notify_user",
+                  "description": "Powiadamia o pomyślnym wdrożeniu nowego modelu."
+                },
+                {
+                  "name": "Notify_Manual_Review",
+                  "implementation": "notify_user",
+                  "description": "Powiadamia o potrzebie ręcznej oceny modelu z częściowym sukcesem."
+                },
+                {
+                  "name": "Notify_General",
+                  "implementation": "notify_user",
+                  "description": "Wysyła ogólne powiadomienia o statusie."
+                },
+                {
+                  "name": "Generate_Report",
+                  "implementation": "generate_report",
+                  "description": "Generuje końcowy raport z cyklu."
+                },
+                {
+                  "name": "Error_Handler",
+                  "implementation": "error_handler",
+                  "description": "Obsługuje krytyczne błędy techniczne."
+                }
+              ],
+              "edges": [
+                {
+                  "from": "Load_Data",
+                  "to": "Clean_Data",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Load_Data",
+                  "to": "Error_Handler",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Clean_Data",
+                  "to": "Validate_Data",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Clean_Data",
+                  "to": "Error_Handler",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Validate_Data",
+                  "to": "Check_Model_Drift",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Validate_Data",
+                  "to": "Error_Handler",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Check_Model_Drift",
+                  "to": "Proactive_Optimize",
+                  "condition": "on_success",
+                  "label": "Brak dryftu"
+                },
+                {
+                  "from": "Check_Model_Drift",
+                  "to": "Discover_Causality",
+                  "condition": "on_failure",
+                  "label": "Wykryto dryft"
+                },
+                {
+                  "from": "Proactive_Optimize",
+                  "to": "Notify_General",
+                  "condition": "on_success",
+                  "label": "Optymalizacja OK"
+                },
+                {
+                  "from": "Proactive_Optimize",
+                  "to": "Notify_General",
+                  "condition": "on_failure",
+                  "label": "Optymalizacja nie powiodła się"
+                },
+                {
+                  "from": "Discover_Causality",
+                  "to": "Retrain_Model",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Discover_Causality",
+                  "to": "Retrain_Model",
+                  "condition": "validated",
+                  "label": "Analiza nie powiodła się, kontynuuj"
+                },
+                {
+                  "from": "Retrain_Model",
+                  "to": "Validate_New_Model",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Retrain_Model",
+                  "to": "Error_Handler",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Validate_New_Model",
+                  "to": "Notify_Deployment_Success",
+                  "condition": "on_success",
+                  "label": "Nowy model lepszy"
+                },
+                {
+                  "from": "Validate_New_Model",
+                  "to": "Notify_Manual_Review",
+                  "condition": "partial_success",
+                  "label": "Częściowy sukces"
+                },
+                {
+                  "from": "Validate_New_Model",
+                  "to": "Rollback_Changes",
+                  "condition": "on_failure",
+                  "label": "Nowy model gorszy"
+                },
+                {
+                  "from": "Rollback_Changes",
+                  "to": "Notify_General",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Error_Handler",
+                  "to": "Notify_General",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Notify_Deployment_Success",
+                  "to": "Generate_Report",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Notify_Manual_Review",
+                  "to": "Generate_Report",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Notify_General",
+                  "to": "Generate_Report",
+                  "condition": "on_success"
+                }
+              ]
+            },
+            "confidence": 0.95,
+            "key_innovations": [
+              "Architektura dwuścieżkowa: System rozdziela ścieżkę reaktywną (odpowiedź na dryft) od proaktywnej (optymalizacja dobrego modelu), co zwiększa stabilność i eliminuje ryzyko pętli.",
+              "Inteligentna obsługa niepewności: Zamiast binarnego odrzucenia/akceptacji, modele z 'częściowym sukcesem' są kierowane do oceny przez człowieka, co zapobiega marnowaniu zasobów.",
+              "Wdrożenie implikowane przez sukces: Cykl życia modelu jest kompletny, a udane wdrożenie jest jawnie sygnalizowane przez dedykowane powiadomienie, co rozwiązuje lukę z poprzedniego planu."
+            ],
+            "risk_mitigation": {
+              "Ryzyko: Pętla nieskończona między optymalizacją a retrenowaniem.": "Mitygacja: Całkowite rozdzielenie ścieżek. Optymalizacja działa tylko na stabilnym modelu i jej niepowodzenie nie wyzwala retrenowania.",
+              "Ryzyko: Niejasna logika decyzyjna.": "Mitygacja: Użycie `on_failure` z `Check_Model_Drift` jako jedynego, klarownego wyzwalacza dla pętli adaptacyjnej. Nazwy węzłów powiadomień (`Notify_Deployment_Success`, `Notify_Manual_Review`) precyzują wynik każdej ścieżki.",
+              "Ryzyko: Odrzucenie potencjalnie użytecznego modelu.": "Mitygacja: Wprowadzenie ścieżki `partial_success`, która kieruje model do oceny manualnej zamiast do natychmiastowego `Rollback`."
+            },
+            "cognitive_trace": {
+              "trigger_words": [
+                "ODRZUCONY",
+                "pętli nieskończonej",
+                "niejasnej semantyki",
+                "partial_success",
+                "brak jawnego kroku wdrożenia"
+              ],
+              "reasoning_chain": [
+                "Received rejection verdict and analyzed the critique.",
+                "Identified the core flaw: the `Optimize_Performance` -> `Retrain_Model` loop.",
+                "Designed a new, safer architecture by separating the proactive optimization path from the reactive retraining path.",
+                "Addressed the `partial_success` issue by routing it to a manual review notification instead of rollback.",
+                "Addressed the missing deployment step by creating an explicit notification node (`Notify_Deployment_Success`) to signify a successful deployment.",
+                "Clarified edge semantics by using `on_failure` from `Check_Model_Drift` as the single, unambiguous trigger for the adaptation loop.",
+                "Maintained my role's focus by keeping `Discover_Causality` as the key diagnostic step after drift detection.",
+                "Verified that all points from the critique were addressed in the new plan."
+              ],
+              "confidence_per_decision": {
+                "node_selection": 0.95,
+                "edge_conditions": 0.95,
+                "overall_structure": 0.98
+              },
+              "alternatives_considered": {
+                "rejected_nodes": [],
+                "rejected_patterns": [
+                  "Single feedback loop: Rejected because it was the source of the original plan's instability. Separating proactive and reactive loops is fundamentally safer.",
+                  "Using `needs_optimization` condition: Rejected in favor of a clearer `on_failure` from `Check_Model_Drift` to avoid any ambiguity about what triggers the main adaptation cycle."
+                ]
+              },
+              "key_influences": {
+                "from_prompt": "The mission to build an 'adaptacyjny system' was re-interpreted in light of the critique to mean 'stable and robust' adaptive system.",
+                "from_context": "The Quality Critic's detailed rejection report was the primary driver for this entire redesign. Each identified weakness was treated as a requirement to be fixed.",
+                "from_role": "As Causal Analyst, my role was to ensure that even in this revised, safer architecture, the 'why' (causality) behind model drift remains a central part of the solution, not just the 'what' (retraining)."
+              },
+              "uncertainty_points": [
+                "The primary remaining uncertainty is the precise definition of 'partial_success' within the `Validate_New_Model` node's implementation. The plan handles this by routing to a human, which is a robust way to manage implementation ambiguity."
+              ],
+              "word_choices": {
+                "Proactive_Optimize": "Chosen to clearly distinguish this optimization step from a reactive fix. It happens when things are good, not when they are broken.",
+                "Notify_Deployment_Success": "Chosen to make the implicit deployment step explicit and unambiguous, directly addressing a key point of critique.",
+                "Architektura dwuścieżkowa": "Used in 'key_innovations' to concisely label the core structural improvement that solves the infinite loop problem."
+              }
+            }
+          },
+          "key_ideas": [
+            "clean_data",
+            "error_handler",
+            "load_data",
+            "optimize",
+            "rollback",
+            "validate_data"
+          ]
+        },
+        {
+          "agent": "Creative_Planner",
+          "content": {
+            "thought_process": [
+              "Krok 1: Analizuję poprawiony plan Analityka Przyczynowego. Wszystkie krytyczne problemy z poprzedniej iteracji zostały rozwiązane - pętla nieskończona wyeliminowana, semantyka krawędzi wyjaśniona, obsługa partial_success poprawiona",
+              "Krok 2: Jako Creative Planner, stosuję SCAMPER do węzłów 'validate_model' (Modify → staged validation) i 'notify_user' (Combine → różne typy powiadomień). Proponuję 3 podejścia: (A) Conservative single-path, (B) Multi-branch notification, (C) Hybrid adaptive-reactive - wybieram (C)",
+              "Krok 3: Dodaję innowacyjne elementy zachowując stabilność: staging area dla modeli, adaptive thresholds, performance monitoring loop",
+              "Krok 4: Projektuję enhanced continuous learning z feedback loop ale bez ryzyka nieskończonej pętli",
+              "Krok 5: Integruję monitoring wydajności jako oddzielny, bezpieczny proces",
+              "Krok 6: Zachowuję wszystkie poprawki z revised plan dodając layer innowacji"
+            ],
+            "plan": {
+              "entry_point": "Load_Data",
+              "nodes": [
+                {
+                  "name": "Load_Data",
+                  "implementation": "load_data"
+                },
+                {
+                  "name": "Clean_Data",
+                  "implementation": "clean_data"
+                },
+                {
+                  "name": "Validate_Data",
+                  "implementation": "validate_data"
+                },
+                {
+                  "name": "Check_Model_Drift",
+                  "implementation": "validate_model"
+                },
+                {
+                  "name": "Monitor_Performance",
+                  "implementation": "optimize_performance"
+                },
+                {
+                  "name": "Discover_Drift_Causes",
+                  "implementation": "discover_causality"
+                },
+                {
+                  "name": "Stage_Model_Training",
+                  "implementation": "train_model"
+                },
+                {
+                  "name": "Multi_Stage_Validation",
+                  "implementation": "validate_model"
+                },
+                {
+                  "name": "Performance_Boost",
+                  "implementation": "optimize_performance"
+                },
+                {
+                  "name": "Rollback_Model",
+                  "implementation": "rollback"
+                },
+                {
+                  "name": "Alert_Success",
+                  "implementation": "notify_user"
+                },
+                {
+                  "name": "Alert_Review_Needed",
+                  "implementation": "notify_user"
+                },
+                {
+                  "name": "Alert_System_Status",
+                  "implementation": "notify_user"
+                },
+                {
+                  "name": "Learning_Report",
+                  "implementation": "generate_report"
+                },
+                {
+                  "name": "Critical_Handler",
+                  "implementation": "error_handler"
+                }
+              ],
+              "edges": [
+                {
+                  "from": "Load_Data",
+                  "to": "Clean_Data",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Load_Data",
+                  "to": "Critical_Handler",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Clean_Data",
+                  "to": "Validate_Data",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Clean_Data",
+                  "to": "Critical_Handler",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Validate_Data",
+                  "to": "Check_Model_Drift",
+                  "condition": "validated"
+                },
+                {
+                  "from": "Validate_Data",
+                  "to": "Critical_Handler",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Check_Model_Drift",
+                  "to": "Monitor_Performance",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Check_Model_Drift",
+                  "to": "Discover_Drift_Causes",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Monitor_Performance",
+                  "to": "Performance_Boost",
+                  "condition": "needs_optimization"
+                },
+                {
+                  "from": "Monitor_Performance",
+                  "to": "Alert_System_Status",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Performance_Boost",
+                  "to": "Alert_Success",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Performance_Boost",
+                  "to": "Alert_System_Status",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Discover_Drift_Causes",
+                  "to": "Stage_Model_Training",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Discover_Drift_Causes",
+                  "to": "Stage_Model_Training",
+                  "condition": "validated"
+                },
+                {
+                  "from": "Stage_Model_Training",
+                  "to": "Multi_Stage_Validation",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Stage_Model_Training",
+                  "to": "Critical_Handler",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Multi_Stage_Validation",
+                  "to": "Alert_Success",
+                  "condition": "validated"
+                },
+                {
+                  "from": "Multi_Stage_Validation",
+                  "to": "Alert_Review_Needed",
+                  "condition": "partial_success"
+                },
+                {
+                  "from": "Multi_Stage_Validation",
+                  "to": "Rollback_Model",
+                  "condition": "on_failure"
+                },
+                {
+                  "from": "Rollback_Model",
+                  "to": "Alert_System_Status",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Critical_Handler",
+                  "to": "Alert_System_Status",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Alert_Success",
+                  "to": "Learning_Report",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Alert_Review_Needed",
+                  "to": "Learning_Report",
+                  "condition": "on_success"
+                },
+                {
+                  "from": "Alert_System_Status",
+                  "to": "Learning_Report",
+                  "condition": "on_success"
+                }
+              ]
+            },
+            "confidence": 0.88,
+            "key_innovations": [
+              "Safe Performance Monitoring Loop: Monitor_Performance → Performance_Boost z warunkiem needs_optimization, który nie tworzy nieskończonej pętli ale umożliwia continuous improvement",
+              "Staged Model Development: Stage_Model_Training sugeruje etapowe podejście do trenowania z checkpointami i możliwością rollback na każdym etapie",
+              "Adaptive Threshold System: Multi_Stage_Validation z trzema wyjściami (validated/partial_success/on_failure) pozwala na bardziej nuanced decision making"
+            ],
+            "risk_mitigation": {
+              "Ryzyko nieskończonej pętli": "Monitor_Performance i Performance_Boost są izolowane od głównej pętli retrenowania - ich failure prowadzi tylko do alertu, nie do ponownego trenowania",
+              "Ryzyko utraty dobrych modeli": "Staged training z multi-stage validation pozwala na zachowanie intermediate results nawet przy częściowym sukcesie",
+              "Ryzyko braku feedback": "Wszystkie ścieżki prowadzą do Learning_Report, zapewniając complete audit trail dla continuous learning"
+            },
+            "cognitive_trace": {
+              "trigger_words": [
+                "adaptacyjny system",
+                "continuous learning",
+                "Creative Planner",
+                "SCAMPER"
+              ],
+              "reasoning_chain": [
+                "Built upon the stable foundation of the revised Causal Analyst plan",
+                "Applied SCAMPER: Modified validation to multi-stage, Combined notifications by type",
+                "Added safe performance monitoring loop using needs_optimization condition",
+                "Preserved all safety fixes while adding innovation layer",
+                "Ensured no infinite loops through careful condition selection"
+              ],
+              "confidence_per_decision": {
+                "node_selection": 0.9,
+                "edge_conditions": 0.85,
+                "overall_structure": 0.88
+              },
+              "alternatives_considered": {
+                "rejected_nodes": [
+                  "Separate A/B testing node - would complicate without adding clear value"
+                ],
+                "rejected_patterns": [
+                  "Direct optimization loop - too risky after previous rejection",
+                  "Single notification node - less informative than typed notifications"
+                ]
+              },
+              "key_influences": {
+                "from_prompt": "Creative Planner role pushed for innovation while maintaining safety",
+                "from_context": "Previous rejection mandated conservative approach to loop design",
+                "from_role": "SCAMPER technique guided specific node modifications and combinations"
+              },
+              "uncertainty_points": [
+                "Implementation details of needs_optimization condition - assumed to be safer than on_failure",
+                "Exact behavior of staged training - relies on implementation to provide appropriate checkpoints"
+              ],
+              "word_choices": {
+                "Monitor_Performance": "Distinguished from optimization to clarify it's observational first",
+                "Stage_Model_Training": "Implies controlled, step-by-step approach vs direct training",
+                "Multi_Stage_Validation": "Emphasizes the enhanced validation process with multiple outcomes"
+              }
+            }
+          },
+          "key_ideas": [
+            "clean_data",
+            "error_handler",
+            "load_data",
+            "optimize",
+            "rollback",
+            "validate_data"
+          ]
+        }
+      ],
+      "aggregator": {
+        "content": {
+          "thought_process": [
+            "Łączę stabilną architekturę dwuścieżkową z propozycji 1 (rozwiązanie problemu pętli) z innowacyjnym staged training i performance monitoring z propozycji 2",
+            "Ujednolicam nazewnictwo węzłów dla czytelności, zachowując kluczowe funkcjonalności obu propozycji",
+            "Rozwiązuję konflikt między Monitor_Performance a Proactive_Optimize - wybieram Monitor_Performance jako bezpieczniejsze podejście obserwacyjne",
+            "Zachowuję explicite deployment signaling przez dedykowane powiadomienia z propozycji 1",
+            "Integruję multi-stage validation z propozycji 2 z clear failure paths z propozycji 1",
+            "Upewniam się, że wszystkie ścieżki kończą się raportem dla pełnej audytowalności"
+          ],
+          "final_plan": {
+            "entry_point": "Load_Data",
+            "nodes": [
+              {
+                "name": "Load_Data",
+                "implementation": "load_data"
+              },
+              {
+                "name": "Clean_Data",
+                "implementation": "clean_data"
+              },
+              {
+                "name": "Validate_Data",
+                "implementation": "validate_data"
+              },
+              {
+                "name": "Check_Model_Drift",
+                "implementation": "validate_model"
+              },
+              {
+                "name": "Monitor_Performance",
+                "implementation": "optimize_performance"
+              },
+              {
+                "name": "Discover_Causality",
+                "implementation": "discover_causality"
+              },
+              {
+                "name": "Retrain_Model",
+                "implementation": "train_model"
+              },
+              {
+                "name": "Validate_New_Model",
+                "implementation": "validate_model"
+              },
+              {
+                "name": "Performance_Optimization",
+                "implementation": "optimize_performance"
+              },
+              {
+                "name": "Rollback_Changes",
+                "implementation": "rollback"
+              },
+              {
+                "name": "Notify_Deployment",
+                "implementation": "notify_user"
+              },
+              {
+                "name": "Notify_Review",
+                "implementation": "notify_user"
+              },
+              {
+                "name": "Notify_Status",
+                "implementation": "notify_user"
+              },
+              {
+                "name": "Generate_Report",
+                "implementation": "generate_report"
+              },
+              {
+                "name": "Error_Handler",
+                "implementation": "error_handler"
+              }
+            ],
+            "edges": [
+              {
+                "from": "Load_Data",
+                "to": "Clean_Data",
+                "condition": "on_success"
+              },
+              {
+                "from": "Load_Data",
+                "to": "Error_Handler",
+                "condition": "on_failure"
+              },
+              {
+                "from": "Clean_Data",
+                "to": "Validate_Data",
+                "condition": "on_success"
+              },
+              {
+                "from": "Clean_Data",
+                "to": "Error_Handler",
+                "condition": "on_failure"
+              },
+              {
+                "from": "Validate_Data",
+                "to": "Check_Model_Drift",
+                "condition": "validated"
+              },
+              {
+                "from": "Validate_Data",
+                "to": "Error_Handler",
+                "condition": "on_failure"
+              },
+              {
+                "from": "Check_Model_Drift",
+                "to": "Monitor_Performance",
+                "condition": "on_success"
+              },
+              {
+                "from": "Check_Model_Drift",
+                "to": "Discover_Causality",
+                "condition": "on_failure"
+              },
+              {
+                "from": "Monitor_Performance",
+                "to": "Performance_Optimization",
+                "condition": "needs_optimization"
+              },
+              {
+                "from": "Monitor_Performance",
+                "to": "Notify_Status",
+                "condition": "on_success"
+              },
+              {
+                "from": "Performance_Optimization",
+                "to": "Notify_Deployment",
+                "condition": "on_success"
+              },
+              {
+                "from": "Performance_Optimization",
+                "to": "Notify_Status",
+                "condition": "on_failure"
+              },
+              {
+                "from": "Discover_Causality",
+                "to": "Retrain_Model",
+                "condition": "on_success"
+              },
+              {
+                "from": "Discover_Causality",
+                "to": "Retrain_Model",
+                "condition": "validated"
+              },
+              {
+                "from": "Retrain_Model",
+                "to": "Validate_New_Model",
+                "condition": "on_success"
+              },
+              {
+                "from": "Retrain_Model",
+                "to": "Error_Handler",
+                "condition": "on_failure"
+              },
+              {
+                "from": "Validate_New_Model",
+                "to": "Notify_Deployment",
+                "condition": "validated"
+              },
+              {
+                "from": "Validate_New_Model",
+                "to": "Notify_Review",
+                "condition": "partial_success"
+              },
+              {
+                "from": "Validate_New_Model",
+                "to": "Rollback_Changes",
+                "condition": "on_failure"
+              },
+              {
+                "from": "Rollback_Changes",
+                "to": "Notify_Status",
+                "condition": "on_success"
+              },
+              {
+                "from": "Error_Handler",
+                "to": "Notify_Status",
+                "condition": "on_success"
+              },
+              {
+                "from": "Notify_Deployment",
+                "to": "Generate_Report",
+                "condition": "on_success"
+              },
+              {
+                "from": "Notify_Review",
+                "to": "Generate_Report",
+                "condition": "on_success"
+              },
+              {
+                "from": "Notify_Status",
+                "to": "Generate_Report",
+                "condition": "on_success"
+              }
+            ]
+          },
+          "synthesis_reasoning": "Finalny plan łączy bezpieczną architekturę dwuścieżkową (eliminacja pętli nieskończonej) z innowacyjnym performance monitoring. System wykrywa dryft przez analizę przyczynową, adaptacyjnie się uczy, a w przypadku braku dryftu proaktywnie monitoruje i optymalizuje wydajność. Kluczowe: izolacja ścieżek optymalizacji od retrenowania, inteligentna obsługa partial_success przez manual review, explicite sygnalizowanie deployment przez dedykowane powiadomienia.",
+          "component_sources": {
+            "Revised Causal Analyst": [
+              "Architektura dwuścieżkowa",
+              "Explicit deployment notification",
+              "Clear drift detection semantics"
+            ],
+            "Creative Planner": [
+              "Monitor_Performance + Performance_Optimization flow",
+              "Multi-outcome validation",
+              "Typed notifications"
+            ]
+          },
+          "confidence_score": 0.94
+        },
+        "synthesis": "Finalny plan łączy bezpieczną architekturę dwuścieżkową (eliminacja pętli nieskończonej) z innowacyjnym performance monitoring. System wykrywa dryft przez analizę przyczynową, adaptacyjnie się uczy, a w przypadku braku dryftu proaktywnie monitoruje i optymalizuje wydajność. Kluczowe: izolacja ścieżek optymalizacji od retrenowania, inteligentna obsługa partial_success przez manual review, explicite sygnalizowanie deployment przez dedykowane powiadomienia."
+      },
+      "critic": {
+        "content": "```json\n{\n  \"critique_summary\": {\n    \"verdict\": \"ZATWIERDZONY\",\n    \"statement\": \"Plan został gruntownie poprawiony i w pełni adresuje wszystkie wcześniej zidentyfikowane krytyczne wady. Wprowadzona architektura dwuścieżkowa skutecznie eliminuje ryzyko pętli nieskończonej, semantyka przepływów jest teraz jednoznaczna, a obsługa częściowego sukcesu i wdrożenia jest inteligentna i kompletna. Plan jest solidny, innowacyjny i gotowy do realizacji.\",\n    \"key_strengths\": [\n      \"Stabilna architektura dwuścieżkowa, która bezpiecznie oddziela proaktywną optymalizację od reaktywnego retrenowania, eliminując ryzyko pętli nieskończonej.\",\n      \"Inteligentna obsługa niepewności: ścieżka `partial_success` prowadzi do przeglądu manualnego, co zapobiega marnowaniu potencjalnie wartościowych modeli.\",\n      \"Jasna i jednoznaczna logika decyzyjna, z `on_failure` z `Check_Model_Drift` jako jedynym, klarownym wyzwalaczem pętli adaptacyjnej.\",\n      \"Kompletny cykl życia modelu, z jawnym sygnałem wdrożenia (`Notify_Deployment`) i kompleksowym raportowaniem na końcu każdej ścieżki.\"\n    ],\n    \"identified_weaknesses\": []\n  },\n  \"quality_metrics\": {\n    \"Complexity_Score_C\": 6.5,\n    \"Robustness_Score_R\": 95,\n    \"Innovation_Score_I\": 90,\n    \"Completeness_Score\": 100,\n    \"Overall_Quality_Q\": 91.37\n  },\n  \"plan_approved\": {\n    \"entry_point\": \"Load_Data\",\n    \"nodes\": [\n      {\n        \"name\": \"Load_Data\",\n        \"implementation\": \"load_data\"\n      },\n      {\n        \"name\": \"Clean_Data\",\n        \"implementation\": \"clean_data\"\n      },\n      {\n        \"name\": \"Validate_Data\",\n        \"implementation\": \"validate_data\"\n      },\n      {\n        \"name\": \"Check_Model_Drift\",\n        \"implementation\": \"validate_model\"\n      },\n      {\n        \"name\": \"Monitor_Performance\",\n        \"implementation\": \"optimize_performance\"\n      },\n      {\n        \"name\": \"Discover_Causality\",\n        \"implementation\": \"discover_causality\"\n      },\n      {\n        \"name\": \"Retrain_Model\",\n        \"implementation\": \"train_model\"\n      },\n      {\n        \"name\": \"Validate_New_Model\",\n        \"implementation\": \"validate_model\"\n      },\n      {\n        \"name\": \"Performance_Optimization\",\n        \"implementation\": \"optimize_performance\"\n      },\n      {\n        \"name\": \"Rollback_Changes\",\n        \"implementation\": \"rollback\"\n      },\n      {\n        \"name\": \"Notify_Deployment\",\n        \"implementation\": \"notify_user\"\n      },\n      {\n        \"name\": \"Notify_Review\",\n        \"implementation\": \"notify_user\"\n      },\n      {\n        \"name\": \"Notify_Status\",\n        \"implementation\": \"notify_user\"\n      },\n      {\n        \"name\": \"Generate_Report\",\n        \"implementation\": \"generate_report\"\n      },\n      {\n        \"name\": \"Error_Handler\",\n        \"implementation\": \"error_handler\"\n      }\n    ],\n    \"edges\": [\n      {\n        \"from\": \"Load_Data\",\n        \"to\": \"Clean_Data\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Load_Data\",\n        \"to\": \"Error_Handler\",\n        \"condition\": \"on_failure\"\n      },\n      {\n        \"from\": \"Clean_Data\",\n        \"to\": \"Validate_Data\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Clean_Data\",\n        \"to\": \"Error_Handler\",\n        \"condition\": \"on_failure\"\n      },\n      {\n        \"from\": \"Validate_Data\",\n        \"to\": \"Check_Model_Drift\",\n        \"condition\": \"validated\"\n      },\n      {\n        \"from\": \"Validate_Data\",\n        \"to\": \"Error_Handler\",\n        \"condition\": \"on_failure\"\n      },\n      {\n        \"from\": \"Check_Model_Drift\",\n        \"to\": \"Monitor_Performance\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Check_Model_Drift\",\n        \"to\": \"Discover_Causality\",\n        \"condition\": \"on_failure\"\n      },\n      {\n        \"from\": \"Monitor_Performance\",\n        \"to\": \"Performance_Optimization\",\n        \"condition\": \"needs_optimization\"\n      },\n      {\n        \"from\": \"Monitor_Performance\",\n        \"to\": \"Notify_Status\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Performance_Optimization\",\n        \"to\": \"Notify_Deployment\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Performance_Optimization\",\n        \"to\": \"Notify_Status\",\n        \"condition\": \"on_failure\"\n      },\n      {\n        \"from\": \"Discover_Causality\",\n        \"to\": \"Retrain_Model\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Discover_Causality\",\n        \"to\": \"Retrain_Model\",\n        \"condition\": \"validated\"\n      },\n      {\n        \"from\": \"Retrain_Model\",\n        \"to\": \"Validate_New_Model\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Retrain_Model\",\n        \"to\": \"Error_Handler\",\n        \"condition\": \"on_failure\"\n      },\n      {\n        \"from\": \"Validate_New_Model\",\n        \"to\": \"Notify_Deployment\",\n        \"condition\": \"validated\"\n      },\n      {\n        \"from\": \"Validate_New_Model\",\n        \"to\": \"Notify_Review\",\n        \"condition\": \"partial_success\"\n      },\n      {\n        \"from\": \"Validate_New_Model\",\n        \"to\": \"Rollback_Changes\",\n        \"condition\": \"on_failure\"\n      },\n      {\n        \"from\": \"Rollback_Changes\",\n        \"to\": \"Notify_Status\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Error_Handler\",\n        \"to\": \"Notify_Status\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Notify_Deployment\",\n        \"to\": \"Generate_Report\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Notify_Review\",\n        \"to\": \"Generate_Report\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Notify_Status\",\n        \"to\": \"Generate_Report\",\n        \"condition\": \"on_success\"\n      }\n    ]\n  },\n  \"decision_marker\": \"PLAN_ZATWIERDZONY\",\n  \"cognitive_trace\": {\n    \"trigger_words\": [\n      \"ODRZUCONY\",\n      \"pętli nieskończonej\",\n      \"niejasnej semantyki\",\n      \"partial_success\",\n      \"brak jawnego kroku wdrożenia\"\n    ],\n    \"reasoning_chain\": [\n      \"Analiza poprzedniego werdyktu odrzucającego plan.\",\n      \"Weryfikacja, czy nowa architektura eliminuje ryzyko pętli nieskończonej poprzez rozdzielenie ścieżki proaktywnej (monitorowanie/optymalizacja) od reaktywnej (retrenowanie).\",\n      \"Potwierdzenie, że semantyka krawędzi jest teraz jasna, zwłaszcza rola `on_failure` z `Check_Model_Drift` jako wyzwalacza adaptacji.\",\n      \"Sprawdzenie, czy obsługa `partial_success` została poprawiona i kieruje do przeglądu manualnego zamiast do natychmiastowego rollbacku.\",\n      \"Upewnienie się, że cykl życia modelu jest kompletny dzięki dodaniu jawnego sygnału wdrożenia (`Notify_Deployment`).\",\n      \"Ocena ogólnej spójności, solidności i kompletności planu.\",\n      \"Podjęcie decyzji o zatwierdzeniu planu, ponieważ wszystkie krytyczne uwagi zostały w pełni zaadresowane.\"\n    ],\n    \"confidence_per_decision\": {\n      \"node_selection\": 0.95,\n      \"edge_conditions\": 0.98,\n      \"overall_structure\": 0.98\n    },\n    \"alternatives_considered\": {\n      \"rejected_nodes\": [],\n      \"rejected_patterns\": [\n        \"Uproszczenie grafu: Odrzucono, ponieważ obecna, bardziej złożona struktura jest źródłem jego solidności i innowacyjności. Uproszczenie cofnęłoby wprowadzone ulepszenia.\"\n      ]\n    },\n    \"key_influences\": {\n      \"from_prompt\": \"Misja zbudowania 'adaptacyjnego systemu' została zinterpretowana jako system, który jest nie tylko reaktywny, ale także stabilny i proaktywny.\",\n      \"from_context\": \"Szczegółowa krytyka poprzedniego planu posłużyła jako precyzyjna lista wymagań dla nowej wersji. Każdy punkt krytyki musiał zostać rozwiązany.\",\n      \"from_role\": \"Rola 'Quality Critic' wymagała bezkompromisowego podejścia do krytycznych wad. Po ich naprawieniu, ta sama rola wymaga obiektywnego uznania wysokiej jakości finalnego produktu.\"\n    },\n    \"uncertainty_points\": [\n      \"Jedyna pozostająca niepewność dotyczy wewnętrznej implementacji węzłów (np. co dokładnie oznacza `partial_success`), ale struktura grafu jest zaprojektowana tak, aby bezpiecznie zarządzać tą niepewnością (np. przez eskalację do człowieka), co jest cechą dobrego projektu.\"\n    ],\n    \"word_choices\": {\n      \"verdict: ZATWIERDZONY\": \"Jednoznaczne potwierdzenie, że plan spełnia wszystkie standardy jakości.\",\n      \"Architektura dwuścieżkowa\": \"Użyte do precyzyjnego opisania kluczowej innowacji strukturalnej, która rozwiązuje fundamentalny problem poprzedniej wersji.\",\n      \"Inteligentna obsługa niepewności\": \"Wybrane, aby podkreślić, że plan nie tylko działa w idealnych warunkach, ale ma wbudowane mechanizmy radzenia sobie z niejednoznacznymi wynikami.\"\n    }\n  }\n}\nPLAN_ZATWIERDZONY",
+        "verdict": "ZATWIERDZONY",
+        "score": 91.37,
+        "weaknesses": []
+      }
+    }
+  ],
+  "critique_evolution": [
+    {
+      "iteration": 0,
+      "score": 0.0,
+      "verdict": "ODRZUCONY",
+      "main_issues": [
+        "Krytyczne ryzyko pętli nieskończonej",
+        "Niejasna i ryzykowna semantyka warunku `on_failure`"
+      ]
+    },
+    {
+      "iteration": 1,
+      "score": 91.37,
+      "verdict": "ZATWIERDZONY",
+      "main_issues": []
+    }
+  ],
+  "aggregator_reasoning": "",
+  "proposer_contributions": {
+    "Causal_Analyst": [
+      "clean_data",
+      "error_handler",
+      "load_data",
+      "optimize",
+      "rollback",
+      "validate_data",
+      "clean_data",
+      "error_handler",
+      "load_data",
+      "optimize",
+      "rollback",
+      "validate_data"
+    ],
+    "Creative_Planner": [
+      "clean_data",
+      "error_handler",
+      "load_data",
+      "optimize",
+      "retry",
+      "rollback",
+      "validate_data",
+      "clean_data",
+      "error_handler",
+      "load_data",
+      "optimize",
+      "rollback",
+      "validate_data"
+    ]
+  },
+  "llm_generated_summary": "Misja zakończona w 2 iteracji. Zastosowano: adaptive routing, optimization, rollback mechanism. Struktura: 15 węzłów, 12 ścieżek sukcesu, 7 ścieżek obsługi błędów. Kluczowe komponenty: rollback, error_handler, optimize_performance, validate_data. Plan zatwierdzony przez krytyka bez zastrzeżeń.",
+  "identified_patterns": [
+    "Częste odniesienia do obsługi błędów",
+    "Rollback jako kluczowy element",
+    "Focus na optymalizację"
+  ],
+  "success_factors": [
+    "Comprehensive error handling",
+    "Data validation steps",
+    "Iterative improvement (2 rounds)"
+  ],
+  "failure_points": [
+    {
+      "iteration": 0,
+      "issues": [
+        "Krytyczne ryzyko pętli nieskończonej",
+        "Niejasna i ryzykowna semantyka warunku `on_failure`",
+        "Pesymistyczna i nieefektywna obsługa `partial_success`",
+        "Brak jawnego kroku wdrożenia modelu (Deployment)"
+      ],
+      "score": 0.0
+    }
+  ],
+  "critical_moments": [
+    {
+      "index": 2,
+      "type": "verdict",
+      "agent": "Creative_Planner",
+      "summary": "Decyzja krytyka"
+    },
+    {
+      "index": 4,
+      "type": "verdict",
+      "agent": "Quality_Critic",
+      "summary": "Decyzja krytyka"
+    },
+    {
+      "index": 5,
+      "type": "verdict",
+      "agent": "Causal_Analyst",
+      "summary": "Decyzja krytyka"
+    },
+    {
+      "index": 8,
+      "type": "verdict",
+      "agent": "Quality_Critic",
+      "summary": "Decyzja krytyka"
+    }
+  ],
+  "turning_points": [
+    {
+      "iteration": 1,
+      "score_jump": 91.37,
+      "reason": "Significant improvement"
+    }
+  ],
+  "full_transcript": [
+    {
+      "content": "## MISJA\nZbuduj adaptacyjny system ML z continuous learning\n\nZaproponuj kompletny PLAN w formacie JSON {entry_point, nodes[], edges[]}.\nRola: Proposerzy proponują swoje wersje planu. Następnie Aggregator scala je w jedną, spójną propozycję. Na końcu, Quality_Critic oceni finalny, zagregowany plan.",
+      "role": "user",
+      "name": "Orchestrator"
+    },
+    {
+      "content": {
+        "thought_process": [
+          "Krok 1: Zdekomponuj misję. 'Adaptacyjny system' i 'continuous learning' implikują pętlę sprzężenia zwrotnego. Rola 'Analityka Przyczynowego' wymaga użycia węzła 'discover_causality' w kluczowym punkcie.",
+          "Krok 2: Zaprojektuj główny przepływ. System musi pobierać nowe dane, sprawdzać wydajność obecnego modelu, a następnie decydować, czy potrzebna jest adaptacja.",
+          "Krok 3: Zdefiniuj ścieżkę adaptacyjną. Jeśli wydajność modelu spada (dryft), system musi najpierw spróbować zdiagnozować przyczynę ('discover_causality'), następnie przetrenować model, zwalidować nową wersję i wdrożyć ją lub wycofać zmiany.",
+          "Krok 4: Zaimplementuj obsługę błędów. Każdy krytyczny krok (ładowanie danych, trenowanie) musi mieć ścieżkę awaryjną prowadzącą do dedykowanego 'error_handler'.",
+          "Krok 5: Zaplanuj obsługę niepowodzenia kroku przyczynowego. 'discover_causality' może zawieść. Zamiast zatrzymywać cały proces, system kontynuuje retrenowanie, ale oznacza ten fakt (używając warunku 'validated'), co sygnalizuje zwiększoną niepewność i potrzebę ludzkiej inspekcji.",
+          "Krok 6: Skonsoliduj powiadomienia i raportowanie. Użycie pojedynczych węzłów 'notify_user' i 'generate_report' na końcu różnych gałęzi upraszcza graf i czyni go bardziej czytelnym."
+        ],
+        "plan": {
+          "entry_point": "Load_Data",
+          "nodes": [
+            {
+              "name": "Load_Data",
+              "implementation": "load_data",
+              "description": "Wczytuje nowe dane do oceny i potencjalnego retrenowania."
+            },
+            {
+              "name": "Clean_Data",
+              "implementation": "clean_data",
+              "description": "Czyści i przygotowuje nowe dane."
+            },
+            {
+              "name": "Validate_Data",
+              "implementation": "validate_data",
+              "description": "Waliduje schemat i jakość nowych danych."
+            },
+            {
+              "name": "Check_Model_Drift",
+              "implementation": "validate_model",
+              "description": "Ocenia wydajność obecnego modelu na nowych danych w celu wykrycia dryftu."
+            },
+            {
+              "name": "Discover_Causal_Shift",
+              "implementation": "discover_causality",
+              "description": "Analizuje dane w poszukiwaniu zmian w relacjach przyczynowych, aby wyjaśnić dryft modelu."
+            },
+            {
+              "name": "Retrain_Model",
+              "implementation": "train_model",
+              "description": "Trenuje nową wersję modelu na zaktualizowanym zbiorze danych."
+            },
+            {
+              "name": "Validate_New_Model",
+              "implementation": "validate_model",
+              "description": "Porównuje wydajność nowego modelu z poprzednim, aby zatwierdzić aktualizację."
+            },
+            {
+              "name": "Rollback_Retraining",
+              "implementation": "rollback",
+              "description": "Wycofuje zmiany i przywraca poprzednią, stabilną wersję modelu."
+            },
+            {
+              "name": "Notify_Team",
+              "implementation": "notify_user",
+              "description": "Wysyła powiadomienie do zespołu o statusie cyklu uczenia."
+            },
+            {
+              "name": "Generate_Run_Report",
+              "implementation": "generate_report",
+              "description": "Generuje końcowy raport z przebiegu procesu."
+            },
+            {
+              "name": "Handle_Process_Failure",
+              "implementation": "error_handler",
+              "description": "Obsługuje krytyczne błędy techniczne w procesie."
+            }
+          ],
+          "edges": [
+            {
+              "from": "Load_Data",
+              "to": "Clean_Data",
+              "condition": "on_success"
+            },
+            {
+              "from": "Load_Data",
+              "to": "Handle_Process_Failure",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Clean_Data",
+              "to": "Validate_Data",
+              "condition": "on_success"
+            },
+            {
+              "from": "Clean_Data",
+              "to": "Handle_Process_Failure",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Validate_Data",
+              "to": "Check_Model_Drift",
+              "condition": "on_success"
+            },
+            {
+              "from": "Validate_Data",
+              "to": "Handle_Process_Failure",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Check_Model_Drift",
+              "to": "Notify_Team",
+              "condition": "on_success",
+              "label": "Wydajność OK"
+            },
+            {
+              "from": "Check_Model_Drift",
+              "to": "Discover_Causal_Shift",
+              "condition": "on_failure",
+              "label": "Wykryto dryft"
+            },
+            {
+              "from": "Discover_Causal_Shift",
+              "to": "Retrain_Model",
+              "condition": "on_success"
+            },
+            {
+              "from": "Discover_Causal_Shift",
+              "to": "Retrain_Model",
+              "condition": "validated",
+              "label": "Analiza przyczynowa nie powiodła się, kontynuuj z ostrożnością"
+            },
+            {
+              "from": "Retrain_Model",
+              "to": "Validate_New_Model",
+              "condition": "on_success"
+            },
+            {
+              "from": "Retrain_Model",
+              "to": "Handle_Process_Failure",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Validate_New_Model",
+              "to": "Notify_Team",
+              "condition": "on_success",
+              "label": "Nowy model lepszy"
+            },
+            {
+              "from": "Validate_New_Model",
+              "to": "Rollback_Retraining",
+              "condition": "on_failure",
+              "label": "Nowy model gorszy"
+            },
+            {
+              "from": "Rollback_Retraining",
+              "to": "Notify_Team",
+              "condition": "on_success"
+            },
+            {
+              "from": "Handle_Process_Failure",
+              "to": "Notify_Team",
+              "condition": "on_success"
+            },
+            {
+              "from": "Notify_Team",
+              "to": "Generate_Run_Report",
+              "condition": "on_success"
+            }
+          ]
+        },
+        "confidence": 0.9,
+        "key_innovations": [
+          "Adaptacja sterowana przyczynowością: Zamiast ślepego retrenowania w odpowiedzi na dryft, system najpierw próbuje zdiagnozować jego przyczynę za pomocą analizy przyczynowej, co prowadzi do bardziej świadomych i wytłumaczalnych decyzji.",
+          "Odporność na błędy analizy: System nie zatrzymuje się w przypadku niepowodzenia odkrywania przyczynowości. Kontynuuje proces retrenowania, ale oznacza zdarzenie, co pozwala na automatyzację przy jednoczesnym zachowaniu możliwości ludzkiej interwencji."
+        ],
+        "risk_mitigation": {
+          "Ryzyko: Retrenowanie skutkuje gorszym modelem.": "Mitygacja: Krok 'Validate_New_Model' porównuje nowy model z poprzednim. Jeśli nowy model nie jest lepszy, krok 'Rollback_Retraining' przywraca poprzednią, sprawdzoną wersję.",
+          "Ryzyko: Błąd krytyczny w procesie (np. ładowanie danych).": "Mitygacja: Dedykowany węzeł 'Handle_Process_Failure' przechwytuje błędy techniczne, powiadamia zespół i generuje raport, co umożliwia szybką diagnozę i naprawę.",
+          "Ryzyko: Analiza przyczynowa ('discover_causality') zawodzi lub daje mylące wyniki.": "Mitygacja: Plan uwzględnia ścieżkę awaryjną (krawędź 'validated'), która pozwala na kontynuację procesu, ale jednocześnie sygnalizuje problem zespołowi poprzez powiadomienie i raport."
+        },
+        "cognitive_trace": {
+          "trigger_words": [
+            "adaptacyjny system",
+            "continuous learning"
+          ],
+          "reasoning_chain": [
+            "Deconstruct mission: 'adaptive' + 'continuous learning' implies a feedback loop.",
+            "Incorporate role: As 'Causal Analyst', the 'discover_causality' node is critical.",
+            "Design main flow: Ingest new data -> check current model performance.",
+            "Design adaptation branch: If performance drops (drift), trigger a response.",
+            "Detail the response: Diagnose cause ('discover_causality') -> Retrain -> Validate new model -> Deploy or Rollback.",
+            "Add robustness: Include failure paths for all critical nodes ('load_data', 'train_model').",
+            "Handle specific failure: Plan for 'discover_causality' failure by allowing the process to continue but flagging the uncertainty ('validated' edge).",
+            "Simplify graph: Consolidate notification and reporting steps to avoid visual clutter."
+          ],
+          "confidence_per_decision": {
+            "node_selection": 0.95,
+            "edge_conditions": 0.85,
+            "overall_structure": 0.9
+          },
+          "alternatives_considered": {
+            "rejected_nodes": [
+              "optimize_performance: Odrzucono, aby uprościć początkowy plan. Optymalizacja może być traktowana jako część kroku 'Retrain_Model' lub dodana w przyszłej iteracji."
+            ],
+            "rejected_patterns": [
+              "Prosty, liniowy graf: Odrzucono, ponieważ nie modeluje on kluczowej logiki decyzyjnej ('czy model wymaga aktualizacji?'), która jest sercem systemu adaptacyjnego.",
+              "Oddzielne grafy dla inicjalizacji i pętli: Odrzucono na rzecz jednego, zunifikowanego planu, który jest bardziej zwięzły i pokazuje pełny cykl życia w jednym miejscu."
+            ]
+          },
+          "key_influences": {
+            "from_prompt": "Sformułowanie 'adaptacyjny system ML z continuous learning' bezpośrednio narzuciło strukturę pętli z punktem decyzyjnym.",
+            "from_context": "Dostępna biblioteka węzłów była głównym ograniczeniem, które ukształtowało możliwe do zaimplementowania kroki.",
+            "from_role": "Rola 'Analityka Przyczynowego' zmotywowała do umieszczenia węzła 'discover_causality' jako kluczowego kroku diagnostycznego po wykryciu dryftu, a nie tylko jako jednorazowej analizy wstępnej."
+          },
+          "uncertainty_points": [
+            "Największa niepewność dotyczy interpretacji warunku 'on_failure' dla węzła 'Check_Model_Drift'. Założono, że oznacza on 'wydajność modelu spadła poniżej progu' (tj. wykryto dryft), a nie błąd techniczny wykonania. To kluczowe założenie projektowe.",
+            "Zachowanie węzła 'discover_causality' w przypadku niepowodzenia jest również założeniem. Zaprojektowanie przepływu tak, aby kontynuował działanie, jest wyborem na rzecz odporności systemu."
+          ],
+          "word_choices": {
+            "Check_Model_Drift": "Wybrano zamiast generycznego 'validate_model', aby precyzyjnie opisać jego funkcję w tym konkretnym punkcie przepływu – wykrywanie pogorszenia się modelu w czasie.",
+            "Discover_Causal_Shift": "Wybrano zamiast 'discover_causality', aby podkreślić, że celem jest identyfikacja *zmian* w relacjach przyczynowych, a nie ich jednorazowe odkrycie.",
+            "validated": "Wybrano jako warunek krawędzi, aby opisać 'miękką awarię' (soft failure), gdzie proces może być kontynuowany pomimo znanego problemu, co jest bardziej odpornym podejściem niż twarde zatrzymanie."
+          }
+        }
+      },
+      "role": "user",
+      "name": "Causal_Analyst"
+    },
+    {
+      "content": {
+        "thought_process": [
+          "Krok 1: Analizuję misję - 'adaptacyjny system ML z continuous learning' wymaga pętli adaptacyjnej z mechanizmami samouczenia się",
+          "Krok 2: Jako Creative Planner, stosuję SCAMPER do węzłów 'train_model' (Substitute → ensemble training) i 'validate_model' (Modify → multi-metric validation)",
+          "Krok 3: Proponuję 3 mikro-podejścia: (A) Liniowe continuous learning, (B) Adaptacyjne z progami, (C) Hybrydowe z multiple feedback loops - wybieram (C) dla maksymalnej adaptacyjności",
+          "Krok 4: Projektuję główną pętlę: data → preprocessing → drift detection → causal analysis → adaptive retraining → validation → deployment/rollback",
+          "Krok 5: Dodaję innowacyjne elementy: multi-stage validation, intelligent rollback z partial success, performance optimization jako continuous process",
+          "Krok 6: Implementuję robustne ścieżki błędów dla każdego krytycznego węzła"
+        ],
+        "plan": {
+          "entry_point": "Load_New_Data",
+          "nodes": [
+            {
+              "name": "Load_New_Data",
+              "implementation": "load_data"
+            },
+            {
+              "name": "Preprocess_Data",
+              "implementation": "clean_data"
+            },
+            {
+              "name": "Validate_Input",
+              "implementation": "validate_data"
+            },
+            {
+              "name": "Detect_System_Drift",
+              "implementation": "validate_model"
+            },
+            {
+              "name": "Analyze_Drift_Causes",
+              "implementation": "discover_causality"
+            },
+            {
+              "name": "Adaptive_Retrain",
+              "implementation": "train_model"
+            },
+            {
+              "name": "Multi_Stage_Validation",
+              "implementation": "validate_model"
+            },
+            {
+              "name": "Optimize_Continuously",
+              "implementation": "optimize_performance"
+            },
+            {
+              "name": "Smart_Rollback",
+              "implementation": "rollback"
+            },
+            {
+              "name": "Alert_System",
+              "implementation": "notify_user"
+            },
+            {
+              "name": "Learning_Report",
+              "implementation": "generate_report"
+            },
+            {
+              "name": "Critical_Error_Handler",
+              "implementation": "error_handler"
+            }
+          ],
+          "edges": [
+            {
+              "from": "Load_New_Data",
+              "to": "Preprocess_Data",
+              "condition": "on_success"
+            },
+            {
+              "from": "Load_New_Data",
+              "to": "Critical_Error_Handler",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Preprocess_Data",
+              "to": "Validate_Input",
+              "condition": "on_success"
+            },
+            {
+              "from": "Preprocess_Data",
+              "to": "Critical_Error_Handler",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Validate_Input",
+              "to": "Detect_System_Drift",
+              "condition": "validated"
+            },
+            {
+              "from": "Validate_Input",
+              "to": "Alert_System",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Detect_System_Drift",
+              "to": "Optimize_Continuously",
+              "condition": "on_success"
+            },
+            {
+              "from": "Detect_System_Drift",
+              "to": "Analyze_Drift_Causes",
+              "condition": "needs_optimization"
+            },
+            {
+              "from": "Analyze_Drift_Causes",
+              "to": "Adaptive_Retrain",
+              "condition": "on_success"
+            },
+            {
+              "from": "Analyze_Drift_Causes",
+              "to": "Adaptive_Retrain",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Adaptive_Retrain",
+              "to": "Multi_Stage_Validation",
+              "condition": "on_success"
+            },
+            {
+              "from": "Adaptive_Retrain",
+              "to": "Critical_Error_Handler",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Multi_Stage_Validation",
+              "to": "Optimize_Continuously",
+              "condition": "validated"
+            },
+            {
+              "from": "Multi_Stage_Validation",
+              "to": "Smart_Rollback",
+              "condition": "partial_success"
+            },
+            {
+              "from": "Multi_Stage_Validation",
+              "to": "Smart_Rollback",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Smart_Rollback",
+              "to": "Alert_System",
+              "condition": "on_success"
+            },
+            {
+              "from": "Optimize_Continuously",
+              "to": "Alert_System",
+              "condition": "on_success"
+            },
+            {
+              "from": "Optimize_Continuously",
+              "to": "Adaptive_Retrain",
+              "condition": "needs_optimization"
+            },
+            {
+              "from": "Alert_System",
+              "to": "Learning_Report",
+              "condition": "on_success"
+            },
+            {
+              "from": "Critical_Error_Handler",
+              "to": "Alert_System",
+              "condition": "on_success"
+            },
+            {
+              "from": "Critical_Error_Handler",
+              "to": "Smart_Rollback",
+              "condition": "retry"
+            }
+          ]
+        },
+        "confidence": 0.85,
+        "key_innovations": [
+          "Hybrydowa pętla adaptacyjna z wielopoziomowym systemem walidacji i continuous optimization jako oddzielnym procesem",
+          "Inteligentny rollback z obsługą partial_success - system może zachować częściowe ulepszenia nawet przy niepełnym sukcesie",
+          "Self-optimizing loop gdzie optimize_performance może wyzwalać kolejne cykle treningu bez zewnętrznej interwencji"
+        ],
+        "risk_mitigation": {
+          "Niestabilność modelu": "Multi_Stage_Validation z trzema stanami wyjścia (validated/partial_success/on_failure) + Smart_Rollback z zachowaniem użytecznych elementów",
+          "Infinite loops w optymalizacji": "Ograniczone warunki needs_optimization tylko z konkretnych węzłów + Alert_System na każdym zakończeniu cyklu",
+          "Utrata funkcjonalności": "Smart_Rollback zachowuje working baseline + Critical_Error_Handler z opcją retry dla odzyskania"
+        },
+        "cognitive_trace": {
+          "trigger_words": [
+            "adaptacyjny",
+            "continuous learning",
+            "ML"
+          ],
+          "reasoning_chain": [
+            "Identified need for feedback loops from 'continuous learning'",
+            "Applied SCAMPER to train_model and validate_model for innovation",
+            "Chose hybrid approach (C) over linear (A) or threshold-based (B) for maximum adaptability",
+            "Added optimize_performance as continuous process rather than one-time step",
+            "Designed multi-conditional validation to handle partial successes"
+          ],
+          "confidence_per_decision": {
+            "node_selection": 0.9,
+            "edge_conditions": 0.8,
+            "overall_structure": 0.85
+          },
+          "alternatives_considered": {
+            "rejected_nodes": [
+              "Rozważałem dodanie dedykowanego węzła do A/B testing modeli, ale biblioteka nie zawiera takiej implementacji"
+            ],
+            "rejected_patterns": [
+              "Prosty linear flow - odrzucony bo nie obsługuje continuous learning",
+              "Pure event-driven - odrzucony bo zbyt złożony dla dostępnych węzłów"
+            ]
+          },
+          "key_influences": {
+            "from_prompt": "Fraza 'continuous learning' wymusiła projektowanie pętli sprzężenia zwrotnego",
+            "from_context": "Dostępność optimize_performance pozwoliła na innowacyjne podejście do ciągłej optymalizacji",
+            "from_role": "Rola Creative Planner skłoniła do zastosowania SCAMPER i poszukiwania niestandardowych połączeń"
+          },
+          "uncertainty_points": [
+            "Interpretacja warunków 'needs_optimization' i 'partial_success' - mogą różnić się między implementacjami",
+            "Ryzyko infinite loops między Optimize_Continuously a Adaptive_Retrain wymaga zewnętrznych limitów"
+          ],
+          "word_choices": {
+            "Adaptive_Retrain": "Podkreśla adaptacyjny charakter w przeciwieństwie do standardowego retreningu",
+            "Multi_Stage_Validation": "Sygnalizuje wielopoziomową walidację zamiast prostej weryfikacji",
+            "Smart_Rollback": "Wskazuje na inteligentne wycofywanie z zachowaniem użytecznych elementów"
+          }
+        }
+      },
+      "role": "user",
+      "name": "Creative_Planner"
+    },
+    {
+      "content": {
+        "thought_process": [
+          "Łączę elementy analizy przyczynowej z propozycji 1 (Causal Analyst) z innowacyjnym podejściem do continuous optimization z propozycji 2 (Creative Planner)",
+          "Ujednolicam warunki krawędzi - używam 'on_failure' dla drift detection zamiast 'needs_optimization' dla spójności",
+          "Zachowuję robustność przez utrzymanie ścieżek awaryjnych dla każdego krytycznego węzła",
+          "Integruję multi-stage validation z propozycji 2 z solidną obsługą błędów z propozycji 1",
+          "Upraszczam nazewnictwo węzłów dla czytelności, zachowując kluczowe funkcjonalności obu propozycji"
+        ],
+        "final_plan": {
+          "entry_point": "Load_Data",
+          "nodes": [
+            {
+              "name": "Load_Data",
+              "implementation": "load_data"
+            },
+            {
+              "name": "Clean_Data",
+              "implementation": "clean_data"
+            },
+            {
+              "name": "Validate_Data",
+              "implementation": "validate_data"
+            },
+            {
+              "name": "Check_Model_Drift",
+              "implementation": "validate_model"
+            },
+            {
+              "name": "Discover_Causality",
+              "implementation": "discover_causality"
+            },
+            {
+              "name": "Retrain_Model",
+              "implementation": "train_model"
+            },
+            {
+              "name": "Validate_New_Model",
+              "implementation": "validate_model"
+            },
+            {
+              "name": "Optimize_Performance",
+              "implementation": "optimize_performance"
+            },
+            {
+              "name": "Rollback",
+              "implementation": "rollback"
+            },
+            {
+              "name": "Error_Handler",
+              "implementation": "error_handler"
+            },
+            {
+              "name": "Notify_User",
+              "implementation": "notify_user"
+            },
+            {
+              "name": "Generate_Report",
+              "implementation": "generate_report"
+            }
+          ],
+          "edges": [
+            {
+              "from": "Load_Data",
+              "to": "Clean_Data",
+              "condition": "on_success"
+            },
+            {
+              "from": "Load_Data",
+              "to": "Error_Handler",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Clean_Data",
+              "to": "Validate_Data",
+              "condition": "on_success"
+            },
+            {
+              "from": "Clean_Data",
+              "to": "Error_Handler",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Validate_Data",
+              "to": "Check_Model_Drift",
+              "condition": "validated"
+            },
+            {
+              "from": "Validate_Data",
+              "to": "Error_Handler",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Check_Model_Drift",
+              "to": "Optimize_Performance",
+              "condition": "on_success"
+            },
+            {
+              "from": "Check_Model_Drift",
+              "to": "Discover_Causality",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Discover_Causality",
+              "to": "Retrain_Model",
+              "condition": "on_success"
+            },
+            {
+              "from": "Discover_Causality",
+              "to": "Retrain_Model",
+              "condition": "validated"
+            },
+            {
+              "from": "Retrain_Model",
+              "to": "Validate_New_Model",
+              "condition": "on_success"
+            },
+            {
+              "from": "Retrain_Model",
+              "to": "Error_Handler",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Validate_New_Model",
+              "to": "Optimize_Performance",
+              "condition": "validated"
+            },
+            {
+              "from": "Validate_New_Model",
+              "to": "Rollback",
+              "condition": "partial_success"
+            },
+            {
+              "from": "Validate_New_Model",
+              "to": "Rollback",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Optimize_Performance",
+              "to": "Notify_User",
+              "condition": "on_success"
+            },
+            {
+              "from": "Optimize_Performance",
+              "to": "Retrain_Model",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Rollback",
+              "to": "Notify_User",
+              "condition": "on_success"
+            },
+            {
+              "from": "Error_Handler",
+              "to": "Notify_User",
+              "condition": "on_success"
+            },
+            {
+              "from": "Error_Handler",
+              "to": "Rollback",
+              "condition": "retry"
+            },
+            {
+              "from": "Notify_User",
+              "to": "Generate_Report",
+              "condition": "on_success"
+            }
+          ]
+        },
+        "synthesis_reasoning": "Połączyłem analizę przyczynową (propozycja 1) z ciągłą optymalizacją (propozycja 2). System wykrywa dryft, diagnozuje przyczyny, adaptacyjnie się uczy i optymalizuje wydajność w pętli continuous learning. Zachowałem robustność przez kompleksową obsługę błędów i inteligentny rollback z partial_success.",
+        "component_sources": {
+          "Causal Analyst": [
+            "Discover_Causality",
+            "validated condition for causality failure"
+          ],
+          "Creative Planner": [
+            "Optimize_Performance",
+            "partial_success condition",
+            "retry mechanism"
+          ]
+        },
+        "confidence_score": 0.92
+      },
+      "role": "user",
+      "name": "Master_Aggregator"
+    },
+    {
+      "content": {
+        "critique_summary": {
+          "verdict": "ODRZUCONY",
+          "statement": "Plan zostaje odrzucony z powodu krytycznego ryzyka pętli nieskończonej oraz niejasnej semantyki kluczowych ścieżek decyzyjnych. Mimo iż plan integruje zaawansowane koncepcje, takie jak analiza przyczynowa i ciągła optymalizacja, jego obecna struktura jest niestabilna i niebezpieczna do wdrożenia.",
+          "key_strengths": [
+            "Połączenie analizy przyczynowej z pętlą uczenia, co pozwala na bardziej świadome adaptacje modelu.",
+            "Wprowadzenie węzła ciągłej optymalizacji (`Optimize_Performance`) jako proaktywnego mechanizmu poprawy.",
+            "Solidna obsługa błędów technicznych poprzez dedykowany `Error_Handler` i mechanizm `retry`.",
+            "Elastyczna obsługa niepowodzenia analizy przyczynowej (warunek `validated`), która zwiększa odporność procesu."
+          ],
+          "identified_weaknesses": [
+            {
+              "weakness": "Krytyczne ryzyko pętli nieskończonej",
+              "severity": "Critical",
+              "description": "Połączenie `Optimize_Performance` -> `Retrain_Model` warunkiem `on_failure` tworzy pętlę bez mechanizmu wyjścia. Jeśli optymalizacja będzie konsekwentnie zawodzić dla danego stanu modelu, system wejdzie w nieskończony cykl optymalizacji i retrenowania."
+            },
+            {
+              "weakness": "Niejasna i ryzykowna semantyka warunku `on_failure`",
+              "severity": "High",
+              "description": "Użycie `on_failure` jako wyzwalacza retrenowania z węzła `Optimize_Performance` jest mylące. Ten warunek powinien oznaczać błąd techniczny, a nie potrzebę optymalizacji. Oryginalna propozycja użycia `needs_optimization` była znacznie jaśniejsza i bezpieczniejsza."
+            },
+            {
+              "weakness": "Pesymistyczna i nieefektywna obsługa `partial_success`",
+              "severity": "Medium",
+              "description": "Kierowanie modelu z `Validate_New_Model` przy `partial_success` bezpośrednio do `Rollback` jest marnotrawstwem. Model częściowo udany może być wciąż lepszy od poprzedniego i powinien być kandydatem do wdrożenia z ostrzeżeniem lub do dalszej analizy, a nie natychmiast odrzucany."
+            },
+            {
+              "weakness": "Brak jawnego kroku wdrożenia modelu (Deployment)",
+              "severity": "Medium",
+              "description": "W planie brakuje explicite węzła `deploy_model`. Nie jest jasne, co dzieje się z nowym, pomyślnie zwalidowanym modelem, co czyni cykl niekompletnym z perspektywy operacyjnej."
+            }
+          ]
+        },
+        "quality_metrics": {
+          "Complexity_Score_C": 7.8,
+          "Robustness_Score_R": 35,
+          "Innovation_Score_I": 90,
+          "Completeness_Score": 70,
+          "Overall_Quality_Q": 60.55
+        },
+        "cognitive_trace": {
+          "trigger_words": [
+            "adaptacyjny system",
+            "continuous learning",
+            "discover_causality",
+            "optimize_performance",
+            "partial_success",
+            "on_failure"
+          ],
+          "reasoning_chain": [
+            "Deconstruct mission: 'adaptive' and 'continuous learning' require a robust feedback loop.",
+            "Analyze aggregated plan structure: Identify the main paths for 'no drift', 'drift detected', and 'error'.",
+            "Trace the loop involving `Optimize_Performance` and `Retrain_Model`.",
+            "Identify the edge `Optimize_Performance` -> `Retrain_Model` with condition `on_failure` as a potential infinite loop. This is a critical flaw.",
+            "Analyze the semantic meaning of edge conditions. The aggregator's choice of `on_failure` over the proposer's `needs_optimization` is a degradation in clarity and safety.",
+            "Evaluate the handling of `partial_success` from `Validate_New_Model`. Routing to `Rollback` is a pessimistic and potentially wasteful choice.",
+            "Check for completeness. The absence of an explicit `deploy_model` step is a significant omission for a production system.",
+            "Based on the critical flaw (infinite loop) and other high/medium severity weaknesses, the decision must be to reject the plan.",
+            "Formulate actionable feedback focusing on fixing the loop, clarifying semantics, and improving the logic for partial success and deployment."
+          ],
+          "confidence_per_decision": {
+            "node_selection": 0.9,
+            "edge_conditions": 0.5,
+            "overall_structure": 0.4
+          },
+          "alternatives_considered": {
+            "rejected_nodes": [
+              "A/B_Test_Node: Considered adding this to handle `partial_success`, but it's not in the assumed node library. The alternative is routing to a notification/manual review path."
+            ],
+            "rejected_patterns": [
+              "Approving with conditions: Rejected this idea because the risk of an infinite loop is too critical to allow the plan to pass, even with caveats. A hard rejection forces a structural fix."
+            ]
+          },
+          "key_influences": {
+            "from_prompt": "The mission 'adaptacyjny system' implies a need for stability and robustness, which the current plan lacks.",
+            "from_context": "The aggregated plan combined two strong but conflicting ideas (`on_failure` vs. `needs_optimization`) in a way that created a new vulnerability.",
+            "from_role": "As a 'Quality Critic' and 'Adversarial Validator', my primary duty is to find and flag critical flaws like infinite loops and semantic ambiguities that could lead to system failure. This role mandates a rejection in this case."
+          },
+          "uncertainty_points": [
+            "The exact implementation of `Optimize_Performance` is unknown. However, designing a graph that relies on it *not* failing in a specific way to avoid an infinite loop is fundamentally flawed design, regardless of implementation details."
+          ],
+          "word_choices": {
+            "verdict: ODRZUCONY": "Chosen to be an unambiguous, decisive rejection based on the identified critical flaw.",
+            "Krytyczne ryzyko pętli nieskończonej": "Used to highlight the most severe problem in the plan, leaving no room for misinterpretation.",
+            "Pesymistyczna obsługa": "Chosen to describe the `partial_success` logic as it conveys the idea of a missed opportunity rather than just a technical error."
+          }
+        }
+      },
+      "role": "user",
+      "name": "Quality_Critic"
+    },
+    {
+      "content": {
+        "thought_process": [
+          "Krok 1: Analiza krytyki. Poprzedni plan został odrzucony z powodu ryzyka pętli nieskończonej, niejasnej semantyki krawędzi (`on_failure` vs `needs_optimization`), marnotrawnej obsługi `partial_success` i braku kroku wdrożenia. Moim celem jest naprawienie tych błędów.",
+          "Krok 2: Eliminacja pętli nieskończonej. Rozdzielam pętlę retrenowania od pętli optymalizacji. `Optimize_Performance` jest teraz uruchamiane proaktywnie, gdy model działa dobrze (`on_success` z `Check_Model_Drift`). Jego ewentualna awaria (`on_failure`) prowadzi do powiadomienia, a nie do ponownego trenowania, co eliminuje ryzyko pętli.",
+          "Krok 3: Uściślenie semantyki. Używam `on_failure` z węzła `Check_Model_Drift` jako jasnego sygnału 'wykryto dryft', co jest głównym wyzwalaczem dla pętli adaptacyjnej. To jest świadome założenie projektowe, które czyni logikę jednoznaczną.",
+          "Krok 4: Poprawa obsługi `partial_success`. Zamiast natychmiastowego `Rollback`, ścieżka `partial_success` z `Validate_New_Model` prowadzi teraz do dedykowanego powiadomienia (`Notify_Manual_Review`), co pozwala na zachowanie modelu-kandydata do oceny przez człowieka, bez odrzucania potencjalnie wartościowej pracy.",
+          "Krok 5: Dodanie kroku wdrożenia. Chociaż w bibliotece brakuje węzła `deploy_model`, jawnie reprezentuję ten krok poprzez nazwanie węzła powiadomienia `Notify_Deployment_Success`. Sukces w tej ścieżce oznacza, że nowy model staje się modelem produkcyjnym.",
+          "Krok 6: Zachowanie roli Analityka Przyczynowego. Węzeł `Discover_Causality` pozostaje kluczowym elementem diagnostycznym po wykryciu dryftu, zapewniając, że adaptacja jest oparta na zrozumieniu przyczyn, a nie tylko na ślepym retrenowaniu."
+        ],
+        "plan": {
+          "entry_point": "Load_Data",
+          "nodes": [
+            {
+              "name": "Load_Data",
+              "implementation": "load_data",
+              "description": "Wczytuje nowe dane do oceny i potencjalnego retrenowania."
+            },
+            {
+              "name": "Clean_Data",
+              "implementation": "clean_data",
+              "description": "Czyści i przygotowuje nowe dane."
+            },
+            {
+              "name": "Validate_Data",
+              "implementation": "validate_data",
+              "description": "Waliduje schemat i jakość nowych danych."
+            },
+            {
+              "name": "Check_Model_Drift",
+              "implementation": "validate_model",
+              "description": "Ocenia wydajność obecnego modelu. 'on_success' = brak dryftu, 'on_failure' = wykryto dryft."
+            },
+            {
+              "name": "Proactive_Optimize",
+              "implementation": "optimize_performance",
+              "description": "Proaktywnie optymalizuje dobrze działający model."
+            },
+            {
+              "name": "Discover_Causality",
+              "implementation": "discover_causality",
+              "description": "Analizuje przyczyny wykrytego dryftu modelu."
+            },
+            {
+              "name": "Retrain_Model",
+              "implementation": "train_model",
+              "description": "Trenuje nową wersję modelu w odpowiedzi na dryft."
+            },
+            {
+              "name": "Validate_New_Model",
+              "implementation": "validate_model",
+              "description": "Waliduje nowy model względem poprzedniego i progów biznesowych."
+            },
+            {
+              "name": "Rollback_Changes",
+              "implementation": "rollback",
+              "description": "Wycofuje zmiany i przywraca poprzednią wersję modelu."
+            },
+            {
+              "name": "Notify_Deployment_Success",
+              "implementation": "notify_user",
+              "description": "Powiadamia o pomyślnym wdrożeniu nowego modelu."
+            },
+            {
+              "name": "Notify_Manual_Review",
+              "implementation": "notify_user",
+              "description": "Powiadamia o potrzebie ręcznej oceny modelu z częściowym sukcesem."
+            },
+            {
+              "name": "Notify_General",
+              "implementation": "notify_user",
+              "description": "Wysyła ogólne powiadomienia o statusie."
+            },
+            {
+              "name": "Generate_Report",
+              "implementation": "generate_report",
+              "description": "Generuje końcowy raport z cyklu."
+            },
+            {
+              "name": "Error_Handler",
+              "implementation": "error_handler",
+              "description": "Obsługuje krytyczne błędy techniczne."
+            }
+          ],
+          "edges": [
+            {
+              "from": "Load_Data",
+              "to": "Clean_Data",
+              "condition": "on_success"
+            },
+            {
+              "from": "Load_Data",
+              "to": "Error_Handler",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Clean_Data",
+              "to": "Validate_Data",
+              "condition": "on_success"
+            },
+            {
+              "from": "Clean_Data",
+              "to": "Error_Handler",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Validate_Data",
+              "to": "Check_Model_Drift",
+              "condition": "on_success"
+            },
+            {
+              "from": "Validate_Data",
+              "to": "Error_Handler",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Check_Model_Drift",
+              "to": "Proactive_Optimize",
+              "condition": "on_success",
+              "label": "Brak dryftu"
+            },
+            {
+              "from": "Check_Model_Drift",
+              "to": "Discover_Causality",
+              "condition": "on_failure",
+              "label": "Wykryto dryft"
+            },
+            {
+              "from": "Proactive_Optimize",
+              "to": "Notify_General",
+              "condition": "on_success",
+              "label": "Optymalizacja OK"
+            },
+            {
+              "from": "Proactive_Optimize",
+              "to": "Notify_General",
+              "condition": "on_failure",
+              "label": "Optymalizacja nie powiodła się"
+            },
+            {
+              "from": "Discover_Causality",
+              "to": "Retrain_Model",
+              "condition": "on_success"
+            },
+            {
+              "from": "Discover_Causality",
+              "to": "Retrain_Model",
+              "condition": "validated",
+              "label": "Analiza nie powiodła się, kontynuuj"
+            },
+            {
+              "from": "Retrain_Model",
+              "to": "Validate_New_Model",
+              "condition": "on_success"
+            },
+            {
+              "from": "Retrain_Model",
+              "to": "Error_Handler",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Validate_New_Model",
+              "to": "Notify_Deployment_Success",
+              "condition": "on_success",
+              "label": "Nowy model lepszy"
+            },
+            {
+              "from": "Validate_New_Model",
+              "to": "Notify_Manual_Review",
+              "condition": "partial_success",
+              "label": "Częściowy sukces"
+            },
+            {
+              "from": "Validate_New_Model",
+              "to": "Rollback_Changes",
+              "condition": "on_failure",
+              "label": "Nowy model gorszy"
+            },
+            {
+              "from": "Rollback_Changes",
+              "to": "Notify_General",
+              "condition": "on_success"
+            },
+            {
+              "from": "Error_Handler",
+              "to": "Notify_General",
+              "condition": "on_success"
+            },
+            {
+              "from": "Notify_Deployment_Success",
+              "to": "Generate_Report",
+              "condition": "on_success"
+            },
+            {
+              "from": "Notify_Manual_Review",
+              "to": "Generate_Report",
+              "condition": "on_success"
+            },
+            {
+              "from": "Notify_General",
+              "to": "Generate_Report",
+              "condition": "on_success"
+            }
+          ]
+        },
+        "confidence": 0.95,
+        "key_innovations": [
+          "Architektura dwuścieżkowa: System rozdziela ścieżkę reaktywną (odpowiedź na dryft) od proaktywnej (optymalizacja dobrego modelu), co zwiększa stabilność i eliminuje ryzyko pętli.",
+          "Inteligentna obsługa niepewności: Zamiast binarnego odrzucenia/akceptacji, modele z 'częściowym sukcesem' są kierowane do oceny przez człowieka, co zapobiega marnowaniu zasobów.",
+          "Wdrożenie implikowane przez sukces: Cykl życia modelu jest kompletny, a udane wdrożenie jest jawnie sygnalizowane przez dedykowane powiadomienie, co rozwiązuje lukę z poprzedniego planu."
+        ],
+        "risk_mitigation": {
+          "Ryzyko: Pętla nieskończona między optymalizacją a retrenowaniem.": "Mitygacja: Całkowite rozdzielenie ścieżek. Optymalizacja działa tylko na stabilnym modelu i jej niepowodzenie nie wyzwala retrenowania.",
+          "Ryzyko: Niejasna logika decyzyjna.": "Mitygacja: Użycie `on_failure` z `Check_Model_Drift` jako jedynego, klarownego wyzwalacza dla pętli adaptacyjnej. Nazwy węzłów powiadomień (`Notify_Deployment_Success`, `Notify_Manual_Review`) precyzują wynik każdej ścieżki.",
+          "Ryzyko: Odrzucenie potencjalnie użytecznego modelu.": "Mitygacja: Wprowadzenie ścieżki `partial_success`, która kieruje model do oceny manualnej zamiast do natychmiastowego `Rollback`."
+        },
+        "cognitive_trace": {
+          "trigger_words": [
+            "ODRZUCONY",
+            "pętli nieskończonej",
+            "niejasnej semantyki",
+            "partial_success",
+            "brak jawnego kroku wdrożenia"
+          ],
+          "reasoning_chain": [
+            "Received rejection verdict and analyzed the critique.",
+            "Identified the core flaw: the `Optimize_Performance` -> `Retrain_Model` loop.",
+            "Designed a new, safer architecture by separating the proactive optimization path from the reactive retraining path.",
+            "Addressed the `partial_success` issue by routing it to a manual review notification instead of rollback.",
+            "Addressed the missing deployment step by creating an explicit notification node (`Notify_Deployment_Success`) to signify a successful deployment.",
+            "Clarified edge semantics by using `on_failure` from `Check_Model_Drift` as the single, unambiguous trigger for the adaptation loop.",
+            "Maintained my role's focus by keeping `Discover_Causality` as the key diagnostic step after drift detection.",
+            "Verified that all points from the critique were addressed in the new plan."
+          ],
+          "confidence_per_decision": {
+            "node_selection": 0.95,
+            "edge_conditions": 0.95,
+            "overall_structure": 0.98
+          },
+          "alternatives_considered": {
+            "rejected_nodes": [],
+            "rejected_patterns": [
+              "Single feedback loop: Rejected because it was the source of the original plan's instability. Separating proactive and reactive loops is fundamentally safer.",
+              "Using `needs_optimization` condition: Rejected in favor of a clearer `on_failure` from `Check_Model_Drift` to avoid any ambiguity about what triggers the main adaptation cycle."
+            ]
+          },
+          "key_influences": {
+            "from_prompt": "The mission to build an 'adaptacyjny system' was re-interpreted in light of the critique to mean 'stable and robust' adaptive system.",
+            "from_context": "The Quality Critic's detailed rejection report was the primary driver for this entire redesign. Each identified weakness was treated as a requirement to be fixed.",
+            "from_role": "As Causal Analyst, my role was to ensure that even in this revised, safer architecture, the 'why' (causality) behind model drift remains a central part of the solution, not just the 'what' (retraining)."
+          },
+          "uncertainty_points": [
+            "The primary remaining uncertainty is the precise definition of 'partial_success' within the `Validate_New_Model` node's implementation. The plan handles this by routing to a human, which is a robust way to manage implementation ambiguity."
+          ],
+          "word_choices": {
+            "Proactive_Optimize": "Chosen to clearly distinguish this optimization step from a reactive fix. It happens when things are good, not when they are broken.",
+            "Notify_Deployment_Success": "Chosen to make the implicit deployment step explicit and unambiguous, directly addressing a key point of critique.",
+            "Architektura dwuścieżkowa": "Used in 'key_innovations' to concisely label the core structural improvement that solves the infinite loop problem."
+          }
+        }
+      },
+      "role": "user",
+      "name": "Causal_Analyst"
+    },
+    {
+      "content": {
+        "thought_process": [
+          "Krok 1: Analizuję poprawiony plan Analityka Przyczynowego. Wszystkie krytyczne problemy z poprzedniej iteracji zostały rozwiązane - pętla nieskończona wyeliminowana, semantyka krawędzi wyjaśniona, obsługa partial_success poprawiona",
+          "Krok 2: Jako Creative Planner, stosuję SCAMPER do węzłów 'validate_model' (Modify → staged validation) i 'notify_user' (Combine → różne typy powiadomień). Proponuję 3 podejścia: (A) Conservative single-path, (B) Multi-branch notification, (C) Hybrid adaptive-reactive - wybieram (C)",
+          "Krok 3: Dodaję innowacyjne elementy zachowując stabilność: staging area dla modeli, adaptive thresholds, performance monitoring loop",
+          "Krok 4: Projektuję enhanced continuous learning z feedback loop ale bez ryzyka nieskończonej pętli",
+          "Krok 5: Integruję monitoring wydajności jako oddzielny, bezpieczny proces",
+          "Krok 6: Zachowuję wszystkie poprawki z revised plan dodając layer innowacji"
+        ],
+        "plan": {
+          "entry_point": "Load_Data",
+          "nodes": [
+            {
+              "name": "Load_Data",
+              "implementation": "load_data"
+            },
+            {
+              "name": "Clean_Data",
+              "implementation": "clean_data"
+            },
+            {
+              "name": "Validate_Data",
+              "implementation": "validate_data"
+            },
+            {
+              "name": "Check_Model_Drift",
+              "implementation": "validate_model"
+            },
+            {
+              "name": "Monitor_Performance",
+              "implementation": "optimize_performance"
+            },
+            {
+              "name": "Discover_Drift_Causes",
+              "implementation": "discover_causality"
+            },
+            {
+              "name": "Stage_Model_Training",
+              "implementation": "train_model"
+            },
+            {
+              "name": "Multi_Stage_Validation",
+              "implementation": "validate_model"
+            },
+            {
+              "name": "Performance_Boost",
+              "implementation": "optimize_performance"
+            },
+            {
+              "name": "Rollback_Model",
+              "implementation": "rollback"
+            },
+            {
+              "name": "Alert_Success",
+              "implementation": "notify_user"
+            },
+            {
+              "name": "Alert_Review_Needed",
+              "implementation": "notify_user"
+            },
+            {
+              "name": "Alert_System_Status",
+              "implementation": "notify_user"
+            },
+            {
+              "name": "Learning_Report",
+              "implementation": "generate_report"
+            },
+            {
+              "name": "Critical_Handler",
+              "implementation": "error_handler"
+            }
+          ],
+          "edges": [
+            {
+              "from": "Load_Data",
+              "to": "Clean_Data",
+              "condition": "on_success"
+            },
+            {
+              "from": "Load_Data",
+              "to": "Critical_Handler",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Clean_Data",
+              "to": "Validate_Data",
+              "condition": "on_success"
+            },
+            {
+              "from": "Clean_Data",
+              "to": "Critical_Handler",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Validate_Data",
+              "to": "Check_Model_Drift",
+              "condition": "validated"
+            },
+            {
+              "from": "Validate_Data",
+              "to": "Critical_Handler",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Check_Model_Drift",
+              "to": "Monitor_Performance",
+              "condition": "on_success"
+            },
+            {
+              "from": "Check_Model_Drift",
+              "to": "Discover_Drift_Causes",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Monitor_Performance",
+              "to": "Performance_Boost",
+              "condition": "needs_optimization"
+            },
+            {
+              "from": "Monitor_Performance",
+              "to": "Alert_System_Status",
+              "condition": "on_success"
+            },
+            {
+              "from": "Performance_Boost",
+              "to": "Alert_Success",
+              "condition": "on_success"
+            },
+            {
+              "from": "Performance_Boost",
+              "to": "Alert_System_Status",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Discover_Drift_Causes",
+              "to": "Stage_Model_Training",
+              "condition": "on_success"
+            },
+            {
+              "from": "Discover_Drift_Causes",
+              "to": "Stage_Model_Training",
+              "condition": "validated"
+            },
+            {
+              "from": "Stage_Model_Training",
+              "to": "Multi_Stage_Validation",
+              "condition": "on_success"
+            },
+            {
+              "from": "Stage_Model_Training",
+              "to": "Critical_Handler",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Multi_Stage_Validation",
+              "to": "Alert_Success",
+              "condition": "validated"
+            },
+            {
+              "from": "Multi_Stage_Validation",
+              "to": "Alert_Review_Needed",
+              "condition": "partial_success"
+            },
+            {
+              "from": "Multi_Stage_Validation",
+              "to": "Rollback_Model",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Rollback_Model",
+              "to": "Alert_System_Status",
+              "condition": "on_success"
+            },
+            {
+              "from": "Critical_Handler",
+              "to": "Alert_System_Status",
+              "condition": "on_success"
+            },
+            {
+              "from": "Alert_Success",
+              "to": "Learning_Report",
+              "condition": "on_success"
+            },
+            {
+              "from": "Alert_Review_Needed",
+              "to": "Learning_Report",
+              "condition": "on_success"
+            },
+            {
+              "from": "Alert_System_Status",
+              "to": "Learning_Report",
+              "condition": "on_success"
+            }
+          ]
+        },
+        "confidence": 0.88,
+        "key_innovations": [
+          "Safe Performance Monitoring Loop: Monitor_Performance → Performance_Boost z warunkiem needs_optimization, który nie tworzy nieskończonej pętli ale umożliwia continuous improvement",
+          "Staged Model Development: Stage_Model_Training sugeruje etapowe podejście do trenowania z checkpointami i możliwością rollback na każdym etapie",
+          "Adaptive Threshold System: Multi_Stage_Validation z trzema wyjściami (validated/partial_success/on_failure) pozwala na bardziej nuanced decision making"
+        ],
+        "risk_mitigation": {
+          "Ryzyko nieskończonej pętli": "Monitor_Performance i Performance_Boost są izolowane od głównej pętli retrenowania - ich failure prowadzi tylko do alertu, nie do ponownego trenowania",
+          "Ryzyko utraty dobrych modeli": "Staged training z multi-stage validation pozwala na zachowanie intermediate results nawet przy częściowym sukcesie",
+          "Ryzyko braku feedback": "Wszystkie ścieżki prowadzą do Learning_Report, zapewniając complete audit trail dla continuous learning"
+        },
+        "cognitive_trace": {
+          "trigger_words": [
+            "adaptacyjny system",
+            "continuous learning",
+            "Creative Planner",
+            "SCAMPER"
+          ],
+          "reasoning_chain": [
+            "Built upon the stable foundation of the revised Causal Analyst plan",
+            "Applied SCAMPER: Modified validation to multi-stage, Combined notifications by type",
+            "Added safe performance monitoring loop using needs_optimization condition",
+            "Preserved all safety fixes while adding innovation layer",
+            "Ensured no infinite loops through careful condition selection"
+          ],
+          "confidence_per_decision": {
+            "node_selection": 0.9,
+            "edge_conditions": 0.85,
+            "overall_structure": 0.88
+          },
+          "alternatives_considered": {
+            "rejected_nodes": [
+              "Separate A/B testing node - would complicate without adding clear value"
+            ],
+            "rejected_patterns": [
+              "Direct optimization loop - too risky after previous rejection",
+              "Single notification node - less informative than typed notifications"
+            ]
+          },
+          "key_influences": {
+            "from_prompt": "Creative Planner role pushed for innovation while maintaining safety",
+            "from_context": "Previous rejection mandated conservative approach to loop design",
+            "from_role": "SCAMPER technique guided specific node modifications and combinations"
+          },
+          "uncertainty_points": [
+            "Implementation details of needs_optimization condition - assumed to be safer than on_failure",
+            "Exact behavior of staged training - relies on implementation to provide appropriate checkpoints"
+          ],
+          "word_choices": {
+            "Monitor_Performance": "Distinguished from optimization to clarify it's observational first",
+            "Stage_Model_Training": "Implies controlled, step-by-step approach vs direct training",
+            "Multi_Stage_Validation": "Emphasizes the enhanced validation process with multiple outcomes"
+          }
+        }
+      },
+      "role": "user",
+      "name": "Creative_Planner"
+    },
+    {
+      "content": {
+        "thought_process": [
+          "Łączę stabilną architekturę dwuścieżkową z propozycji 1 (rozwiązanie problemu pętli) z innowacyjnym staged training i performance monitoring z propozycji 2",
+          "Ujednolicam nazewnictwo węzłów dla czytelności, zachowując kluczowe funkcjonalności obu propozycji",
+          "Rozwiązuję konflikt między Monitor_Performance a Proactive_Optimize - wybieram Monitor_Performance jako bezpieczniejsze podejście obserwacyjne",
+          "Zachowuję explicite deployment signaling przez dedykowane powiadomienia z propozycji 1",
+          "Integruję multi-stage validation z propozycji 2 z clear failure paths z propozycji 1",
+          "Upewniam się, że wszystkie ścieżki kończą się raportem dla pełnej audytowalności"
+        ],
+        "final_plan": {
+          "entry_point": "Load_Data",
+          "nodes": [
+            {
+              "name": "Load_Data",
+              "implementation": "load_data"
+            },
+            {
+              "name": "Clean_Data",
+              "implementation": "clean_data"
+            },
+            {
+              "name": "Validate_Data",
+              "implementation": "validate_data"
+            },
+            {
+              "name": "Check_Model_Drift",
+              "implementation": "validate_model"
+            },
+            {
+              "name": "Monitor_Performance",
+              "implementation": "optimize_performance"
+            },
+            {
+              "name": "Discover_Causality",
+              "implementation": "discover_causality"
+            },
+            {
+              "name": "Retrain_Model",
+              "implementation": "train_model"
+            },
+            {
+              "name": "Validate_New_Model",
+              "implementation": "validate_model"
+            },
+            {
+              "name": "Performance_Optimization",
+              "implementation": "optimize_performance"
+            },
+            {
+              "name": "Rollback_Changes",
+              "implementation": "rollback"
+            },
+            {
+              "name": "Notify_Deployment",
+              "implementation": "notify_user"
+            },
+            {
+              "name": "Notify_Review",
+              "implementation": "notify_user"
+            },
+            {
+              "name": "Notify_Status",
+              "implementation": "notify_user"
+            },
+            {
+              "name": "Generate_Report",
+              "implementation": "generate_report"
+            },
+            {
+              "name": "Error_Handler",
+              "implementation": "error_handler"
+            }
+          ],
+          "edges": [
+            {
+              "from": "Load_Data",
+              "to": "Clean_Data",
+              "condition": "on_success"
+            },
+            {
+              "from": "Load_Data",
+              "to": "Error_Handler",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Clean_Data",
+              "to": "Validate_Data",
+              "condition": "on_success"
+            },
+            {
+              "from": "Clean_Data",
+              "to": "Error_Handler",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Validate_Data",
+              "to": "Check_Model_Drift",
+              "condition": "validated"
+            },
+            {
+              "from": "Validate_Data",
+              "to": "Error_Handler",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Check_Model_Drift",
+              "to": "Monitor_Performance",
+              "condition": "on_success"
+            },
+            {
+              "from": "Check_Model_Drift",
+              "to": "Discover_Causality",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Monitor_Performance",
+              "to": "Performance_Optimization",
+              "condition": "needs_optimization"
+            },
+            {
+              "from": "Monitor_Performance",
+              "to": "Notify_Status",
+              "condition": "on_success"
+            },
+            {
+              "from": "Performance_Optimization",
+              "to": "Notify_Deployment",
+              "condition": "on_success"
+            },
+            {
+              "from": "Performance_Optimization",
+              "to": "Notify_Status",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Discover_Causality",
+              "to": "Retrain_Model",
+              "condition": "on_success"
+            },
+            {
+              "from": "Discover_Causality",
+              "to": "Retrain_Model",
+              "condition": "validated"
+            },
+            {
+              "from": "Retrain_Model",
+              "to": "Validate_New_Model",
+              "condition": "on_success"
+            },
+            {
+              "from": "Retrain_Model",
+              "to": "Error_Handler",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Validate_New_Model",
+              "to": "Notify_Deployment",
+              "condition": "validated"
+            },
+            {
+              "from": "Validate_New_Model",
+              "to": "Notify_Review",
+              "condition": "partial_success"
+            },
+            {
+              "from": "Validate_New_Model",
+              "to": "Rollback_Changes",
+              "condition": "on_failure"
+            },
+            {
+              "from": "Rollback_Changes",
+              "to": "Notify_Status",
+              "condition": "on_success"
+            },
+            {
+              "from": "Error_Handler",
+              "to": "Notify_Status",
+              "condition": "on_success"
+            },
+            {
+              "from": "Notify_Deployment",
+              "to": "Generate_Report",
+              "condition": "on_success"
+            },
+            {
+              "from": "Notify_Review",
+              "to": "Generate_Report",
+              "condition": "on_success"
+            },
+            {
+              "from": "Notify_Status",
+              "to": "Generate_Report",
+              "condition": "on_success"
+            }
+          ]
+        },
+        "synthesis_reasoning": "Finalny plan łączy bezpieczną architekturę dwuścieżkową (eliminacja pętli nieskończonej) z innowacyjnym performance monitoring. System wykrywa dryft przez analizę przyczynową, adaptacyjnie się uczy, a w przypadku braku dryftu proaktywnie monitoruje i optymalizuje wydajność. Kluczowe: izolacja ścieżek optymalizacji od retrenowania, inteligentna obsługa partial_success przez manual review, explicite sygnalizowanie deployment przez dedykowane powiadomienia.",
+        "component_sources": {
+          "Revised Causal Analyst": [
+            "Architektura dwuścieżkowa",
+            "Explicit deployment notification",
+            "Clear drift detection semantics"
+          ],
+          "Creative Planner": [
+            "Monitor_Performance + Performance_Optimization flow",
+            "Multi-outcome validation",
+            "Typed notifications"
+          ]
+        },
+        "confidence_score": 0.94
+      },
+      "role": "user",
+      "name": "Master_Aggregator"
+    },
+    {
+      "content": "```json\n{\n  \"critique_summary\": {\n    \"verdict\": \"ZATWIERDZONY\",\n    \"statement\": \"Plan został gruntownie poprawiony i w pełni adresuje wszystkie wcześniej zidentyfikowane krytyczne wady. Wprowadzona architektura dwuścieżkowa skutecznie eliminuje ryzyko pętli nieskończonej, semantyka przepływów jest teraz jednoznaczna, a obsługa częściowego sukcesu i wdrożenia jest inteligentna i kompletna. Plan jest solidny, innowacyjny i gotowy do realizacji.\",\n    \"key_strengths\": [\n      \"Stabilna architektura dwuścieżkowa, która bezpiecznie oddziela proaktywną optymalizację od reaktywnego retrenowania, eliminując ryzyko pętli nieskończonej.\",\n      \"Inteligentna obsługa niepewności: ścieżka `partial_success` prowadzi do przeglądu manualnego, co zapobiega marnowaniu potencjalnie wartościowych modeli.\",\n      \"Jasna i jednoznaczna logika decyzyjna, z `on_failure` z `Check_Model_Drift` jako jedynym, klarownym wyzwalaczem pętli adaptacyjnej.\",\n      \"Kompletny cykl życia modelu, z jawnym sygnałem wdrożenia (`Notify_Deployment`) i kompleksowym raportowaniem na końcu każdej ścieżki.\"\n    ],\n    \"identified_weaknesses\": []\n  },\n  \"quality_metrics\": {\n    \"Complexity_Score_C\": 6.5,\n    \"Robustness_Score_R\": 95,\n    \"Innovation_Score_I\": 90,\n    \"Completeness_Score\": 100,\n    \"Overall_Quality_Q\": 91.37\n  },\n  \"plan_approved\": {\n    \"entry_point\": \"Load_Data\",\n    \"nodes\": [\n      {\n        \"name\": \"Load_Data\",\n        \"implementation\": \"load_data\"\n      },\n      {\n        \"name\": \"Clean_Data\",\n        \"implementation\": \"clean_data\"\n      },\n      {\n        \"name\": \"Validate_Data\",\n        \"implementation\": \"validate_data\"\n      },\n      {\n        \"name\": \"Check_Model_Drift\",\n        \"implementation\": \"validate_model\"\n      },\n      {\n        \"name\": \"Monitor_Performance\",\n        \"implementation\": \"optimize_performance\"\n      },\n      {\n        \"name\": \"Discover_Causality\",\n        \"implementation\": \"discover_causality\"\n      },\n      {\n        \"name\": \"Retrain_Model\",\n        \"implementation\": \"train_model\"\n      },\n      {\n        \"name\": \"Validate_New_Model\",\n        \"implementation\": \"validate_model\"\n      },\n      {\n        \"name\": \"Performance_Optimization\",\n        \"implementation\": \"optimize_performance\"\n      },\n      {\n        \"name\": \"Rollback_Changes\",\n        \"implementation\": \"rollback\"\n      },\n      {\n        \"name\": \"Notify_Deployment\",\n        \"implementation\": \"notify_user\"\n      },\n      {\n        \"name\": \"Notify_Review\",\n        \"implementation\": \"notify_user\"\n      },\n      {\n        \"name\": \"Notify_Status\",\n        \"implementation\": \"notify_user\"\n      },\n      {\n        \"name\": \"Generate_Report\",\n        \"implementation\": \"generate_report\"\n      },\n      {\n        \"name\": \"Error_Handler\",\n        \"implementation\": \"error_handler\"\n      }\n    ],\n    \"edges\": [\n      {\n        \"from\": \"Load_Data\",\n        \"to\": \"Clean_Data\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Load_Data\",\n        \"to\": \"Error_Handler\",\n        \"condition\": \"on_failure\"\n      },\n      {\n        \"from\": \"Clean_Data\",\n        \"to\": \"Validate_Data\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Clean_Data\",\n        \"to\": \"Error_Handler\",\n        \"condition\": \"on_failure\"\n      },\n      {\n        \"from\": \"Validate_Data\",\n        \"to\": \"Check_Model_Drift\",\n        \"condition\": \"validated\"\n      },\n      {\n        \"from\": \"Validate_Data\",\n        \"to\": \"Error_Handler\",\n        \"condition\": \"on_failure\"\n      },\n      {\n        \"from\": \"Check_Model_Drift\",\n        \"to\": \"Monitor_Performance\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Check_Model_Drift\",\n        \"to\": \"Discover_Causality\",\n        \"condition\": \"on_failure\"\n      },\n      {\n        \"from\": \"Monitor_Performance\",\n        \"to\": \"Performance_Optimization\",\n        \"condition\": \"needs_optimization\"\n      },\n      {\n        \"from\": \"Monitor_Performance\",\n        \"to\": \"Notify_Status\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Performance_Optimization\",\n        \"to\": \"Notify_Deployment\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Performance_Optimization\",\n        \"to\": \"Notify_Status\",\n        \"condition\": \"on_failure\"\n      },\n      {\n        \"from\": \"Discover_Causality\",\n        \"to\": \"Retrain_Model\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Discover_Causality\",\n        \"to\": \"Retrain_Model\",\n        \"condition\": \"validated\"\n      },\n      {\n        \"from\": \"Retrain_Model\",\n        \"to\": \"Validate_New_Model\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Retrain_Model\",\n        \"to\": \"Error_Handler\",\n        \"condition\": \"on_failure\"\n      },\n      {\n        \"from\": \"Validate_New_Model\",\n        \"to\": \"Notify_Deployment\",\n        \"condition\": \"validated\"\n      },\n      {\n        \"from\": \"Validate_New_Model\",\n        \"to\": \"Notify_Review\",\n        \"condition\": \"partial_success\"\n      },\n      {\n        \"from\": \"Validate_New_Model\",\n        \"to\": \"Rollback_Changes\",\n        \"condition\": \"on_failure\"\n      },\n      {\n        \"from\": \"Rollback_Changes\",\n        \"to\": \"Notify_Status\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Error_Handler\",\n        \"to\": \"Notify_Status\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Notify_Deployment\",\n        \"to\": \"Generate_Report\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Notify_Review\",\n        \"to\": \"Generate_Report\",\n        \"condition\": \"on_success\"\n      },\n      {\n        \"from\": \"Notify_Status\",\n        \"to\": \"Generate_Report\",\n        \"condition\": \"on_success\"\n      }\n    ]\n  },\n  \"decision_marker\": \"PLAN_ZATWIERDZONY\",\n  \"cognitive_trace\": {\n    \"trigger_words\": [\n      \"ODRZUCONY\",\n      \"pętli nieskończonej\",\n      \"niejasnej semantyki\",\n      \"partial_success\",\n      \"brak jawnego kroku wdrożenia\"\n    ],\n    \"reasoning_chain\": [\n      \"Analiza poprzedniego werdyktu odrzucającego plan.\",\n      \"Weryfikacja, czy nowa architektura eliminuje ryzyko pętli nieskończonej poprzez rozdzielenie ścieżki proaktywnej (monitorowanie/optymalizacja) od reaktywnej (retrenowanie).\",\n      \"Potwierdzenie, że semantyka krawędzi jest teraz jasna, zwłaszcza rola `on_failure` z `Check_Model_Drift` jako wyzwalacza adaptacji.\",\n      \"Sprawdzenie, czy obsługa `partial_success` została poprawiona i kieruje do przeglądu manualnego zamiast do natychmiastowego rollbacku.\",\n      \"Upewnienie się, że cykl życia modelu jest kompletny dzięki dodaniu jawnego sygnału wdrożenia (`Notify_Deployment`).\",\n      \"Ocena ogólnej spójności, solidności i kompletności planu.\",\n      \"Podjęcie decyzji o zatwierdzeniu planu, ponieważ wszystkie krytyczne uwagi zostały w pełni zaadresowane.\"\n    ],\n    \"confidence_per_decision\": {\n      \"node_selection\": 0.95,\n      \"edge_conditions\": 0.98,\n      \"overall_structure\": 0.98\n    },\n    \"alternatives_considered\": {\n      \"rejected_nodes\": [],\n      \"rejected_patterns\": [\n        \"Uproszczenie grafu: Odrzucono, ponieważ obecna, bardziej złożona struktura jest źródłem jego solidności i innowacyjności. Uproszczenie cofnęłoby wprowadzone ulepszenia.\"\n      ]\n    },\n    \"key_influences\": {\n      \"from_prompt\": \"Misja zbudowania 'adaptacyjnego systemu' została zinterpretowana jako system, który jest nie tylko reaktywny, ale także stabilny i proaktywny.\",\n      \"from_context\": \"Szczegółowa krytyka poprzedniego planu posłużyła jako precyzyjna lista wymagań dla nowej wersji. Każdy punkt krytyki musiał zostać rozwiązany.\",\n      \"from_role\": \"Rola 'Quality Critic' wymagała bezkompromisowego podejścia do krytycznych wad. Po ich naprawieniu, ta sama rola wymaga obiektywnego uznania wysokiej jakości finalnego produktu.\"\n    },\n    \"uncertainty_points\": [\n      \"Jedyna pozostająca niepewność dotyczy wewnętrznej implementacji węzłów (np. co dokładnie oznacza `partial_success`), ale struktura grafu jest zaprojektowana tak, aby bezpiecznie zarządzać tą niepewnością (np. przez eskalację do człowieka), co jest cechą dobrego projektu.\"\n    ],\n    \"word_choices\": {\n      \"verdict: ZATWIERDZONY\": \"Jednoznaczne potwierdzenie, że plan spełnia wszystkie standardy jakości.\",\n      \"Architektura dwuścieżkowa\": \"Użyte do precyzyjnego opisania kluczowej innowacji strukturalnej, która rozwiązuje fundamentalny problem poprzedniej wersji.\",\n      \"Inteligentna obsługa niepewności\": \"Wybrane, aby podkreślić, że plan nie tylko działa w idealnych warunkach, ale ma wbudowane mechanizmy radzenia sobie z niejednoznacznymi wynikami.\"\n    }\n  }\n}\nPLAN_ZATWIERDZONY",
+      "role": "user",
+      "name": "Quality_Critic"
+    }
+  ],
+  "performance_metrics": {
+    "token_usage": 0,
+    "api_calls": 0,
+    "convergence_rate": 1.0
+  }
+}

@@ -26,10 +26,160 @@
         "robust"
       ],
       "outcome": "Success"
+    },
+    {
+      "mission_id": "mission_20250908_115442_92ed8ebc",
+      "file_path": "memory/missions/mission_20250908_115442_92ed8ebc.json",
+      "timestamp": "2025-09-08T11:54:42.511964",
+      "mission_prompt": "Stwórz prosty pipeline do analizy danych CSV",
+      "mission_type": "data_processing",
+      "final_score": 85.0,
+      "tags": [
+        "robust",
+        "data",
+        "optimized"
+      ],
+      "outcome": "Success"
+    },
+    {
+      "mission_id": "mission_20250908_123301_92ed8ebc",
+      "file_path": "memory/missions/mission_20250908_123301_92ed8ebc.json",
+      "timestamp": "2025-09-08T12:33:01.593560",
+      "mission_prompt": "Stwórz prosty pipeline do analizy danych CSV",
+      "mission_type": "data_processing",
+      "final_score": 85.0,
+      "tags": [
+        "optimized",
+        "robust",
+        "data"
+      ],
+      "outcome": "Success"
+    },
+    {
+      "mission_id": "mission_20250908_123941_92ed8ebc",
+      "file_path": "memory/missions/mission_20250908_123941_92ed8ebc.json",
+      "timestamp": "2025-09-08T12:39:41.329798",
+      "mission_prompt": "Stwórz prosty pipeline do analizy danych CSV",
+      "mission_type": "data_processing",
+      "final_score": 85.0,
+      "tags": [
+        "data",
+        "optimized",
+        "robust"
+      ],
+      "outcome": "Success"
+    },
+    {
+      "mission_id": "mission_20250908_124034_92ed8ebc",
+      "file_path": "memory/missions/mission_20250908_124034_92ed8ebc.json",
+      "timestamp": "2025-09-08T12:40:34.301328",
+      "mission_prompt": "Stwórz prosty pipeline do analizy danych CSV",
+      "mission_type": "data_processing",
+      "final_score": 85.0,
+      "tags": [
+        "robust",
+        "data",
+        "optimized"
+      ],
+      "outcome": "Success"
+    },
+    {
+      "mission_id": "mission_20250908_141736_92ed8ebc",
+      "file_path": "memory/missions/mission_20250908_141736_92ed8ebc.json",
+      "timestamp": "2025-09-08T14:17:36.875886",
+      "mission_prompt": "Stwórz prosty pipeline do analizy danych CSV",
+      "mission_type": "data_processing",
+      "final_score": 85.0,
+      "tags": [
+        "robust",
+        "data",
+        "optimized"
+      ],
+      "outcome": "Success"
+    },
+    {
+      "mission_id": "mission_20250908_141901_92ed8ebc",
+      "file_path": "memory/missions/mission_20250908_141901_92ed8ebc.json",
+      "timestamp": "2025-09-08T14:19:01.709584",
+      "mission_prompt": "Stwórz prosty pipeline do analizy danych CSV",
+      "mission_type": "data_processing",
+      "final_score": 85.0,
+      "tags": [
+        "optimized",
+        "robust",
+        "data"
+      ],
+      "outcome": "Success"
+    },
+    {
+      "mission_id": "mission_20250908_142027_92ed8ebc",
+      "file_path": "memory/missions/mission_20250908_142027_92ed8ebc.json",
+      "timestamp": "2025-09-08T14:20:27.231516",
+      "mission_prompt": "Stwórz prosty pipeline do analizy danych CSV",
+      "mission_type": "data_processing",
+      "final_score": 85.0,
+      "tags": [
+        "data",
+        "robust",
+        "optimized"
+      ],
+      "outcome": "Success"
+    },
+    {
+      "mission_id": "mission_20250908_204757_1e55a591",
+      "file_path": "memory/missions/mission_20250908_204757_1e55a591.json",
+      "timestamp": "2025-09-08T20:47:57.123878",
+      "mission_prompt": "Zbuduj adaptacyjny system ML z continuous learning",
+      "mission_type": "general",
+      "final_score": 91.37,
+      "tags": [
+        "optimized",
+        "robust"
+      ],
+      "outcome": "Success"
+    },
+    {
+      "mission_id": "mission_20250908_213605_1e55a591",
+      "file_path": "memory/missions/mission_20250908_213605_1e55a591.json",
+      "timestamp": "2025-09-08T21:36:05.015122",
+      "mission_prompt": "Zbuduj adaptacyjny system ML z continuous learning",
+      "mission_type": "general",
+      "final_score": 91.37,
+      "tags": [
+        "robust",
+        "optimized"
+      ],
+      "outcome": "Success"
+    },
+    {
+      "mission_id": "mission_20250908_214049_1e55a591",
+      "file_path": "memory/missions/mission_20250908_214049_1e55a591.json",
+      "timestamp": "2025-09-08T21:40:49.432942",
+      "mission_prompt": "Zbuduj adaptacyjny system ML z continuous learning",
+      "mission_type": "general",
+      "final_score": 91.37,
+      "tags": [
+        "optimized",
+        "robust"
+      ],
+      "outcome": "Success"
+    },
+    {
+      "mission_id": "mission_20250908_221617_2182fc58",
+      "file_path": "memory/missions/mission_20250908_221617_2182fc58.json",
+      "timestamp": "2025-09-08T22:16:17.965281",
+      "mission_prompt": "zaprojektuj przepływ ODPORNY NA BLEDY do zrobienia składu książki w InDesign",
+      "mission_type": "general",
+      "final_score": 93.75,
+      "tags": [
+        "robust",
+        "optimized"
+      ],
+      "outcome": "Success"
     }
   ],
   "metadata": {
-    "last_updated": "2025-08-29T21:29:54.885027",
-    "total_missions": 2
+    "last_updated": "2025-09-08T22:16:17.972165",
+    "total_missions": 13
   }
 }

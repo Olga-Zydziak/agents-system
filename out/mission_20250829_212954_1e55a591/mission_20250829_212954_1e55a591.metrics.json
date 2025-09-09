@@ -1,0 +1,18 @@
+{
+  "mission_id": "mission_20250829_212954_1e55a591",
+  "timestamp": "2025-08-29T21:29:54Z",
+  "mission_type": "general",
+  "tags": [
+    "optimized",
+    "robust"
+  ],
+  "outcome": "Success",
+  "final_score": 94.9,
+  "approved": true,
+  "nodes_count": 25,
+  "edges_count": 38,
+  "has_retry": true,
+  "has_rollback": true,
+  "has_optimization": true,
+  "lang": "pl"
+}
