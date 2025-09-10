@@ -18,7 +18,7 @@ from process_logger import log as process_log
 
 
 import re, unicodedata
-
+from autogen_vertex_mcp_system_claude import SystemConfig, VertexSearchTool
 
 
 def _to_text_safe(x) -> str:
@@ -149,6 +149,56 @@ class ContextMemory:
 
         return context
 
+    
+    
+    #przeszukiwanie pamieci
+    
+    def get_vertex_context(self, mission: str, min_score: float = 80.0, top_k: int = 5) -> dict:
+        ctx = {"recommended_strategies": [], "common_pitfalls": [], "examples": []}
+        if VertexSearchTool is None or SystemConfig is None:
+            return ctx
+        try:
+            cfg = SystemConfig()
+            vst = VertexSearchTool(cfg)
+            raw = vst.search_mission_memory(query=mission, top_k=top_k)
+            results = (json.loads(raw) or {}).get("results", [])
+            for r in results:
+                try:
+                    score = float(r.get("score") or 0)
+                except Exception:
+                    score = 0.0
+                if score < min_score:
+                    continue
+                tags = r.get("tags") or []
+                links = r.get("links") or {}
+                if "retry" in tags:
+                    ctx["recommended_strategies"].append("Use retry with backoff + DLQ.")
+                if "rollback" in tags:
+                    ctx["recommended_strategies"].append("Add rollback path for irreversible ops.")
+                if "optimize" in tags:
+                    ctx["recommended_strategies"].append("Add optimize_performance guarded loop.")
+                if links.get("plan_uri"):
+                    ctx["examples"].append({
+                    "mission_id": r.get("mission_id"),
+                    "plan_uri": links["plan_uri"],
+                    })
+            # dedup + limit
+            dedup = []
+            seen = set()
+            for t in ctx["recommended_strategies"]:
+                if t not in seen:
+                    seen.add(t)
+                    dedup.append(t)
+            ctx["recommended_strategies"] = dedup[:6]
+            return ctx
+        except Exception as e:
+            process_log(f"[MEMORY] Vertex ctx skipped: {e}")
+            return {"recommended_strategies": [], "common_pitfalls": [], "examples": []}
+    
+    #koniec poprawki
+    
+    
+    
     def add_successful_plan(self, plan: Dict[str, Any], mission: str, metadata: Dict[str, Any]):
         """
         Zapisuje „udany plan” lokalnie (folder per misja) oraz aktualizuje proste „best practices”.

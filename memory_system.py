@@ -156,7 +156,7 @@ class ContextMemory:
     def get_vertex_context(self, mission: str, min_score: float = 80.0, top_k: int = 5) -> dict:
         ctx = {"recommended_strategies": [], "common_pitfalls": [], "examples": []}
         if VertexSearchTool is None or SystemConfig is None:
-        return ctx
+            return ctx
         try:
             cfg = SystemConfig()
             vst = VertexSearchTool(cfg)

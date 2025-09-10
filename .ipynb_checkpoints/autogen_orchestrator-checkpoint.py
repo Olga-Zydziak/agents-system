@@ -34,11 +34,6 @@ class AutoGenMOAOrchestrator:
     def __init__(self, mission: str, node_library: Dict[str, Any], config_file: str = "agents_config.json"):
         self.mission = mission
         self.node_library = node_library
-        # self.memory = ContextMemory(
-        # max_episodes=50,
-        # gcs_bucket="debate_rag",   # ten sam bucket co w Memory_bank.ipynb
-        # gcs_prefix=""                   # opcjonalnie; usuń lub zostaw ""
-        # )
         self.memory = ContextMemory(
         max_episodes=50,
         gcs_bucket=None,   # ten sam bucket co w Memory_bank.ipynb
@@ -63,6 +58,82 @@ class AutoGenMOAOrchestrator:
         self._secret_cache = {}
         
         process_log(f"=== AutoGen MOA Orchestrator initialized for mission: {mission[:100]}... ===")
+    
+    
+    #nowe helpery
+    
+    @staticmethod
+    def _valid_memory_json(js: dict) -> bool:
+        if not isinstance(js, dict):
+            return False
+        required = ("recommended_strategies", "common_pitfalls", "examples", "notes")
+        if any(k not in js for k in required):
+            return False
+        return (
+            isinstance(js["recommended_strategies"], list) and
+            isinstance(js["common_pitfalls"], list) and
+            isinstance(js["examples"], list) and
+            isinstance(js["notes"], str)
+        )
+
+    
+    
+    def _make_memory_message_once(self):
+        """LIGHT -> walidacja -> MID fallback -> lokalny fallback (bez LLM). Zwraca pojedynczą wiadomość do historii czatu."""
+        user_msg = {"role":"user","content": f"mission={self.mission}"}
+
+        # 1) LIGHT (PRIMARY)
+        if self.memory_analyst_agent:
+            try:
+                out = self.memory_analyst_agent.generate_reply(messages=[user_msg])
+                try: js = json.loads(out)
+                except Exception: js = None
+                if self._valid_memory_json(js) and (len(js["recommended_strategies"])>=2 or len(js["examples"])>=1):
+                    return {"name":"Memory_Analyst","role":"assistant","content": out}
+            except Exception as e:
+                log_exc(f"[MEMORY] LIGHT failed:", e)
+
+            # 2) MID (FALLBACK)
+            if self.memory_analyst_fallback_model:
+                try:
+                    mid_llm = self._build_llm_config(self.memory_analyst_fallback_model)
+                    tmp = autogen.ConversableAgent(
+                        name="Memory_Analyst_MID",
+                        llm_config=mid_llm,
+                        system_message=MOAPrompts.get_memory_analyst_prompt(),
+                        human_input_mode="NEVER"
+                    )
+                    out = tmp.generate_reply(messages=[user_msg])
+                    try: js = json.loads(out)
+                    except Exception: js = None
+                    if self._valid_memory_json(js):
+                        return {"name":"Memory_Analyst","role":"assistant","content": out}
+                except Exception as e:
+                    log_exc(f"[MEMORY] MID failed:", e)
+
+        # 3) Fallback bez LLM — lokalny + (opcjonalnie) Vertex
+        try:
+            ctx_local = self.memory.get_relevant_context(self.mission) if self.memory else {}
+            get_v = getattr(self.memory, "get_vertex_context", None)
+            ctx_vertex = get_v(self.mission) if callable(get_v) else {}
+            tips = list(dict.fromkeys(
+                (ctx_local.get("recommended_strategies") or []) +
+                (ctx_vertex.get("recommended_strategies") or [])
+            ))[:6]
+            examples = (ctx_vertex.get("examples") or [])[:3]
+            minimal = {
+                "recommended_strategies": tips,
+                "common_pitfalls": ctx_local.get("common_pitfalls") or [],
+                "examples": [{"mission_id": e.get("mission_id",""), "plan_uri": e.get("plan_uri","")} for e in examples],
+                "notes": ""
+            }
+            return {"name":"Memory_Analyst","role":"assistant","content": json.dumps(minimal, ensure_ascii=False)}
+        except Exception as e:
+            log_exc(f"[MEMORY] local fallback failed:",e)
+            return {"name":"Memory_Analyst","role":"assistant","content": '{"recommended_strategies":[],"common_pitfalls":[],"examples":[],"notes":""}'}
+    
+    #koniec nowych helperow
+    
     
     
     def reset(self):
@@ -108,7 +179,7 @@ class AutoGenMOAOrchestrator:
     
     #pamiec:
     
-    def _build_memoryanalyst_message(self) -> str:
+    def _build_memory_analyst_message(self) -> str:
         ctx_local = self.memory.get_relevant_context(self.mission) if self.memory else {}
         get_v = getattr(self.memory, "get_vertex_context", None)
         ctx_vertex = get_v(self.mission) if callable(get_v) else {}
@@ -430,6 +501,13 @@ class AutoGenMOAOrchestrator:
         
         
         
+        # --- [DODANE] Memory Analyst ma tylko jedną wypowiedź na starcie ---
+        ma_name = (getattr(self, "memory_analyst_agent", None).name or "").lower() \
+                  if getattr(self, "memory_analyst_agent", None) else ""
+        if last_name == ma_name:
+            # Po jednorazowym komunikacie pamięci przechodzimy do pierwszego Proposera
+            return self.proposer_agents[0]
+
         # ❶ Po bootstrapie (ostatni był Orchestrator → wybieramy pierwszego proposera)
         if last_name == (self.user_proxy.name or "").lower() and last_content.strip():
             return self.proposer_agents[0]
@@ -511,7 +589,10 @@ class AutoGenMOAOrchestrator:
         self.critic = None
         self.aggregator_agent = None
         self.critic_agent = None
-
+        self.memory_analyst_agent = None
+        self.memory_analyst_fallback_model = None
+        
+        
         # User Proxy – nigdy nie kończy rozmowy
         self.user_proxy = autogen.ConversableAgent( # <-- POPRAWKA
         name="Orchestrator",
@@ -525,7 +606,7 @@ class AutoGenMOAOrchestrator:
         # Proposerzy
         for agent_config in self.config['agents']:
             rn = agent_config['role_name'].lower()
-            if 'aggregator' in rn or 'critic' in rn:
+            if 'aggregator' in rn or 'critic' in rn or 'memory analyst' in rn:
                 continue
             role = AgentRole(
                 role_name=agent_config['role_name'],
@@ -543,6 +624,32 @@ class AutoGenMOAOrchestrator:
             self.proposer_agents.append(ag)
             process_log(f"[INIT] Proposer initialized: {ag.name}")
 
+        #memory agent
+        
+        # --- Memory Analyst (lekki agent, mówi tylko raz na starcie; prompt z MOAPrompts) ---
+        mem_cfg = next((a for a in self.config['agents'] if 'memory analyst' in a['role_name'].lower()), None)
+        if mem_cfg:
+            try:
+                mem_llm = self._build_llm_config(mem_cfg['model'])
+                self.memory_analyst_agent = autogen.ConversableAgent(
+                    name="Memory_Analyst",
+                    llm_config=mem_llm,
+                    system_message=MOAPrompts.get_memory_analyst_prompt(),
+                    human_input_mode="NEVER"
+                )
+                self.memory_analyst_agent.silent = False
+                self.memory_analyst_fallback_model = mem_cfg.get("fallback")  # dict lub None
+                process_log("[INIT] Memory Analyst initialized")
+            except Exception as e:
+                process_log(f"[INIT][WARN] Memory Analyst init failed: {e}")
+        else:
+            process_log("[INIT] Memory Analyst not configured")
+        
+        
+        
+        #koniec memory agent
+        
+            
         # Aggregator
         aggregator_config = next((a for a in self.config['agents'] if 'aggregator' in a['role_name'].lower()), None)
         if aggregator_config:
@@ -588,6 +695,48 @@ class AutoGenMOAOrchestrator:
         process_log("[INIT] Critic initialized")
 
         process_log(f"Initialized {len(self.proposer_agents)} proposers, 1 aggregator, 1 critic using AutoGen")
+    
+    
+    
+    def reset(self):
+        """
+        Minimalny reset: czyści historię agentów i liczniki sesji,
+        bez dotykania cache'u LLM i bez zmian w konfiguracji.
+        """
+        agents = []
+
+        # Zbierz agentów, jeśli istnieją (nie zakładamy, że wszystkie są zainicjalizowane)
+        if getattr(self, "user_proxy", None):           agents.append(self.user_proxy)
+        if getattr(self, "proposer_agents", None):      agents.extend(self.proposer_agents)
+        if getattr(self, "aggregator_agent", None):     agents.append(self.aggregator_agent)
+        if getattr(self, "critic_agent", None):         agents.append(self.critic_agent)
+        if getattr(self, "memory_analyst_agent", None): agents.append(self.memory_analyst_agent)
+
+        # Czyść historie czatu agentów (jeśli wspierają .reset())
+        for ag in agents:
+            try:
+                if hasattr(ag, "reset") and callable(ag.reset):
+                    ag.reset()
+            except Exception as e:
+                process_log(f"[RESET][WARN] {getattr(ag,'name','<agent>')}: {e}")
+
+        # Zresetuj licznik iteracji i bootstrap
+        self.iteration_count = 0
+        self._initial_bootstrap = ""
+
+        # (opcjonalnie) miękko wyczyść lokalny kontekst pamięci, jeśli ma takie API
+        try:
+            mem = getattr(self, "memory", None)
+            if mem and hasattr(mem, "reset") and callable(mem.reset):
+                mem.reset()
+            elif mem and hasattr(mem, "clear") and callable(mem.clear):
+                mem.clear()
+        except Exception as e:
+            process_log(f"[RESET][WARN] memory: {e}")
+
+        process_log("[RESET] Orchestrator state cleared")
+    
+    
     
     
     def _runtime_env_snapshot(self) -> dict:
@@ -812,15 +961,24 @@ class AutoGenMOAOrchestrator:
 
         self._initial_bootstrap = bootstrap
         
+        
+        
+        memory_msg = self._make_memory_message_once()
+        
+        agents = (
+        ([self.memory_analyst_agent] if self.memory_analyst_agent else []) +
+        [*self.proposer_agents, self.aggregator_agent, self.critic_agent]
+        )
+        
         # Uczestnicy – tylko agenci
-        agents = [*self.proposer_agents, self.aggregator_agent, self.critic_agent]
+        # agents = [*self.proposer_agents, self.aggregator_agent, self.critic_agent]
 
         turns_per_iteration = len(self.proposer_agents) + 2 
         max_rounds = self.max_iterations * turns_per_iteration + 5 # Dodajemy bufor bezpieczeństwa
 
         gc = GroupChat(
             agents=agents,
-            messages=[],
+            messages = [memory_msg],
             max_round=max_rounds, # Używamy nowej, dynamicznie obliczonej wartości
             speaker_selection_method=self.custom_speaker_selection_logic)
         

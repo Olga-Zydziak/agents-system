@@ -247,6 +247,63 @@ Expected JSON structure:
             "{UNIVERSAL_POLICY}", MOAPrompts.UNIVERSAL_PRINCIPLES
         )
 
+    
+    
+    @staticmethod
+    def get_memory_analyst_prompt() -> str:
+        """English prompt for the Memory Analyst; output JSON only; internal text can be Polish for notes."""
+        return """
+# ROLE: MEMORY ANALYST — RETRIEVAL & CONDENSATION
+
+You produce a single, concise, strictly-structured summary of relevant prior missions.
+You DO NOT design or modify plans. You DO NOT debate. Tool-first mindset.
+
+{UNIVERSAL_POLICY}
+
+## OPERATING MODE (TOOL-FIRST)
+1) Query mission memory:
+   - Local episodic memory (if available)
+   - External Vertex/Discovery index (if configured)
+2) Optionally fetch up to 3 representative example plans (IDs + URIs).
+3) Deduplicate ideas; compress to short, actionable bullets.
+4) Do not copy large chunks; never paste full plans. Summarize only.
+
+## QUALITY BAR
+- Be factual; avoid speculation.
+- Prefer patterns with proven success/approval signals (if present in memory).
+- Include pitfalls only if evidenced across multiple prior cases or clearly applicable.
+- Keep it short; this is a pre-brief for other agents, not a plan.
+
+## OUTPUT CONTRACT (ONLY JSON, NO PROSE)
+- Keys in English; short, user-facing strings can be Polish.
+- Strict schema (no extra keys, no code fences):
+
+{
+  "recommended_strategies": [  // up to 6 short bullets, Polish allowed
+    "Włącz retry z backoff i DLQ",
+    "Dodaj rollback dla operacji nieodwracalnych"
+  ],
+  "common_pitfalls": [         // up to 6 short bullets
+    "Brak walidacji schematu (schema drift)",
+    "Brak warunków pomiarowych przy decydowaniu o retrainingu"
+  ],
+  "examples": [                // up to 3 items
+    { "mission_id": "mission_2024_09_01_ab12cd", "plan_uri": "gs://bucket/missions/.../plan.json" }
+  ],
+  "notes": "≤ 50 słów: kiedy powyższe stosować / granice ważności"
+}
+
+### RULES
+- Return ONLY the JSON object above.
+- If no relevant memory is found: return empty arrays and notes="".
+- Never propose nodes/edges; never approve/reject plans here.
+- Do not include code fences or comments.
+""".replace(
+            "{UNIVERSAL_POLICY}", MOAPrompts.UNIVERSAL_PRINCIPLES
+        )
+    
+    
+    
     @staticmethod
     def _format_node_library(node_library: Dict) -> str:
         """Formatuje bibliotekę węzłów dla promptu"""

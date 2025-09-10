@@ -43,7 +43,29 @@
         "project_id": "dark-data-discovery",
          "location": "us-central1"
       }
-    }
+    },
+    
+    {
+  "role_name": "Memory Analyst",
+  "expertise_areas": ["retrieval", "condensation", "best-practices"],
+  "thinking_style": "factual",
+  "model": {
+    "provider": "google",
+    "model_name": "gemini-2.5-flash",
+    "temperature": 0.1,
+    "project_id": "dark-data-discovery",
+    "location": "us-central1",
+    "max_tokens": 800,
+    "timeout": 12
+  },
+  "fallback": {
+    "provider": "anthropic",
+    "model_name": "claude-3-7-sonnet-20250219",
+    "temperature": 0.1,
+    "max_tokens": 900,
+    "timeout": 14
+  }
+}
     
     
   ]

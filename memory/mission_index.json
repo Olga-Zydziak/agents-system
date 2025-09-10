@@ -190,10 +190,24 @@
         "optimized"
       ],
       "outcome": "Success"
+    },
+    {
+      "mission_id": "mission_20250910_123121_92ed8ebc",
+      "file_path": "memory/missions/mission_20250910_123121_92ed8ebc.json",
+      "timestamp": "2025-09-10T12:31:21.127684",
+      "mission_prompt": "Stwórz prosty pipeline do analizy danych CSV",
+      "mission_type": "data_processing",
+      "final_score": 85.0,
+      "tags": [
+        "data",
+        "robust",
+        "optimized"
+      ],
+      "outcome": "Success"
     }
   ],
   "metadata": {
-    "last_updated": "2025-09-09T10:37:32.687856",
-    "total_missions": 14
+    "last_updated": "2025-09-10T12:31:21.135585",
+    "total_missions": 15
   }
 }
