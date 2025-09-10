@@ -204,10 +204,94 @@
         "optimized"
       ],
       "outcome": "Success"
+    },
+    {
+      "mission_id": "mission_20250910_210909_92ed8ebc",
+      "file_path": "memory/missions/mission_20250910_210909_92ed8ebc.json",
+      "timestamp": "2025-09-10T21:09:09.812380",
+      "mission_prompt": "Stwórz prosty pipeline do analizy danych CSV",
+      "mission_type": "data_processing",
+      "final_score": 85.0,
+      "tags": [
+        "robust",
+        "optimized",
+        "data"
+      ],
+      "outcome": "Success"
+    },
+    {
+      "mission_id": "mission_20250910_213008_92ed8ebc",
+      "file_path": "memory/missions/mission_20250910_213008_92ed8ebc.json",
+      "timestamp": "2025-09-10T21:30:08.010737",
+      "mission_prompt": "Stwórz prosty pipeline do analizy danych CSV",
+      "mission_type": "data_processing",
+      "final_score": 85.0,
+      "tags": [
+        "data",
+        "optimized",
+        "robust"
+      ],
+      "outcome": "Success"
+    },
+    {
+      "mission_id": "mission_20250910_220559_92ed8ebc",
+      "file_path": "memory/missions/mission_20250910_220559_92ed8ebc.json",
+      "timestamp": "2025-09-10T22:05:59.943350",
+      "mission_prompt": "Stwórz prosty pipeline do analizy danych CSV",
+      "mission_type": "data_processing",
+      "final_score": 85.0,
+      "tags": [
+        "robust",
+        "optimized",
+        "data"
+      ],
+      "outcome": "Success"
+    },
+    {
+      "mission_id": "mission_20250910_223807_92ed8ebc",
+      "file_path": "memory/missions/mission_20250910_223807_92ed8ebc.json",
+      "timestamp": "2025-09-10T22:38:07.371862",
+      "mission_prompt": "Stwórz prosty pipeline do analizy danych CSV",
+      "mission_type": "data_processing",
+      "final_score": 85.0,
+      "tags": [
+        "data",
+        "robust",
+        "optimized"
+      ],
+      "outcome": "Success"
+    },
+    {
+      "mission_id": "mission_20250910_224338_92ed8ebc",
+      "file_path": "memory/missions/mission_20250910_224338_92ed8ebc.json",
+      "timestamp": "2025-09-10T22:43:38.410885",
+      "mission_prompt": "Stwórz prosty pipeline do analizy danych CSV",
+      "mission_type": "data_processing",
+      "final_score": 85.0,
+      "tags": [
+        "data",
+        "robust",
+        "optimized"
+      ],
+      "outcome": "Success"
+    },
+    {
+      "mission_id": "mission_20250910_230656_92ed8ebc",
+      "file_path": "memory/missions/mission_20250910_230656_92ed8ebc.json",
+      "timestamp": "2025-09-10T23:06:56.598374",
+      "mission_prompt": "Stwórz prosty pipeline do analizy danych CSV",
+      "mission_type": "data_processing",
+      "final_score": 85.0,
+      "tags": [
+        "optimized",
+        "robust",
+        "data"
+      ],
+      "outcome": "Success"
     }
   ],
   "metadata": {
-    "last_updated": "2025-09-10T12:31:21.135585",
-    "total_missions": 15
+    "last_updated": "2025-09-10T23:06:56.605610",
+    "total_missions": 21
   }
 }

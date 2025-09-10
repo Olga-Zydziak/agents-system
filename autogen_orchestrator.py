@@ -77,6 +77,163 @@ class AutoGenMOAOrchestrator:
         )
 
     
+    def _extract_name_and_len(self, msg):
+        """
+        Zwraca (name, content_len, type_name) z wiadomości w wielu możliwych formatach:
+        - dict z kluczami name/content/sender/role
+        - list/tuple w stylu [role, name, content] lub [name, content]
+        - obiekt z atrybutami .name/.content
+        - plain string
+        """
+        try:
+            tname = type(msg).__name__
+            # 1) dict
+            if isinstance(msg, dict):
+                name = msg.get("name") or msg.get("sender") or msg.get("role") or None
+                content = msg.get("content") or msg.get("text") or ""
+                return name, len(content or ""), tname
+
+            # 2) list/tuple – najczęstsze warianty
+            if isinstance(msg, (list, tuple)):
+                if len(msg) >= 3:
+                    # [role, name, content]
+                    name = str(msg[1])
+                    content = str(msg[2])
+                elif len(msg) == 2:
+                    # [name, content] lub [role, content]
+                    name = str(msg[0])
+                    content = str(msg[1])
+                elif len(msg) == 1:
+                    name = None
+                    content = str(msg[0])
+                else:
+                    name, content = None, ""
+                return name, len(content or ""), tname
+
+            # 3) obiekt z atrybutami
+            if hasattr(msg, "name") or hasattr(msg, "content"):
+                name = getattr(msg, "name", None)
+                content = getattr(msg, "content", "") or ""
+                return name, len(content or ""), tname
+
+            # 4) fallback: traktuj jako string
+            s = str(msg)
+            return None, len(s), tname
+
+        except Exception:
+            # ostateczny fallback
+            return None, 0, "unknown"
+
+        
+        
+        
+    #liczenie uzycia pamieci
+    
+    def _log_memory_alignment(self, plan_text: str, phase: str):
+        """
+        Miękka telemetria: sprawdza, na ile 'plan_text' (JSON/tekst Aggregatora)
+        pokrywa się z seedowaną pamięcią (self._last_seeded_memory).
+        Nie modyfikuje promptów ani toku debaty – tylko loguje.
+        """
+        import json, re
+
+        mem = getattr(self, "_last_seeded_memory", None)
+        if not mem or not plan_text:
+            process_log(f"[MEMORY ALIGNMENT] skipped (mem_or_plan_missing) phase={phase}")
+            return
+
+        # --- 1) wyciągnij czysty tekst planu (jeśli to JSON w stringu)
+        txt = plan_text
+        # spróbuj znaleźć największy blok JSON (ostrożny regex)
+        try:
+            match = re.search(r"\{[\s\S]*\}", plan_text)
+            if match:
+                txt = match.group(0)
+        except Exception:
+            pass
+
+        # --- 2) zbuduj 'work_text' do prostych dopasowań (lowercase)
+        work_text = txt.lower()
+
+        # --- 3) źródło pamięci
+        strategies = [s.strip().lower() for s in (mem.get("recommended_strategies") or []) if s and isinstance(s, str)]
+        pitfalls   = [p.strip().lower() for p in (mem.get("common_pitfalls")       or []) if p and isinstance(p, str)]
+        examples   = mem.get("examples") or []
+
+        # --- 4) proste dopasowania substring (bez magii – chodzi o telemetrię, nie scoring naukowy)
+        def _hitcount(items, text):
+            hits = []
+            for it in items:
+                if len(it) >= 5 and it in text:  # mini-próg, żeby „csv” itp. nie łapać
+                    hits.append(it)
+            return hits
+
+        used_strats   = _hitcount(strategies, work_text)
+        addressed_pts = _hitcount(pitfalls,   work_text)
+
+        # --- 5) examples: sprawdzimy, czy wystąpiły ID lub URI w planie
+        ex_total = len(examples)
+        ex_hits = 0
+        for ex in examples:
+            mid = str(ex.get("mission_id","")).strip().lower()
+            uri = str(ex.get("plan_uri","")).strip().lower()
+            if (mid and mid in work_text) or (uri and uri in work_text):
+                ex_hits += 1
+
+        # --- 6) prosty score 0..1 (wagi możesz zmienić)
+        import math
+        def frac(num, den): 
+            return (num/den) if den else 0.0
+
+        s_frac = frac(len(used_strats),   len(strategies))
+        p_frac = frac(len(addressed_pts), len(pitfalls))
+        e_frac = frac(ex_hits,            ex_total)
+
+        score = round(0.5 * s_frac + 0.3 * p_frac + 0.2 * e_frac, 3)
+
+        # --- 7) log + opcjonalna integracja z EXPLAINABILITY (jeśli jest)
+        process_log(
+            "[MEMORY ALIGNMENT] phase=%s score=%.3f "
+            "strategies_used=%d/%d pitfalls_addressed=%d/%d examples_ref=%d/%d" % (
+                phase, score,
+                len(used_strats), len(strategies),
+                len(addressed_pts), len(pitfalls),
+                ex_hits, ex_total
+            )
+        )
+        try:
+            if "EXPLAINABILITY" in globals() and hasattr(EXPLAINABILITY, "on_memory_alignment"):
+                EXPLAINABILITY.on_memory_alignment({
+                    "phase": phase, "score": score,
+                    "strategies_used": used_strats,
+                    "pitfalls_addressed": addressed_pts,
+                    "examples_hits": ex_hits,
+                    "examples_total": ex_total
+                })
+        except Exception as e:
+            process_log(f"[MEMORY ALIGNMENT][WARN] explainability hook failed: {type(e).__name__}: {e}")
+
+        # --- 8) (opcjonalnie) krótki, niewpływający podgląd w transkrypcie
+        try:
+            if True:
+            # if getattr(self.config, "show_memory_alignment_preview", False):
+                preview = {
+                    "phase": phase, "score": score,
+                    "strategies_used": len(used_strats), "strategies_total": len(strategies),
+                    "pitfalls_addressed": len(addressed_pts), "pitfalls_total": len(pitfalls),
+                    "examples_ref": ex_hits, "examples_total": ex_total
+                }
+                # zapisz do historii – jako wiadomość Orchestratora (nie zmienia mówcy)
+                self.groupchat.messages.append({
+                    "role": "assistant", "name": "Orchestrator",
+                    "content": f"[MEMORY ALIGNMENT PREVIEW] {preview}"
+                })
+        except Exception as e:
+            process_log(f"[MEMORY ALIGNMENT][DEBUG] preview append failed: {type(e).__name__}: {e}")
+    
+    
+    #koniec liczenia
+    
     
     def _make_memory_message_once(self):
         """LIGHT -> walidacja -> MID fallback -> lokalny fallback (bez LLM). Zwraca pojedynczą wiadomość do historii czatu."""
@@ -89,6 +246,8 @@ class AutoGenMOAOrchestrator:
                 try: js = json.loads(out)
                 except Exception: js = None
                 if self._valid_memory_json(js) and (len(js["recommended_strategies"])>=2 or len(js["examples"])>=1):
+                    self._last_seeded_memory = js
+                    process_log("[MEMORY][LIGHT] Valid memory JSON produced")
                     return {"name":"Memory_Analyst","role":"assistant","content": out}
             except Exception as e:
                 log_exc(f"[MEMORY] LIGHT failed:", e)
@@ -107,6 +266,8 @@ class AutoGenMOAOrchestrator:
                     try: js = json.loads(out)
                     except Exception: js = None
                     if self._valid_memory_json(js):
+                        self._last_seeded_memory = js
+                        process_log("[MEMORY][MID] Valid memory JSON produced")
                         return {"name":"Memory_Analyst","role":"assistant","content": out}
                 except Exception as e:
                     log_exc(f"[MEMORY] MID failed:", e)
@@ -127,6 +288,7 @@ class AutoGenMOAOrchestrator:
                 "examples": [{"mission_id": e.get("mission_id",""), "plan_uri": e.get("plan_uri","")} for e in examples],
                 "notes": ""
             }
+            self._last_seeded_memory = minimal
             return {"name":"Memory_Analyst","role":"assistant","content": json.dumps(minimal, ensure_ascii=False)}
         except Exception as e:
             log_exc(f"[MEMORY] local fallback failed:",e)
@@ -514,13 +676,30 @@ class AutoGenMOAOrchestrator:
 
         # ❷ Po Aggregatorze → czas na Critica
         if last_name == (self.aggregator_agent.name or "").lower():
+            try:
+                # zapamiętaj ostatni tekst planu do późniejszego użytku (np. post-approval)
+                self._last_aggregated_plan_text = last_content
+                # policz adhezję tuż po agregacji
+                self._log_memory_alignment(last_content, phase="post_aggregation")
+            except Exception as e:
+                process_log(f"[MEMORY ALIGNMENT][WARN] post_aggregation failed: {type(e).__name__}: {e}")
             return self.critic_agent
 
         # ❸ Po Criticu → zatwierdzenie albo nowa iteracja
         if last_name == (self.critic_agent.name or "").lower():
             self._save_iteration_to_memory(last_content, self.iteration_count)
             if "PLAN_ZATWIERDZONY" in last_content:
+                try:
+                    plan_text = getattr(self, "_last_aggregated_plan_text", "") or last_content
+                    self._log_memory_alignment(plan_text, phase="post_approval")
+                except Exception as e:
+                    process_log(f"[MEMORY ALIGNMENT][WARN] post_approval failed: {type(e).__name__}: {e}")
                 return None
+                
+                
+                
+                
+                # return None
             # nowa iteracja
             self.iteration_count += 1
             if self.iteration_count >= self.max_iterations:
@@ -962,8 +1141,23 @@ class AutoGenMOAOrchestrator:
         self._initial_bootstrap = bootstrap
         
         
+        #nowe wczytywanie pamieci
+        memory_msg = None
+        try:
+            memory_msg = self._make_memory_message_once()
+            if memory_msg and isinstance(memory_msg, dict) and memory_msg.get("content"):
+                process_log("[MEMORY] Seeded memory message into history")
+            else:
+                process_log("[MEMORY][WARN] No usable memory message produced; seeding skipped")
+                memory_msg = None
+        except Exception as e:
+            process_log(f"[MEMORY][ERROR] Could not build memory message: {type(e).__name__}: {e}")
+            memory_msg = None
         
-        memory_msg = self._make_memory_message_once()
+        #koniec 
+        
+        
+        
         
         agents = (
         ([self.memory_analyst_agent] if self.memory_analyst_agent else []) +
@@ -976,11 +1170,28 @@ class AutoGenMOAOrchestrator:
         turns_per_iteration = len(self.proposer_agents) + 2 
         max_rounds = self.max_iterations * turns_per_iteration + 5 # Dodajemy bufor bezpieczeństwa
 
+        start_messages = []
+        if memory_msg:
+            start_messages.append(memory_msg)
+
+        
+        
         gc = GroupChat(
             agents=agents,
-            messages = [memory_msg],
+            messages = start_messages,
             max_round=max_rounds, # Używamy nowej, dynamicznie obliczonej wartości
             speaker_selection_method=self.custom_speaker_selection_logic)
+        
+        self.groupchat = gc
+        
+        try:
+            for i, m in enumerate(gc.messages[:3]):  # pokaż do 3 pierwszych
+                n, l, tn = self._extract_name_and_len(m)
+                process_log(f"[MEMORY][DEBUG] m{i}: type={tn} name={n} len={l}")
+        except Exception as e:
+            process_log(f"[MEMORY][DEBUG] inspect failed: {type(e).__name__}: {e}")
+        
+        
         
         manager = GroupChatManager(
             groupchat=gc,
@@ -1159,7 +1370,7 @@ class AutoGenMOAOrchestrator:
             return
         
         
-        parsed = self.parser.parse_agent_response(critique_message)
+        parsed = self.parser.parse_critic_response(critique_message)
         
         if parsed:
             feedback = f"Score: {parsed.get('score', 'N/A')}. "

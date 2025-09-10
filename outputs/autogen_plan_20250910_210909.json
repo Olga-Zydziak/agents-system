@@ -1,0 +1,197 @@
+{
+  "mission": "Stwórz prosty pipeline do analizy danych CSV",
+  "final_plan": {
+    "entry_point": "Load_Data",
+    "nodes": [
+      {
+        "name": "Load_Data",
+        "implementation": "load_data",
+        "parameters": {
+          "source_type": "csv",
+          "validation_on_load": true
+        }
+      },
+      {
+        "name": "Clean_Data",
+        "implementation": "clean_data",
+        "parameters": {
+          "adaptive_threshold": true
+        }
+      },
+      {
+        "name": "Validate_Data",
+        "implementation": "validate_data",
+        "parameters": {
+          "quality_threshold": 0.85
+        }
+      },
+      {
+        "name": "Discover_Causality",
+        "implementation": "discover_causality",
+        "parameters": {
+          "method": "advanced"
+        }
+      },
+      {
+        "name": "Optimize_Performance",
+        "implementation": "optimize_performance",
+        "parameters": {
+          "target": "analysis_speed"
+        }
+      },
+      {
+        "name": "Validate_Results",
+        "implementation": "validate_model",
+        "parameters": {
+          "validation_type": "results_coherence"
+        }
+      },
+      {
+        "name": "Generate_Causal_Report",
+        "implementation": "generate_report",
+        "parameters": {
+          "report_type": "causal_analysis",
+          "detail_level": "comprehensive"
+        }
+      },
+      {
+        "name": "Generate_Standard_Report",
+        "implementation": "generate_report",
+        "parameters": {
+          "report_type": "descriptive_statistics",
+          "detail_level": "standard"
+        }
+      },
+      {
+        "name": "Handle_Load_Error",
+        "implementation": "error_handler",
+        "parameters": {
+          "error_type": "load_failure"
+        }
+      },
+      {
+        "name": "Handle_Process_Error",
+        "implementation": "error_handler",
+        "parameters": {
+          "error_type": "processing_failure"
+        }
+      },
+      {
+        "name": "Notify_Success",
+        "implementation": "notify_user",
+        "parameters": {
+          "message": "Analiza zakończona sukcesem. Raport dostępny.",
+          "status": "success"
+        }
+      },
+      {
+        "name": "Notify_Partial",
+        "implementation": "notify_user",
+        "parameters": {
+          "message": "Analiza częściowo udana. Wygenerowano raport opisowy.",
+          "status": "partial_success"
+        }
+      },
+      {
+        "name": "Notify_Failure",
+        "implementation": "notify_user",
+        "parameters": {
+          "message": "Analiza nieudana. Sprawdź dane wejściowe.",
+          "status": "failure"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "Load_Data",
+        "to": "Clean_Data",
+        "condition": "on_success"
+      },
+      {
+        "from": "Load_Data",
+        "to": "Handle_Load_Error",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Handle_Load_Error",
+        "to": "Notify_Failure",
+        "condition": "on_success"
+      },
+      {
+        "from": "Clean_Data",
+        "to": "Validate_Data",
+        "condition": "on_success"
+      },
+      {
+        "from": "Clean_Data",
+        "to": "Handle_Process_Error",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Validate_Data",
+        "to": "Discover_Causality",
+        "condition": "validated"
+      },
+      {
+        "from": "Validate_Data",
+        "to": "Optimize_Performance",
+        "condition": "partial_success"
+      },
+      {
+        "from": "Discover_Causality",
+        "to": "Validate_Results",
+        "condition": "on_success"
+      },
+      {
+        "from": "Discover_Causality",
+        "to": "Optimize_Performance",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Optimize_Performance",
+        "to": "Generate_Standard_Report",
+        "condition": "on_success"
+      },
+      {
+        "from": "Validate_Results",
+        "to": "Generate_Causal_Report",
+        "condition": "validated"
+      },
+      {
+        "from": "Validate_Results",
+        "to": "Generate_Standard_Report",
+        "condition": "partial_success"
+      },
+      {
+        "from": "Generate_Causal_Report",
+        "to": "Notify_Success",
+        "condition": "on_success"
+      },
+      {
+        "from": "Generate_Causal_Report",
+        "to": "Handle_Process_Error",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Generate_Standard_Report",
+        "to": "Notify_Partial",
+        "condition": "on_success"
+      },
+      {
+        "from": "Generate_Standard_Report",
+        "to": "Handle_Process_Error",
+        "condition": "on_failure"
+      },
+      {
+        "from": "Handle_Process_Error",
+        "to": "Notify_Failure",
+        "condition": "on_success"
+      }
+    ]
+  },
+  "metadata": {
+    "iterations": 0,
+    "timestamp": "2025-09-10T21:09:09.806801",
+    "autogen_debate": true
+  }
+}
