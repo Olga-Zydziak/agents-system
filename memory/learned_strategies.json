@@ -37,7 +37,7 @@
       ]
     },
     "success_pattern_data_processing": {
-      "occurrences": 16,
+      "occurrences": 26,
       "examples": [
         {
           "mission_prompt": "Stwórz prosty pipeline do analizy danych CSV",
@@ -184,16 +184,106 @@
             "performance_optimization"
           ],
           "score": 85.0
+        },
+        {
+          "mission_prompt": "Stwórz prosty pipeline do analizy danych CSV",
+          "success_factors": [
+            "comprehensive_error_handling",
+            "data_validation",
+            "performance_optimization"
+          ],
+          "score": 85.0
+        },
+        {
+          "mission_prompt": "Stwórz prosty pipeline do analizy danych CSV",
+          "success_factors": [
+            "comprehensive_error_handling",
+            "data_validation",
+            "performance_optimization"
+          ],
+          "score": 85.0
+        },
+        {
+          "mission_prompt": "Stwórz prosty pipeline do analizy danych CSV",
+          "success_factors": [
+            "comprehensive_error_handling",
+            "data_validation",
+            "performance_optimization"
+          ],
+          "score": 85.0
+        },
+        {
+          "mission_prompt": "Stwórz prosty pipeline do analizy danych CSV",
+          "success_factors": [
+            "comprehensive_error_handling",
+            "data_validation",
+            "performance_optimization"
+          ],
+          "score": 85.0
+        },
+        {
+          "mission_prompt": "Stwórz prosty pipeline do analizy danych CSV",
+          "success_factors": [
+            "comprehensive_error_handling",
+            "data_validation",
+            "performance_optimization"
+          ],
+          "score": 85.0
+        },
+        {
+          "mission_prompt": "Stwórz prosty pipeline do analizy danych CSV",
+          "success_factors": [
+            "comprehensive_error_handling",
+            "data_validation",
+            "performance_optimization"
+          ],
+          "score": 85.0
+        },
+        {
+          "mission_prompt": "Stwórz prosty pipeline do analizy danych CSV",
+          "success_factors": [
+            "comprehensive_error_handling",
+            "data_validation",
+            "performance_optimization"
+          ],
+          "score": 85.0
+        },
+        {
+          "mission_prompt": "Stwórz prosty pipeline do analizy danych CSV",
+          "success_factors": [
+            "comprehensive_error_handling",
+            "data_validation",
+            "performance_optimization"
+          ],
+          "score": 85.0
+        },
+        {
+          "mission_prompt": "Stwórz prosty pipeline do analizy danych CSV",
+          "success_factors": [
+            "comprehensive_error_handling",
+            "data_validation",
+            "performance_optimization"
+          ],
+          "score": 85.0
+        },
+        {
+          "mission_prompt": "Stwórz prosty pipeline do analizy danych CSV",
+          "success_factors": [
+            "comprehensive_error_handling",
+            "data_validation",
+            "performance_optimization"
+          ],
+          "score": 85.0
         }
       ],
       "common_elements": {
-        "comprehensive_error_handling": 16,
+        "comprehensive_error_handling": 26,
         "rollback_mechanism": 1,
-        "data_validation": 16,
-        "performance_optimization": 16,
+        "data_validation": 26,
+        "performance_optimization": 26,
         "adaptive_routing": 1
       },
-      "avg_score": 85.60625,
+      "avg_score": 85.37307692307692,
       "best_practices": [
         {
           "mission_id": "mission_20250829_212413_92ed8ebc",
@@ -686,10 +776,140 @@
       "success_factors": [],
       "performance_metrics": {},
       "timestamp": "2025-09-10T23:06:56.590183"
+    },
+    {
+      "mission_type": "data_processing",
+      "plan_structure": {
+        "num_nodes": 13,
+        "num_edges": 17,
+        "has_error_handling": true,
+        "has_validation": true,
+        "graph_complexity": 0.46153846153846156
+      },
+      "success_factors": [],
+      "performance_metrics": {},
+      "timestamp": "2025-09-15T11:44:22.942339"
+    },
+    {
+      "mission_type": "data_processing",
+      "plan_structure": {
+        "num_nodes": 13,
+        "num_edges": 17,
+        "has_error_handling": true,
+        "has_validation": true,
+        "graph_complexity": 0.46153846153846156
+      },
+      "success_factors": [],
+      "performance_metrics": {},
+      "timestamp": "2025-09-15T11:52:10.091040"
+    },
+    {
+      "mission_type": "data_processing",
+      "plan_structure": {
+        "num_nodes": 13,
+        "num_edges": 17,
+        "has_error_handling": true,
+        "has_validation": true,
+        "graph_complexity": 0.46153846153846156
+      },
+      "success_factors": [],
+      "performance_metrics": {},
+      "timestamp": "2025-09-15T11:54:52.305866"
+    },
+    {
+      "mission_type": "data_processing",
+      "plan_structure": {
+        "num_nodes": 13,
+        "num_edges": 17,
+        "has_error_handling": true,
+        "has_validation": true,
+        "graph_complexity": 0.46153846153846156
+      },
+      "success_factors": [],
+      "performance_metrics": {},
+      "timestamp": "2025-09-15T12:02:06.355578"
+    },
+    {
+      "mission_type": "data_processing",
+      "plan_structure": {
+        "num_nodes": 13,
+        "num_edges": 17,
+        "has_error_handling": true,
+        "has_validation": true,
+        "graph_complexity": 0.46153846153846156
+      },
+      "success_factors": [],
+      "performance_metrics": {},
+      "timestamp": "2025-09-15T12:19:52.274625"
+    },
+    {
+      "mission_type": "data_processing",
+      "plan_structure": {
+        "num_nodes": 13,
+        "num_edges": 17,
+        "has_error_handling": true,
+        "has_validation": true,
+        "graph_complexity": 0.46153846153846156
+      },
+      "success_factors": [],
+      "performance_metrics": {},
+      "timestamp": "2025-09-15T12:21:05.868869"
+    },
+    {
+      "mission_type": "data_processing",
+      "plan_structure": {
+        "num_nodes": 13,
+        "num_edges": 17,
+        "has_error_handling": true,
+        "has_validation": true,
+        "graph_complexity": 0.46153846153846156
+      },
+      "success_factors": [],
+      "performance_metrics": {},
+      "timestamp": "2025-09-15T12:52:02.573669"
+    },
+    {
+      "mission_type": "data_processing",
+      "plan_structure": {
+        "num_nodes": 13,
+        "num_edges": 17,
+        "has_error_handling": true,
+        "has_validation": true,
+        "graph_complexity": 0.46153846153846156
+      },
+      "success_factors": [],
+      "performance_metrics": {},
+      "timestamp": "2025-09-15T12:56:07.147544"
+    },
+    {
+      "mission_type": "data_processing",
+      "plan_structure": {
+        "num_nodes": 13,
+        "num_edges": 17,
+        "has_error_handling": true,
+        "has_validation": true,
+        "graph_complexity": 0.46153846153846156
+      },
+      "success_factors": [],
+      "performance_metrics": {},
+      "timestamp": "2025-09-15T12:59:37.507312"
+    },
+    {
+      "mission_type": "data_processing",
+      "plan_structure": {
+        "num_nodes": 13,
+        "num_edges": 17,
+        "has_error_handling": true,
+        "has_validation": true,
+        "graph_complexity": 0.46153846153846156
+      },
+      "success_factors": [],
+      "performance_metrics": {},
+      "timestamp": "2025-09-15T13:06:09.491516"
     }
   ],
   "metadata": {
-    "last_updated": "2025-09-10T23:06:56.607553",
+    "last_updated": "2025-09-15T13:06:09.509267",
     "mission_count": 11
   }
 }

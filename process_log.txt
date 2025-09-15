@@ -705,3 +705,374 @@ NameError: name '_json' is not defined
 [2025-09-10 23:06:56] [ORCHESTRATOR] Mission completed and saved as: mission_20250910_230656_92ed8ebc
 [2025-09-10 23:06:57] [EXPORT] Wyeksportowano 1 misji do GCS
 [2025-09-10 23:06:57] [RESET] Orchestrator state cleared
+[2025-09-15 11:44:22] [CFG] enable_sanity_ping=False
+[2025-09-15 11:44:22] [INIT] UserProxy initialized
+[2025-09-15 11:44:22] [INIT] Proposer initialized: Causal_Analyst
+[2025-09-15 11:44:22] [INIT] Proposer initialized: Creative_Planner
+[2025-09-15 11:44:22] [INIT] Memory Analyst initialized
+[2025-09-15 11:44:22] [INIT] Aggregator initialized
+[2025-09-15 11:44:22] [INIT] Critic initialized
+[2025-09-15 11:44:22] Initialized 2 proposers, 1 aggregator, 1 critic using AutoGen
+[2025-09-15 11:44:22] === AutoGen MOA Orchestrator initialized for mission: Stwórz prosty pipeline do analizy danych CSV... ===
+[2025-09-15 11:44:22] [RESET] Orchestrator state cleared
+[2025-09-15 11:44:22] [MEMORY] Seeded memory message into history
+[2025-09-15 11:44:22] [MEMORY][DEBUG] m0: type=dict name=Memory_Analyst len=577
+[2025-09-15 11:44:22] [EXPLAINABILITY] causal_analyst confidence: {'node_selection': 0.95, 'edge_conditions': 0.9, 'overall_structure': 0.9}
+[2025-09-15 11:44:22] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Causal Analyst', 'może zawieść']
+[2025-09-15 11:44:22] [EXPLAINABILITY] creative_planner confidence: {'node_selection': 0.9, 'edge_conditions': 0.85, 'overall_structure': 0.88}
+[2025-09-15 11:44:22] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Creative Planner', 'novel twist', 'może zawieść']
+[2025-09-15 11:44:22] [MEMORY ALIGNMENT] phase=post_aggregation score=0.000 strategies_used=0/1 pitfalls_addressed=0/1 examples_ref=0/2
+[2025-09-15 11:44:22] [SUCCESS] Debata zakończona przez StopIteration - plan zatwierdzony
+[2025-09-15 11:44:22] [SUCCESS] Krytyk zatwierdził plan. Rozpoczynam parsowanie...
+[2025-09-15 11:44:22] [PARSER] Znaleziono klucze: ['critique_summary', 'quality_metrics', 'plan_approved', 'decision_marker', 'cognitive_trace']
+[2025-09-15 11:44:22] [SUCCESS] Znaleziono plan pod kluczem: 'plan_approved'
+[2025-09-15 11:44:22] [MEMORY] Added successful plan for mission_type=data_processing, nodes=13
+[2025-09-15 11:44:22] Successful plan saved to outputs/autogen_plan_20250915_114422.json
+[2025-09-15 11:44:22] [MEMORY] Saved mission to file: memory/missions/mission_20250915_114422_92ed8ebc.json
+[2025-09-15 11:44:22] [MEMORY] Learned from success: success_pattern_data_processing, occurrences=17, avg_score=85.57
+[2025-09-15 11:44:22] [MEMORY] Saved complete mission: mission_20250915_114422_92ed8ebc
+[2025-09-15 11:44:22] [ORCHESTRATOR] Mission completed and saved as: mission_20250915_114422_92ed8ebc
+[2025-09-15 11:44:24] [EXPORT] Wyeksportowano 1 misji do GCS
+[2025-09-15 11:44:24] [RESET] Orchestrator state cleared
+[2025-09-15 11:52:09] [CFG] enable_sanity_ping=False
+[2025-09-15 11:52:09] [INIT] UserProxy initialized
+[2025-09-15 11:52:09] [INIT] Proposer initialized: Causal_Analyst
+[2025-09-15 11:52:09] [INIT] Proposer initialized: Creative_Planner
+[2025-09-15 11:52:09] [INIT] Memory Analyst initialized
+[2025-09-15 11:52:09] [INIT] Aggregator initialized
+[2025-09-15 11:52:09] [INIT] Critic initialized
+[2025-09-15 11:52:09] Initialized 2 proposers, 1 aggregator, 1 critic using AutoGen
+[2025-09-15 11:52:09] === AutoGen MOA Orchestrator initialized for mission: Stwórz prosty pipeline do analizy danych CSV... ===
+[2025-09-15 11:52:09] [RESET] Orchestrator state cleared
+[2025-09-15 11:52:09] [MEMORY] Seeded memory message into history
+[2025-09-15 11:52:09] [MEMORY][DEBUG] m0: type=dict name=Memory_Analyst len=577
+[2025-09-15 11:52:10] [EXPLAINABILITY] causal_analyst confidence: {'node_selection': 0.95, 'edge_conditions': 0.9, 'overall_structure': 0.9}
+[2025-09-15 11:52:10] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Causal Analyst', 'może zawieść']
+[2025-09-15 11:52:10] [EXPLAINABILITY] creative_planner confidence: {'node_selection': 0.9, 'edge_conditions': 0.85, 'overall_structure': 0.88}
+[2025-09-15 11:52:10] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Creative Planner', 'novel twist', 'może zawieść']
+[2025-09-15 11:52:10] [MEMORY ALIGNMENT] phase=post_aggregation score=0.000 strategies_used=0/1 pitfalls_addressed=0/1 examples_ref=0/2
+[2025-09-15 11:52:10] [SUCCESS] Debata zakończona przez StopIteration - plan zatwierdzony
+[2025-09-15 11:52:10] [SUCCESS] Krytyk zatwierdził plan. Rozpoczynam parsowanie...
+[2025-09-15 11:52:10] [PARSER] Znaleziono klucze: ['critique_summary', 'quality_metrics', 'plan_approved', 'decision_marker', 'cognitive_trace']
+[2025-09-15 11:52:10] [SUCCESS] Znaleziono plan pod kluczem: 'plan_approved'
+[2025-09-15 11:52:10] [MEMORY] Added successful plan for mission_type=data_processing, nodes=13
+[2025-09-15 11:52:10] Successful plan saved to outputs/autogen_plan_20250915_115210.json
+[2025-09-15 11:52:10] [MEMORY] Saved mission to file: memory/missions/mission_20250915_115210_92ed8ebc.json
+[2025-09-15 11:52:10] [MEMORY] Learned from success: success_pattern_data_processing, occurrences=18, avg_score=85.54
+[2025-09-15 11:52:10] [MEMORY] Saved complete mission: mission_20250915_115210_92ed8ebc
+[2025-09-15 11:52:10] [ORCHESTRATOR] Mission completed and saved as: mission_20250915_115210_92ed8ebc
+[2025-09-15 11:52:11] [EXPORT] Wyeksportowano 1 misji do GCS
+[2025-09-15 11:52:11] [RESET] Orchestrator state cleared
+[2025-09-15 11:54:51] [CFG] enable_sanity_ping=False
+[2025-09-15 11:54:51] [INIT] UserProxy initialized
+[2025-09-15 11:54:51] [INIT] Proposer initialized: Causal_Analyst
+[2025-09-15 11:54:51] [INIT] Proposer initialized: Creative_Planner
+[2025-09-15 11:54:51] [INIT] Memory Analyst initialized
+[2025-09-15 11:54:51] [INIT] Aggregator initialized
+[2025-09-15 11:54:51] [INIT] Critic initialized
+[2025-09-15 11:54:51] Initialized 2 proposers, 1 aggregator, 1 critic using AutoGen
+[2025-09-15 11:54:51] === AutoGen MOA Orchestrator initialized for mission: Stwórz prosty pipeline do analizy danych CSV... ===
+[2025-09-15 11:54:51] [RESET] Orchestrator state cleared
+[2025-09-15 11:54:52] [MEMORY] Seeded memory message into history
+[2025-09-15 11:54:52] [MEMORY][DEBUG] m0: type=dict name=Memory_Analyst len=577
+[2025-09-15 11:54:52] [EXPLAINABILITY] causal_analyst confidence: {'node_selection': 0.95, 'edge_conditions': 0.9, 'overall_structure': 0.9}
+[2025-09-15 11:54:52] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Causal Analyst', 'może zawieść']
+[2025-09-15 11:54:52] [EXPLAINABILITY] creative_planner confidence: {'node_selection': 0.9, 'edge_conditions': 0.85, 'overall_structure': 0.88}
+[2025-09-15 11:54:52] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Creative Planner', 'novel twist', 'może zawieść']
+[2025-09-15 11:54:52] [MEMORY ALIGNMENT] phase=post_aggregation score=0.000 strategies_used=0/1 pitfalls_addressed=0/1 examples_ref=0/2
+[2025-09-15 11:54:52] [SUCCESS] Debata zakończona przez StopIteration - plan zatwierdzony
+[2025-09-15 11:54:52] [SUCCESS] Krytyk zatwierdził plan. Rozpoczynam parsowanie...
+[2025-09-15 11:54:52] [PARSER] Znaleziono klucze: ['critique_summary', 'quality_metrics', 'plan_approved', 'decision_marker', 'cognitive_trace']
+[2025-09-15 11:54:52] [SUCCESS] Znaleziono plan pod kluczem: 'plan_approved'
+[2025-09-15 11:54:52] [MEMORY] Added successful plan for mission_type=data_processing, nodes=13
+[2025-09-15 11:54:52] Successful plan saved to outputs/autogen_plan_20250915_115452.json
+[2025-09-15 11:54:52] [MEMORY] Saved mission to file: memory/missions/mission_20250915_115452_92ed8ebc.json
+[2025-09-15 11:54:52] [MEMORY] Learned from success: success_pattern_data_processing, occurrences=19, avg_score=85.51
+[2025-09-15 11:54:52] [MEMORY] Saved complete mission: mission_20250915_115452_92ed8ebc
+[2025-09-15 11:54:52] [ORCHESTRATOR] Mission completed and saved as: mission_20250915_115452_92ed8ebc
+[2025-09-15 11:54:53] [EXPORT] Wyeksportowano 1 misji do GCS
+[2025-09-15 11:54:53] [RESET] Orchestrator state cleared
+[2025-09-15 12:01:27] [CFG] enable_sanity_ping=False
+[2025-09-15 12:01:27] [INIT] UserProxy initialized
+[2025-09-15 12:01:27] [INIT] Proposer initialized: Causal_Analyst
+[2025-09-15 12:01:27] [INIT] Proposer initialized: Creative_Planner
+[2025-09-15 12:01:27] [INIT] Memory Analyst initialized
+[2025-09-15 12:01:27] [INIT] Aggregator initialized
+[2025-09-15 12:01:27] [INIT] Critic initialized
+[2025-09-15 12:01:27] Initialized 2 proposers, 1 aggregator, 1 critic using AutoGen
+[2025-09-15 12:01:27] === AutoGen MOA Orchestrator initialized for mission: zrob maly przeplyw czyszczenia danych do treningu... ===
+[2025-09-15 12:01:27] [RESET] Orchestrator state cleared
+[2025-09-15 12:01:34] [MEMORY] MID failed:: BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CTA9ifsg3APc3smv8yLMo'} @ /opt/conda/envs/agents_with_memory_py11/lib/python3.11/site-packages/anthropic/_base_client.py:1102 in request
+[2025-09-15 12:01:34] Traceback (most recent call last):
+  File "/home/jupyter/olga_zydziak/version_beta/Folder/agents-system/autogen_orchestrator.py", line 265, in _make_memory_message_once
+    out = tmp.generate_reply(messages=[user_msg])
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/envs/agents_with_memory_py11/lib/python3.11/site-packages/autogen/agentchat/conversable_agent.py", line 2836, in generate_reply
+    final, reply = reply_func(self, messages=messages, sender=sender, config=reply_func_tuple["config"])
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/envs/agents_with_memory_py11/lib/python3.11/site-packages/autogen/agentchat/conversable_agent.py", line 2163, in generate_oai_reply
+    extracted_response = self._generate_oai_reply_from_client(
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/envs/agents_with_memory_py11/lib/python3.11/site-packages/autogen/agentchat/conversable_agent.py", line 2182, in _generate_oai_reply_from_client
+    response = llm_client.create(
+               ^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/envs/agents_with_memory_py11/lib/python3.11/site-packages/autogen/oai/client.py", line 1187, in create
+    response = client.create(params)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/envs/agents_with_memory_py11/lib/python3.11/site-packages/autogen/oai/anthropic.py", line 316, in create
+    response = self._client.messages.create(**anthropic_params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/envs/agents_with_memory_py11/lib/python3.11/site-packages/anthropic/_utils/_utils.py", line 283, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/envs/agents_with_memory_py11/lib/python3.11/site-packages/anthropic/resources/messages/messages.py", line 997, in create
+    return self._post(
+           ^^^^^^^^^^^
+  File "/opt/conda/envs/agents_with_memory_py11/lib/python3.11/site-packages/anthropic/_base_client.py", line 1314, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/envs/agents_with_memory_py11/lib/python3.11/site-packages/anthropic/_base_client.py", line 1102, in request
+    raise self._make_status_error_from_response(err.response) from None
+anthropic.BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CTA9ifsg3APc3smv8yLMo'}
+
+[2025-09-15 12:01:34] [MEMORY] Seeded memory message into history
+[2025-09-15 12:01:34] [MEMORY][DEBUG] m0: type=dict name=Memory_Analyst len=462
+[2025-09-15 12:02:05] [CFG] enable_sanity_ping=False
+[2025-09-15 12:02:05] [INIT] UserProxy initialized
+[2025-09-15 12:02:05] [INIT] Proposer initialized: Causal_Analyst
+[2025-09-15 12:02:05] [INIT] Proposer initialized: Creative_Planner
+[2025-09-15 12:02:05] [INIT] Memory Analyst initialized
+[2025-09-15 12:02:05] [INIT] Aggregator initialized
+[2025-09-15 12:02:05] [INIT] Critic initialized
+[2025-09-15 12:02:05] Initialized 2 proposers, 1 aggregator, 1 critic using AutoGen
+[2025-09-15 12:02:05] === AutoGen MOA Orchestrator initialized for mission: Stwórz prosty pipeline do analizy danych CSV... ===
+[2025-09-15 12:02:06] [RESET] Orchestrator state cleared
+[2025-09-15 12:02:06] [MEMORY] Seeded memory message into history
+[2025-09-15 12:02:06] [MEMORY][DEBUG] m0: type=dict name=Memory_Analyst len=577
+[2025-09-15 12:02:06] [EXPLAINABILITY] causal_analyst confidence: {'node_selection': 0.95, 'edge_conditions': 0.9, 'overall_structure': 0.9}
+[2025-09-15 12:02:06] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Causal Analyst', 'może zawieść']
+[2025-09-15 12:02:06] [EXPLAINABILITY] creative_planner confidence: {'node_selection': 0.9, 'edge_conditions': 0.85, 'overall_structure': 0.88}
+[2025-09-15 12:02:06] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Creative Planner', 'novel twist', 'może zawieść']
+[2025-09-15 12:02:06] [MEMORY ALIGNMENT] phase=post_aggregation score=0.000 strategies_used=0/1 pitfalls_addressed=0/1 examples_ref=0/2
+[2025-09-15 12:02:06] [SUCCESS] Debata zakończona przez StopIteration - plan zatwierdzony
+[2025-09-15 12:02:06] [SUCCESS] Krytyk zatwierdził plan. Rozpoczynam parsowanie...
+[2025-09-15 12:02:06] [PARSER] Znaleziono klucze: ['critique_summary', 'quality_metrics', 'plan_approved', 'decision_marker', 'cognitive_trace']
+[2025-09-15 12:02:06] [SUCCESS] Znaleziono plan pod kluczem: 'plan_approved'
+[2025-09-15 12:02:06] [MEMORY] Added successful plan for mission_type=data_processing, nodes=13
+[2025-09-15 12:02:06] Successful plan saved to outputs/autogen_plan_20250915_120206.json
+[2025-09-15 12:02:06] [MEMORY] Saved mission to file: memory/missions/mission_20250915_120206_92ed8ebc.json
+[2025-09-15 12:02:06] [MEMORY] Learned from success: success_pattern_data_processing, occurrences=20, avg_score=85.48
+[2025-09-15 12:02:06] [MEMORY] Saved complete mission: mission_20250915_120206_92ed8ebc
+[2025-09-15 12:02:06] [ORCHESTRATOR] Mission completed and saved as: mission_20250915_120206_92ed8ebc
+[2025-09-15 12:02:07] [EXPORT] Wyeksportowano 1 misji do GCS
+[2025-09-15 12:02:07] [RESET] Orchestrator state cleared
+[2025-09-15 12:19:51] [CFG] enable_sanity_ping=False
+[2025-09-15 12:19:51] [INIT] UserProxy initialized
+[2025-09-15 12:19:51] [INIT] Proposer initialized: Causal_Analyst
+[2025-09-15 12:19:51] [INIT] Proposer initialized: Creative_Planner
+[2025-09-15 12:19:51] [INIT] Memory Analyst initialized
+[2025-09-15 12:19:51] [INIT] Aggregator initialized
+[2025-09-15 12:19:51] [INIT] Critic initialized
+[2025-09-15 12:19:51] Initialized 2 proposers, 1 aggregator, 1 critic using AutoGen
+[2025-09-15 12:19:51] === AutoGen MOA Orchestrator initialized for mission: Stwórz prosty pipeline do analizy danych CSV... ===
+[2025-09-15 12:19:51] [RESET] Orchestrator state cleared
+[2025-09-15 12:19:52] [MEMORY] Seeded memory message into history
+[2025-09-15 12:19:52] [MEMORY][DEBUG] m0: type=dict name=Memory_Analyst len=577
+[2025-09-15 12:19:52] [EXPLAINABILITY] causal_analyst confidence: {'node_selection': 0.95, 'edge_conditions': 0.9, 'overall_structure': 0.9}
+[2025-09-15 12:19:52] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Causal Analyst', 'może zawieść']
+[2025-09-15 12:19:52] [EXPLAINABILITY] creative_planner confidence: {'node_selection': 0.9, 'edge_conditions': 0.85, 'overall_structure': 0.88}
+[2025-09-15 12:19:52] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Creative Planner', 'novel twist', 'może zawieść']
+[2025-09-15 12:19:52] [MEMORY ALIGNMENT] phase=post_aggregation score=0.000 strategies_used=0/1 pitfalls_addressed=0/1 examples_ref=0/2
+[2025-09-15 12:19:52] [SUCCESS] Debata zakończona przez StopIteration - plan zatwierdzony
+[2025-09-15 12:19:52] [SUCCESS] Krytyk zatwierdził plan. Rozpoczynam parsowanie...
+[2025-09-15 12:19:52] [PARSER] Znaleziono klucze: ['critique_summary', 'quality_metrics', 'plan_approved', 'decision_marker', 'cognitive_trace']
+[2025-09-15 12:19:52] [SUCCESS] Znaleziono plan pod kluczem: 'plan_approved'
+[2025-09-15 12:19:52] [MEMORY] Added successful plan for mission_type=data_processing, nodes=13
+[2025-09-15 12:19:52] Successful plan saved to outputs/autogen_plan_20250915_121952.json
+[2025-09-15 12:19:52] [MEMORY] Saved mission to file: memory/missions/mission_20250915_121952_92ed8ebc.json
+[2025-09-15 12:19:52] [MEMORY] Learned from success: success_pattern_data_processing, occurrences=21, avg_score=85.46
+[2025-09-15 12:19:52] [MEMORY] Saved complete mission: mission_20250915_121952_92ed8ebc
+[2025-09-15 12:19:52] [ORCHESTRATOR] Mission completed and saved as: mission_20250915_121952_92ed8ebc
+[2025-09-15 12:19:53] [EXPORT] Wyeksportowano 1 misji do GCS
+[2025-09-15 12:19:53] [RESET] Orchestrator state cleared
+[2025-09-15 12:21:05] [CFG] enable_sanity_ping=False
+[2025-09-15 12:21:05] [INIT] UserProxy initialized
+[2025-09-15 12:21:05] [INIT] Proposer initialized: Causal_Analyst
+[2025-09-15 12:21:05] [INIT] Proposer initialized: Creative_Planner
+[2025-09-15 12:21:05] [INIT] Memory Analyst initialized
+[2025-09-15 12:21:05] [INIT] Aggregator initialized
+[2025-09-15 12:21:05] [INIT] Critic initialized
+[2025-09-15 12:21:05] Initialized 2 proposers, 1 aggregator, 1 critic using AutoGen
+[2025-09-15 12:21:05] === AutoGen MOA Orchestrator initialized for mission: Stwórz prosty pipeline do analizy danych CSV... ===
+[2025-09-15 12:21:05] [RESET] Orchestrator state cleared
+[2025-09-15 12:21:05] [MEMORY] Seeded memory message into history
+[2025-09-15 12:21:05] [MEMORY][DEBUG] m0: type=dict name=Memory_Analyst len=577
+[2025-09-15 12:21:05] [EXPLAINABILITY] causal_analyst confidence: {'node_selection': 0.95, 'edge_conditions': 0.9, 'overall_structure': 0.9}
+[2025-09-15 12:21:05] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Causal Analyst', 'może zawieść']
+[2025-09-15 12:21:05] [EXPLAINABILITY] creative_planner confidence: {'node_selection': 0.9, 'edge_conditions': 0.85, 'overall_structure': 0.88}
+[2025-09-15 12:21:05] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Creative Planner', 'novel twist', 'może zawieść']
+[2025-09-15 12:21:05] [MEMORY ALIGNMENT] phase=post_aggregation score=0.000 strategies_used=0/1 pitfalls_addressed=0/1 examples_ref=0/2
+[2025-09-15 12:21:05] [SUCCESS] Debata zakończona przez StopIteration - plan zatwierdzony
+[2025-09-15 12:21:05] [SUCCESS] Krytyk zatwierdził plan. Rozpoczynam parsowanie...
+[2025-09-15 12:21:05] [PARSER] Znaleziono klucze: ['critique_summary', 'quality_metrics', 'plan_approved', 'decision_marker', 'cognitive_trace']
+[2025-09-15 12:21:05] [SUCCESS] Znaleziono plan pod kluczem: 'plan_approved'
+[2025-09-15 12:21:05] [MEMORY] Added successful plan for mission_type=data_processing, nodes=13
+[2025-09-15 12:21:05] Successful plan saved to outputs/autogen_plan_20250915_122105.json
+[2025-09-15 12:21:05] [MEMORY] Saved mission to file: memory/missions/mission_20250915_122105_92ed8ebc.json
+[2025-09-15 12:21:05] [MEMORY] Learned from success: success_pattern_data_processing, occurrences=22, avg_score=85.44
+[2025-09-15 12:21:05] [MEMORY] Saved complete mission: mission_20250915_122105_92ed8ebc
+[2025-09-15 12:21:05] [ORCHESTRATOR] Mission completed and saved as: mission_20250915_122105_92ed8ebc
+[2025-09-15 12:21:07] [EXPORT] Wyeksportowano 1 misji do GCS
+[2025-09-15 12:21:07] [RESET] Orchestrator state cleared
+[2025-09-15 12:52:01] [CFG] enable_sanity_ping=False
+[2025-09-15 12:52:01] [INIT] UserProxy initialized
+[2025-09-15 12:52:02] [INIT] Proposer initialized: Causal_Analyst
+[2025-09-15 12:52:02] [INIT] Proposer initialized: Creative_Planner
+[2025-09-15 12:52:02] [INIT] Memory Analyst initialized
+[2025-09-15 12:52:02] [INIT] Aggregator initialized
+[2025-09-15 12:52:02] [INIT] Critic initialized
+[2025-09-15 12:52:02] Initialized 2 proposers, 1 aggregator, 1 critic using AutoGen
+[2025-09-15 12:52:02] === AutoGen MOA Orchestrator initialized for mission: Stwórz prosty pipeline do analizy danych CSV... ===
+[2025-09-15 12:52:02] [RESET] Orchestrator state cleared
+[2025-09-15 12:52:02] [MEMORY] Seeded memory message into history
+[2025-09-15 12:52:02] [MEMORY][DEBUG] m0: type=dict name=Memory_Analyst len=383
+[2025-09-15 12:52:02] [EXPLAINABILITY] causal_analyst confidence: {'node_selection': 0.95, 'edge_conditions': 0.9, 'overall_structure': 0.9}
+[2025-09-15 12:52:02] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Causal Analyst', 'może zawieść']
+[2025-09-15 12:52:02] [EXPLAINABILITY] creative_planner confidence: {'node_selection': 0.9, 'edge_conditions': 0.85, 'overall_structure': 0.88}
+[2025-09-15 12:52:02] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Creative Planner', 'novel twist', 'może zawieść']
+[2025-09-15 12:52:02] [MEMORY ALIGNMENT] phase=post_aggregation score=0.000 strategies_used=0/1 pitfalls_addressed=0/1 examples_ref=0/1
+[2025-09-15 12:52:02] [SUCCESS] Debata zakończona przez StopIteration - plan zatwierdzony
+[2025-09-15 12:52:02] [SUCCESS] Krytyk zatwierdził plan. Rozpoczynam parsowanie...
+[2025-09-15 12:52:02] [PARSER] Znaleziono klucze: ['critique_summary', 'quality_metrics', 'plan_approved', 'decision_marker', 'cognitive_trace']
+[2025-09-15 12:52:02] [SUCCESS] Znaleziono plan pod kluczem: 'plan_approved'
+[2025-09-15 12:52:02] [MEMORY] Added successful plan for mission_type=data_processing, nodes=13
+[2025-09-15 12:52:02] Successful plan saved to outputs/autogen_plan_20250915_125202.json
+[2025-09-15 12:52:02] [MEMORY] Saved mission to file: memory/missions/mission_20250915_125202_92ed8ebc.json
+[2025-09-15 12:52:02] [MEMORY] Learned from success: success_pattern_data_processing, occurrences=23, avg_score=85.42
+[2025-09-15 12:52:02] [MEMORY] Saved complete mission: mission_20250915_125202_92ed8ebc
+[2025-09-15 12:52:02] [ORCHESTRATOR] Mission completed and saved as: mission_20250915_125202_92ed8ebc
+[2025-09-15 12:52:03] [EXPORT][ERROR] Eksport misji do GCS nie powiódł się: NameError: name 'timezone' is not defined @ /home/jupyter/olga_zydziak/version_beta/Folder/agents-system/exporter_missions_gcs.py:142 in export_local_by_filename_date
+[2025-09-15 12:52:03] Traceback (most recent call last):
+  File "/home/jupyter/olga_zydziak/version_beta/Folder/agents-system/autogen_orchestrator.py", line 1296, in run_full_debate_cycle
+    ndjson_uris = export_local_by_filename_date(
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jupyter/olga_zydziak/version_beta/Folder/agents-system/exporter_missions_gcs.py", line 142, in export_local_by_filename_date
+    ts_dt   = datetime.now(timezone.utc)
+                           ^^^^^^^^
+NameError: name 'timezone' is not defined
+
+[2025-09-15 12:52:03] [RESET] Orchestrator state cleared
+[2025-09-15 12:56:06] [CFG] enable_sanity_ping=False
+[2025-09-15 12:56:06] [INIT] UserProxy initialized
+[2025-09-15 12:56:06] [INIT] Proposer initialized: Causal_Analyst
+[2025-09-15 12:56:06] [INIT] Proposer initialized: Creative_Planner
+[2025-09-15 12:56:06] [INIT] Memory Analyst initialized
+[2025-09-15 12:56:06] [INIT] Aggregator initialized
+[2025-09-15 12:56:06] [INIT] Critic initialized
+[2025-09-15 12:56:06] Initialized 2 proposers, 1 aggregator, 1 critic using AutoGen
+[2025-09-15 12:56:06] === AutoGen MOA Orchestrator initialized for mission: Stwórz prosty pipeline do analizy danych CSV... ===
+[2025-09-15 12:56:06] [RESET] Orchestrator state cleared
+[2025-09-15 12:56:07] [MEMORY] Seeded memory message into history
+[2025-09-15 12:56:07] [MEMORY][DEBUG] m0: type=dict name=Memory_Analyst len=383
+[2025-09-15 12:56:07] [EXPLAINABILITY] causal_analyst confidence: {'node_selection': 0.95, 'edge_conditions': 0.9, 'overall_structure': 0.9}
+[2025-09-15 12:56:07] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Causal Analyst', 'może zawieść']
+[2025-09-15 12:56:07] [EXPLAINABILITY] creative_planner confidence: {'node_selection': 0.9, 'edge_conditions': 0.85, 'overall_structure': 0.88}
+[2025-09-15 12:56:07] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Creative Planner', 'novel twist', 'może zawieść']
+[2025-09-15 12:56:07] [MEMORY ALIGNMENT] phase=post_aggregation score=0.000 strategies_used=0/1 pitfalls_addressed=0/1 examples_ref=0/1
+[2025-09-15 12:56:07] [SUCCESS] Debata zakończona przez StopIteration - plan zatwierdzony
+[2025-09-15 12:56:07] [SUCCESS] Krytyk zatwierdził plan. Rozpoczynam parsowanie...
+[2025-09-15 12:56:07] [PARSER] Znaleziono klucze: ['critique_summary', 'quality_metrics', 'plan_approved', 'decision_marker', 'cognitive_trace']
+[2025-09-15 12:56:07] [SUCCESS] Znaleziono plan pod kluczem: 'plan_approved'
+[2025-09-15 12:56:07] [MEMORY] Added successful plan for mission_type=data_processing, nodes=13
+[2025-09-15 12:56:07] Successful plan saved to outputs/autogen_plan_20250915_125607.json
+[2025-09-15 12:56:07] [MEMORY] Saved mission to file: memory/missions/mission_20250915_125607_92ed8ebc.json
+[2025-09-15 12:56:07] [MEMORY] Learned from success: success_pattern_data_processing, occurrences=24, avg_score=85.40
+[2025-09-15 12:56:07] [MEMORY] Saved complete mission: mission_20250915_125607_92ed8ebc
+[2025-09-15 12:56:07] [ORCHESTRATOR] Mission completed and saved as: mission_20250915_125607_92ed8ebc
+[2025-09-15 12:56:08] [EXPORT][ERROR] Eksport misji do GCS nie powiódł się: NameError: name 'timezone' is not defined @ /home/jupyter/olga_zydziak/version_beta/Folder/agents-system/exporter_missions_gcs.py:142 in export_local_by_filename_date
+[2025-09-15 12:56:08] Traceback (most recent call last):
+  File "/home/jupyter/olga_zydziak/version_beta/Folder/agents-system/autogen_orchestrator.py", line 1296, in run_full_debate_cycle
+    ndjson_uris = export_local_by_filename_date(
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jupyter/olga_zydziak/version_beta/Folder/agents-system/exporter_missions_gcs.py", line 142, in export_local_by_filename_date
+    ts_dt   = datetime.now(timezone.utc)
+                           ^^^^^^^^
+NameError: name 'timezone' is not defined
+
+[2025-09-15 12:56:08] [RESET] Orchestrator state cleared
+[2025-09-15 12:59:37] [CFG] enable_sanity_ping=False
+[2025-09-15 12:59:37] [INIT] UserProxy initialized
+[2025-09-15 12:59:37] [INIT] Proposer initialized: Causal_Analyst
+[2025-09-15 12:59:37] [INIT] Proposer initialized: Creative_Planner
+[2025-09-15 12:59:37] [INIT] Memory Analyst initialized
+[2025-09-15 12:59:37] [INIT] Aggregator initialized
+[2025-09-15 12:59:37] [INIT] Critic initialized
+[2025-09-15 12:59:37] Initialized 2 proposers, 1 aggregator, 1 critic using AutoGen
+[2025-09-15 12:59:37] === AutoGen MOA Orchestrator initialized for mission: Stwórz prosty pipeline do analizy danych CSV... ===
+[2025-09-15 12:59:37] [RESET] Orchestrator state cleared
+[2025-09-15 12:59:37] [MEMORY] Seeded memory message into history
+[2025-09-15 12:59:37] [MEMORY][DEBUG] m0: type=dict name=Memory_Analyst len=383
+[2025-09-15 12:59:37] [EXPLAINABILITY] causal_analyst confidence: {'node_selection': 0.95, 'edge_conditions': 0.9, 'overall_structure': 0.9}
+[2025-09-15 12:59:37] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Causal Analyst', 'może zawieść']
+[2025-09-15 12:59:37] [EXPLAINABILITY] creative_planner confidence: {'node_selection': 0.9, 'edge_conditions': 0.85, 'overall_structure': 0.88}
+[2025-09-15 12:59:37] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Creative Planner', 'novel twist', 'może zawieść']
+[2025-09-15 12:59:37] [MEMORY ALIGNMENT] phase=post_aggregation score=0.000 strategies_used=0/1 pitfalls_addressed=0/1 examples_ref=0/1
+[2025-09-15 12:59:37] [SUCCESS] Debata zakończona przez StopIteration - plan zatwierdzony
+[2025-09-15 12:59:37] [SUCCESS] Krytyk zatwierdził plan. Rozpoczynam parsowanie...
+[2025-09-15 12:59:37] [PARSER] Znaleziono klucze: ['critique_summary', 'quality_metrics', 'plan_approved', 'decision_marker', 'cognitive_trace']
+[2025-09-15 12:59:37] [SUCCESS] Znaleziono plan pod kluczem: 'plan_approved'
+[2025-09-15 12:59:37] [MEMORY] Added successful plan for mission_type=data_processing, nodes=13
+[2025-09-15 12:59:37] Successful plan saved to outputs/autogen_plan_20250915_125937.json
+[2025-09-15 12:59:37] [MEMORY] Saved mission to file: memory/missions/mission_20250915_125937_92ed8ebc.json
+[2025-09-15 12:59:37] [MEMORY] Learned from success: success_pattern_data_processing, occurrences=25, avg_score=85.39
+[2025-09-15 12:59:37] [MEMORY] Saved complete mission: mission_20250915_125937_92ed8ebc
+[2025-09-15 12:59:37] [ORCHESTRATOR] Mission completed and saved as: mission_20250915_125937_92ed8ebc
+[2025-09-15 12:59:38] [EXPORT][ERROR] Eksport misji do GCS nie powiódł się: NameError: name 'mission' is not defined @ /home/jupyter/olga_zydziak/version_beta/Folder/agents-system/exporter_missions_gcs.py:158 in export_local_by_filename_date
+[2025-09-15 12:59:38] Traceback (most recent call last):
+  File "/home/jupyter/olga_zydziak/version_beta/Folder/agents-system/autogen_orchestrator.py", line 1296, in run_full_debate_cycle
+    ndjson_uris = export_local_by_filename_date(
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jupyter/olga_zydziak/version_beta/Folder/agents-system/exporter_missions_gcs.py", line 158, in export_local_by_filename_date
+    display_base = _slug_u(mission if isinstance(mission, str) else "")
+                                                 ^^^^^^^
+NameError: name 'mission' is not defined
+
+[2025-09-15 12:59:38] [RESET] Orchestrator state cleared
+[2025-09-15 13:06:08] [CFG] enable_sanity_ping=False
+[2025-09-15 13:06:08] [INIT] UserProxy initialized
+[2025-09-15 13:06:09] [INIT] Proposer initialized: Causal_Analyst
+[2025-09-15 13:06:09] [INIT] Proposer initialized: Creative_Planner
+[2025-09-15 13:06:09] [INIT] Memory Analyst initialized
+[2025-09-15 13:06:09] [INIT] Aggregator initialized
+[2025-09-15 13:06:09] [INIT] Critic initialized
+[2025-09-15 13:06:09] Initialized 2 proposers, 1 aggregator, 1 critic using AutoGen
+[2025-09-15 13:06:09] === AutoGen MOA Orchestrator initialized for mission: Stwórz prosty pipeline do analizy danych CSV... ===
+[2025-09-15 13:06:09] [RESET] Orchestrator state cleared
+[2025-09-15 13:06:09] [MEMORY] Seeded memory message into history
+[2025-09-15 13:06:09] [MEMORY][DEBUG] m0: type=dict name=Memory_Analyst len=383
+[2025-09-15 13:06:09] [EXPLAINABILITY] causal_analyst confidence: {'node_selection': 0.95, 'edge_conditions': 0.9, 'overall_structure': 0.9}
+[2025-09-15 13:06:09] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Causal Analyst', 'może zawieść']
+[2025-09-15 13:06:09] [EXPLAINABILITY] creative_planner confidence: {'node_selection': 0.9, 'edge_conditions': 0.85, 'overall_structure': 0.88}
+[2025-09-15 13:06:09] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Creative Planner', 'novel twist', 'może zawieść']
+[2025-09-15 13:06:09] [MEMORY ALIGNMENT] phase=post_aggregation score=0.000 strategies_used=0/1 pitfalls_addressed=0/1 examples_ref=0/1
+[2025-09-15 13:06:09] [SUCCESS] Debata zakończona przez StopIteration - plan zatwierdzony
+[2025-09-15 13:06:09] [SUCCESS] Krytyk zatwierdził plan. Rozpoczynam parsowanie...
+[2025-09-15 13:06:09] [PARSER] Znaleziono klucze: ['critique_summary', 'quality_metrics', 'plan_approved', 'decision_marker', 'cognitive_trace']
+[2025-09-15 13:06:09] [SUCCESS] Znaleziono plan pod kluczem: 'plan_approved'
+[2025-09-15 13:06:09] [MEMORY] Added successful plan for mission_type=data_processing, nodes=13
+[2025-09-15 13:06:09] Successful plan saved to outputs/autogen_plan_20250915_130609.json
+[2025-09-15 13:06:09] [MEMORY] Saved mission to file: memory/missions/mission_20250915_130609_92ed8ebc.json
+[2025-09-15 13:06:09] [MEMORY] Learned from success: success_pattern_data_processing, occurrences=26, avg_score=85.37
+[2025-09-15 13:06:09] [MEMORY] Saved complete mission: mission_20250915_130609_92ed8ebc
+[2025-09-15 13:06:09] [ORCHESTRATOR] Mission completed and saved as: mission_20250915_130609_92ed8ebc
+[2025-09-15 13:06:11] [EXPORT][ERROR] Eksport misji do GCS nie powiódł się: NameError: name 'approved' is not defined @ /home/jupyter/olga_zydziak/version_beta/Folder/agents-system/exporter_missions_gcs.py:180 in export_local_by_filename_date
+[2025-09-15 13:06:11] Traceback (most recent call last):
+  File "/home/jupyter/olga_zydziak/version_beta/Folder/agents-system/autogen_orchestrator.py", line 1296, in run_full_debate_cycle
+    ndjson_uris = export_local_by_filename_date(
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jupyter/olga_zydziak/version_beta/Folder/agents-system/exporter_missions_gcs.py", line 180, in export_local_by_filename_date
+    f"approved:   {bool(approved)}\n"
+                        ^^^^^^^^
+NameError: name 'approved' is not defined
+
+[2025-09-15 13:06:11] [RESET] Orchestrator state cleared

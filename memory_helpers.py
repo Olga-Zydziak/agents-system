@@ -62,6 +62,12 @@ def save_mission_to_gcs(
     approved: bool = True,
     final_score: Optional[float] = None
 ) -> str:
+    
+    
+    print(">>> save_mission_to_gcs CALLED")
+    print(">>> module:", __name__)
+    print(">>> file:  ", __file__)
+    logging.warning("save_mission_to_gcs CALLED from %s", __file__)
     """
     Zapisuje plan, transkrypt i metadane do Google Cloud Storage w strukturze:
       gs://{bucket}/{base_prefix}/{mission_id}/plan.json
@@ -134,6 +140,82 @@ def save_mission_to_gcs(
     bucket.blob(meta_path).upload_from_string(
         safe_json_dumps(metadata), content_type="application/json; charset=utf-8"
     )
+    
+    
+    
+    #zapisywanie indeksow
+    ts_dt = datetime.now(timezone.utc)
+    ts_file = ts_dt.strftime("%Y%m%d_%H%M%S")
+    ts_iso  = ts_dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    # preview.txt (content.uri)
+    preview_txt = (
+        f"mission_id: {mission_id}\n"
+        f"timestamp:  {ts_iso}\n"
+        f"approved:   {bool(approved)}\n"
+        f"final_score:{final_score if final_score is not None else 'null'}\n"
+        f"tags:       {', '.join(tags) if tags else ''}\n"
+    )
+    preview_path = f"{base_path}/preview.txt"
+    bucket.blob(preview_path).upload_from_string(
+        preview_txt, content_type="text/plain; charset=utf-8"
+    )
+    preview_uri = f"gs://{bucket_name}/{preview_path}"
+
+    # dokument NDJSON (1 linia)
+    ndjson_doc = {
+        "id": f"{ts_file}_{(mission_id[-8:] if len(mission_id) >= 8 else mission_id)}",
+        "structData": {
+            "mission_id": mission_id,
+            "timestamp": ts_iso,
+            "mission_type": "general",
+            "tags": tags,
+            "outcome": "Success" if approved else "Partial" if final_score else "Failure",
+            "final_score": float(final_score) if final_score is not None else None,
+            "approved": bool(approved),
+            "nodes_count": int(nodes_count),
+            "edges_count": int(edges_count),
+            "has_retry": bool(flags.get("has_retry")) if isinstance(flags, dict) else False,
+            "has_rollback": bool(flags.get("has_rollback")) if isinstance(flags, dict) else False,
+            "has_optimization": bool(flags.get("has_optimization")) if isinstance(flags, dict) else False,
+            "lang": "pl",
+            "display_id": f"{ts_file}-{mission_id}",
+            "links": {
+                "txt_uri": preview_uri,
+                "plan_uri": plan_uri,
+                "transcript_uri": transcript_uri,
+                "metrics_uri": meta_uri,
+                "metadata_uri": meta_uri,
+            },
+        },
+        "content": {
+            "mimeType": "text/plain",
+            "uri": preview_uri,
+        },
+    }
+
+    # zapis NDJSON pod {base_prefix}/index/
+    index_dir  = f"{base_prefix}/index"
+    index_path = f"{index_dir}/metadata_{ts_file}.ndjson"
+    bucket.blob(index_path).upload_from_string(
+        json.dumps(ndjson_doc, ensure_ascii=False) + "\n",
+        content_type="application/x-ndjson; charset=utf-8",
+    )
+
+    # twardy log z pełnym URI
+    ndjson_uri = f"gs://{bucket_name}/{index_path}"
+    print("NDJSON ->", ndjson_uri)
+    logging.warning("NDJSON wrote to %s", ndjson_uri)
+
+    # mały kanarek, żeby łatwo złapać prefiks (ten sam katalog co NDJSON)
+    canary_path = f"{index_dir}/_canary_{ts_file}.txt"
+    bucket.blob(canary_path).upload_from_string(
+        f"ok {ts_iso} mission_id={mission_id}",
+        content_type="text/plain; charset=utf-8",
+    )
+    print("CANARY ->", f"gs://{bucket_name}/{canary_path}")
+    
+    #koniec zapisu indeksow
 
     logging.getLogger(__name__).info(f"[MEMORY:GCS] Saved mission {mission_id} at {plan_uri}")
     return mission_id
