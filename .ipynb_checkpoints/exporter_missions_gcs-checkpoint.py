@@ -154,6 +154,38 @@ def export_local_by_filename_date(
         mid_short = mission_id.replace("mission_", "")         # np. "20250829_212413_92ed8ebc"
         tail8     = mid_short[-8:] if len(mid_short) >= 8 else mid_short
 
+        
+        
+        # --- SAFE BINDINGS: używaj *_val zamiast gołych nazw ---
+        _locals = locals()
+        _md = _locals.get("metadata") if isinstance(_locals.get("metadata"), dict) else {}
+
+        approved_val     = _locals.get("approved", _md.get("approved", True))
+        final_score_val  = _locals.get("final_score", _md.get("final_score"))
+        nodes_count_val  = _locals.get("nodes_count", _md.get("nodes_count"))
+        edges_count_val  = _locals.get("edges_count", _md.get("edges_count"))
+        mission_type_val = _locals.get("mission_type", _md.get("mission_type", "general"))
+        lang_val         = _locals.get("lang", _md.get("lang", "pl"))
+
+        # tags jako lista
+        _tags = _locals.get("tags", _md.get("tags", []))
+        tags_list = list(_tags) if isinstance(_tags, (list, tuple)) else ([] if _tags is None else [str(_tags)])
+
+        # flags jako dict + fallback z metadanych (has_* bywa trzymane płasko)
+        flags_val = _locals.get("flags", {})
+        if not isinstance(flags_val, dict):
+            flags_val = {}
+        flags_val = {
+            "has_retry":        bool(flags_val.get("has_retry",        _md.get("has_retry", False))),
+            "has_rollback":     bool(flags_val.get("has_rollback",     _md.get("has_rollback", False))),
+            "has_optimization": bool(flags_val.get("has_optimization", _md.get("has_optimization", False))),
+        }
+        
+        
+        
+        
+        
+        
         # 2) Źródło tytułu do display_id z metadanych (BEZ użycia 'mission')
         _display_src = ""
         try:
@@ -174,13 +206,17 @@ def export_local_by_filename_date(
         txt_name = f"{display_id}.txt"
         # UWAGA: 'root_prefix' to katalog dnia (ten sam, w którym lądują artefakty tej misji)
         txt_path = f"{root_prefix}/{txt_name}"
+        
         txt_body = (
-            f"mission_id: {mid_full}\n"
-            f"timestamp:  {ts_iso}\n"
-            f"approved:   {bool(approved)}\n"
-            f"final_score:{final_score if final_score is not None else 'null'}\n"
-            f"tags:       {', '.join(tags) if isinstance(tags, (list, tuple)) else ''}\n"
-        )
+        f"mission_id: {mid_full}\n"
+        f"timestamp:  {ts_iso}\n"
+        f"approved:   {bool(approved_val)}\n"
+        f"final_score:{final_score_val if final_score_val is not None else 'null'}\n"
+        f"tags:       {', '.join(tags_list) if tags_list else ''}\n"
+    )
+        
+        
+        
         bucket.blob(txt_path).upload_from_string(txt_body, content_type="text/plain; charset=utf-8")
         txt_uri = f"gs://{bucket_name}/{txt_path}"
 
@@ -190,35 +226,39 @@ def export_local_by_filename_date(
         has_rb    = bool(flags.get("has_rollback")) if isinstance(flags, dict) else False
         has_opt   = bool(flags.get("has_optimization")) if isinstance(flags, dict) else False
 
+        
+        
         doc = {
-            "id": mid_short,  # uwaga: w załączniku 'id' NIE ma prefiksu 'mission_'
-            "structData": {
-                "mission_id": mid_full,
-                "timestamp": ts_iso,
-                "mission_type": mission_type if 'mission_type' in locals() else "general",
-                "tags": tags_list,
-                "outcome": "Success" if approved else ("Partial" if (final_score not in (None, 0)) else "Failure"),
-                "final_score": float(final_score) if final_score is not None else None,
-                "approved": bool(approved),
-                "nodes_count": int(nodes_count) if 'nodes_count' in locals() and nodes_count is not None else None,
-                "edges_count": int(edges_count) if 'edges_count' in locals() and edges_count is not None else None,
-                "has_retry": has_retry,
-                "has_rollback": has_rb,
-                "has_optimization": has_opt,
-                "lang": "pl",
-                "display_id": display_id,
-                "links": {
-                    "txt_uri": txt_uri,
-                    "plan_uri": plan_uri,               # wcześniej policzone
-                    "transcript_uri": transcript_uri,   # jw.
-                    "metrics_uri": meta_uri,            # nazwa jak w załączniku
-                },
+        "id": mid_short,
+        "structData": {
+            "mission_id": mid_full,
+            "timestamp": ts_iso,
+            "mission_type": mission_type_val,
+            "tags": tags_list,
+            "outcome": "Success" if approved_val else ("Partial" if (final_score_val not in (None, 0)) else "Failure"),
+            "final_score": float(final_score_val) if final_score_val is not None else None,
+            "approved": bool(approved_val),
+            "nodes_count": int(nodes_count_val) if nodes_count_val is not None else None,
+            "edges_count": int(edges_count_val) if edges_count_val is not None else None,
+            "has_retry": flags_val["has_retry"],
+            "has_rollback": flags_val["has_rollback"],
+            "has_optimization": flags_val["has_optimization"],
+            "lang": lang_val,
+            "display_id": display_id,
+            "links": {
+                "txt_uri": txt_uri,
+                "plan_uri": plan_uri,
+                "transcript_uri": transcript_uri,
+                "metrics_uri": meta_uri,
             },
-            "content": {
-                "mimeType": "text/plain",
-                "uri": txt_uri,
-            },
+        },
+        "content": {
+            "mimeType": "text/plain",
+            "uri": txt_uri,
+        },
         }
+        
+        
 
         # 5) Jednowierszowy plik NDJSON do folderu index/
         index_dir  = f"{root_prefix}/index"    # jeśli chcesz top-level: index_dir = "index"
