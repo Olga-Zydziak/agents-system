@@ -65,6 +65,33 @@ os.environ.setdefault("MOA_SANITY_PING", "0")
 # ---cache-------
 langchain.llm_cache = SQLiteCache(database_path=".langchain.db")
 
+#---memory of debate MoE---
+GCS_BUCKET = os.getenv("GCS_BUCKET", "memory-of-moe")
+GCS_MISSIONS_PREFIX = os.getenv("GCS_MISSIONS_PREFIX", "missions")   # gdzie lądują pełne misje i artefakty
+GCS_INDEX_PREFIX    = os.getenv("GCS_INDEX_PREFIX", "index")         # gdzie lądują indeksy NDJSON/JSON
+# Plik indeksu NDJSON: metadata_<YYYYmmdd_HHMMSS>.ndjson
+GCS_INDEX_FILENAME_TEMPLATE = os.getenv("GCS_INDEX_FILENAME_TEMPLATE", "metadata_{ts}.ndjson")
+
+#-----
+
+#Funkcje do ustawienia sciezek w memory
+
+def gcs_index_path(ts_file: str) -> str:
+    """
+    Zwraca ścieżkę RELATYWNĄ (bez 'gs://<bucket>/') dla pliku indeksu NDJSON,
+    np. 'index/metadata_20250918_090001.ndjson'
+    """
+    fname = GCS_INDEX_FILENAME_TEMPLATE.format(ts=ts_file)
+    return f"{GCS_INDEX_PREFIX.strip('/')}/{fname}"
+
+def gcs_mission_base_prefix(ts_date: str) -> str:
+    """
+    Zwraca bazowy prefix dla misji wg daty: 'missions/YYYY/MM/DD'
+    """
+    y, m, d = ts_date[:4], ts_date[4:6], ts_date[6:8]
+    return f"{GCS_MISSIONS_PREFIX.strip('/')}/{y}/{m}/{d}"
+
+
 
 # FUNKCJA KONFIGURACYJNA AGENTOW AUTOGEN
 def basic_config_agent(

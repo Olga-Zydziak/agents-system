@@ -8,7 +8,10 @@ import json
 import numpy as np
 from collections import deque
 import os
-
+from config_api import (
+    GCS_BUCKET, GCS_MISSIONS_PREFIX, GCS_INDEX_PREFIX, GCS_INDEX_FILENAME_TEMPLATE,
+    gcs_index_path, gcs_mission_base_prefix,
+)
 # Zewnętrzne biblioteki do obliczania podobieństwa tekstu
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -73,10 +76,15 @@ class ContextMemory:
         self.mission_index = {}  # Szybkie wyszukiwanie po ID
 
         self._load_persistent_memory()
-        self.gcs_bucket = gcs_bucket
+        self.gcs_bucket = gcs_bucket or GCS_BUCKET
         self.gcs_prefix = (gcs_prefix or "").strip().strip("/")
         self.use_gcs = bool(self.gcs_bucket)
 
+        
+        self.gcs_missions_prefix = GCS_MISSIONS_PREFIX
+        self.gcs_index_prefix = GCS_INDEX_PREFIX
+        self.gcs_index_filename_template = GCS_INDEX_FILENAME_TEMPLATE
+        
         self.iteration_feedback = []
         self.last_feedback = ""
         
@@ -473,10 +481,11 @@ class ContextMemory:
         if getattr(self, "use_gcs", False) and getattr(self, "gcs_bucket", None):
             # Czytelna ścieżka: missions/YYYY/MM/DD/<plik>.json
             ts_date, ts_time = timestamp.split("_")  # np. 20250917, 213045
+            base_prefix = gcs_mission_base_prefix(ts_date) 
             y, m, d = ts_date[:4], ts_date[4:6], ts_date[6:8]
             slug = _slugify(mission)
             full_name = f"{ts_date}_{ts_time}-{slug}-{mission_hash}.json"
-            mission_blob_rel = f"missions/{y}/{m}/{d}/{full_name}"
+            mission_blob_rel = f"{base_prefix}/{full_name}"
             mission_blob = self._gcs_path(mission_blob_rel)
 
             # 2a) Pełny rekord JSON
@@ -492,7 +501,10 @@ class ContextMemory:
                 client = storage.Client()
                 bucket = client.bucket(self.gcs_bucket)
 
-                base_prefix = _os.path.dirname(mission_blob)  # np. missions/2025/09/17
+                
+                ts_date, ts_time = timestamp.split("_")
+                base_prefix = gcs_mission_base_prefix(ts_date) 
+                
                 base_name = mission_id                      # gwarantuje unikalność per run
 
                 # preview.txt
@@ -597,7 +609,19 @@ class ContextMemory:
                         "lang": "pl",
                     },
                 )
-                ndjson_blob_rel = self._gcs_path(f"index/{mission_id}.ndjson")
+                
+                
+                
+                ts_file = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+                ndjson_rel = gcs_index_path(ts_file)          # np. "index/metadata_20250918_090001.ndjson"
+                ndjson_blob_rel = self._gcs_path(ndjson_rel)
+                bucket.blob(ndjson_blob_rel).upload_from_string(
+                    ndjson_line + "\n",
+                    content_type="application/x-ndjson; charset=utf-8",
+                )
+                
+                
+                
                 # Upload NDJSON
                 from google.cloud import storage as _storage2
                 _storage_client = _storage2.Client()
