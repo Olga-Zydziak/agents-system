@@ -1379,3 +1379,195 @@ NameError: name 'tags' is not defined
 [2025-09-18 11:55:41] [ORCHESTRATOR] Mission completed and saved as: mission_20250918_115540_92ed8ebc
 [2025-09-18 11:55:42] [EXPORT] Wyeksportowano 0 misji do GCS
 [2025-09-18 11:55:42] [RESET] Orchestrator state cleared
+[2025-09-18 20:23:08] [CFG] enable_sanity_ping=False
+[2025-09-18 20:23:08] [INIT] UserProxy initialized
+[2025-09-18 20:23:08] [INIT] Proposer initialized: Causal_Analyst
+[2025-09-18 20:23:09] [INIT] Proposer initialized: Creative_Planner
+[2025-09-18 20:23:09] [INIT] Memory Analyst initialized
+[2025-09-18 20:23:09] [INIT] Aggregator initialized
+[2025-09-18 20:23:09] [INIT] Critic initialized
+[2025-09-18 20:23:09] Initialized 2 proposers, 1 aggregator, 1 critic using AutoGen
+[2025-09-18 20:23:09] === AutoGen MOA Orchestrator initialized for mission: Stwórz prosty pipeline do analizy danych CSV... ===
+[2025-09-18 20:23:09] [RESET] Orchestrator state cleared
+[2025-09-18 20:23:09] [MEMORY] Seeded memory message into history
+[2025-09-18 20:23:09] [MEMORY][DEBUG] m0: type=dict name=Memory_Analyst len=750
+[2025-09-18 20:23:09] [EXPLAINABILITY] causal_analyst confidence: {'node_selection': 0.95, 'edge_conditions': 0.9, 'overall_structure': 0.9}
+[2025-09-18 20:23:09] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Causal Analyst', 'może zawieść']
+[2025-09-18 20:23:09] [EXPLAINABILITY] creative_planner confidence: {'node_selection': 0.9, 'edge_conditions': 0.85, 'overall_structure': 0.88}
+[2025-09-18 20:23:09] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Creative Planner', 'novel twist', 'może zawieść']
+[2025-09-18 20:23:09] [MEMORY ALIGNMENT] phase=post_aggregation score=0.000 strategies_used=0/1 pitfalls_addressed=0/1 examples_ref=0/3
+[2025-09-18 20:23:09] [SUCCESS] Debata zakończona przez StopIteration - plan zatwierdzony
+[2025-09-18 20:23:09] [SUCCESS] Krytyk zatwierdził plan. Rozpoczynam parsowanie...
+[2025-09-18 20:23:09] [PARSER] Znaleziono klucze: ['critique_summary', 'quality_metrics', 'plan_approved', 'decision_marker', 'cognitive_trace']
+[2025-09-18 20:23:09] [SUCCESS] Znaleziono plan pod kluczem: 'plan_approved'
+[2025-09-18 20:23:09] [MEMORY] Saved lightweight memory to GCS: gs://memory-of-moe/learned_strategies.json
+[2025-09-18 20:23:09] [MEMORY] Added successful plan for mission_type=data_processing, nodes=13
+[2025-09-18 20:23:09] Successful plan saved to outputs/autogen_plan_20250918_202309.json
+[2025-09-18 20:23:09] [MEMORY] Saved mission to GCS: gs://memory-of-moe/missions/2025/09/18/20250918_202309-stworz-prosty-pipeline-do-analizy-danych-csv-92ed8ebc.json
+[2025-09-18 20:23:10] [MEMORY ERROR] Failed to save NDJSON index: name 'timezone' is not defined
+[2025-09-18 20:23:10] [MEMORY] Learned from success: success_pattern_data_processing, occurrences=33, avg_score=85.29
+[2025-09-18 20:23:10] [MEMORY] Saved lightweight memory to GCS: gs://memory-of-moe/learned_strategies.json
+[2025-09-18 20:23:10] [MEMORY] Saved complete mission: mission_20250918_202309_92ed8ebc
+[2025-09-18 20:23:10] [ORCHESTRATOR] Mission completed and saved as: mission_20250918_202309_92ed8ebc
+[2025-09-18 20:23:11] [EXPORT] Wyeksportowano 0 misji do GCS
+[2025-09-18 20:23:11] [RESET] Orchestrator state cleared
+[2025-09-18 20:41:12] [CFG] enable_sanity_ping=False
+[2025-09-18 20:41:12] [INIT] UserProxy initialized
+[2025-09-18 20:41:12] [INIT] Proposer initialized: Causal_Analyst
+[2025-09-18 20:41:12] [INIT] Proposer initialized: Creative_Planner
+[2025-09-18 20:41:12] [INIT] Memory Analyst initialized
+[2025-09-18 20:41:12] [INIT] Aggregator initialized
+[2025-09-18 20:41:12] [INIT] Critic initialized
+[2025-09-18 20:41:12] Initialized 2 proposers, 1 aggregator, 1 critic using AutoGen
+[2025-09-18 20:41:12] === AutoGen MOA Orchestrator initialized for mission: Stwórz prosty pipeline do analizy danych CSV... ===
+[2025-09-18 20:41:12] [RESET] Orchestrator state cleared
+[2025-09-18 20:41:12] [MEMORY] Seeded memory message into history
+[2025-09-18 20:41:12] [MEMORY][DEBUG] m0: type=dict name=Memory_Analyst len=750
+[2025-09-18 20:41:12] [EXPLAINABILITY] causal_analyst confidence: {'node_selection': 0.95, 'edge_conditions': 0.9, 'overall_structure': 0.9}
+[2025-09-18 20:41:12] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Causal Analyst', 'może zawieść']
+[2025-09-18 20:41:12] [EXPLAINABILITY] creative_planner confidence: {'node_selection': 0.9, 'edge_conditions': 0.85, 'overall_structure': 0.88}
+[2025-09-18 20:41:12] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Creative Planner', 'novel twist', 'może zawieść']
+[2025-09-18 20:41:12] [MEMORY ALIGNMENT] phase=post_aggregation score=0.000 strategies_used=0/1 pitfalls_addressed=0/1 examples_ref=0/3
+[2025-09-18 20:41:12] [SUCCESS] Debata zakończona przez StopIteration - plan zatwierdzony
+[2025-09-18 20:41:12] [SUCCESS] Krytyk zatwierdził plan. Rozpoczynam parsowanie...
+[2025-09-18 20:41:12] [PARSER] Znaleziono klucze: ['critique_summary', 'quality_metrics', 'plan_approved', 'decision_marker', 'cognitive_trace']
+[2025-09-18 20:41:12] [SUCCESS] Znaleziono plan pod kluczem: 'plan_approved'
+[2025-09-18 20:41:12] [MEMORY] Saved lightweight memory to GCS: gs://memory-of-moe/learned_strategies.json
+[2025-09-18 20:41:12] [MEMORY] Added successful plan for mission_type=data_processing, nodes=13
+[2025-09-18 20:41:12] Successful plan saved to outputs/autogen_plan_20250918_204112.json
+[2025-09-18 20:41:13] [MEMORY] Saved mission to GCS: gs://memory-of-moe/missions/2025/09/18/20250918_204112-stworz-prosty-pipeline-do-analizy-danych-csv-92ed8ebc.json
+[2025-09-18 20:41:13] [MEMORY] Saved NDJSON index: gs://memory-of-moe/index/metadata_20250918_204113.ndjson
+[2025-09-18 20:41:13] [MEMORY] Learned from success: success_pattern_data_processing, occurrences=33, avg_score=85.29
+[2025-09-18 20:41:13] [MEMORY] Saved lightweight memory to GCS: gs://memory-of-moe/learned_strategies.json
+[2025-09-18 20:41:13] [MEMORY] Saved complete mission: mission_20250918_204112_92ed8ebc
+[2025-09-18 20:41:13] [ORCHESTRATOR] Mission completed and saved as: mission_20250918_204112_92ed8ebc
+[2025-09-18 20:41:14] [EXPORT] Wyeksportowano 0 misji do GCS
+[2025-09-18 20:41:14] [RESET] Orchestrator state cleared
+[2025-09-18 21:00:20] [CFG] enable_sanity_ping=False
+[2025-09-18 21:00:20] [INIT] UserProxy initialized
+[2025-09-18 21:00:20] [INIT] Proposer initialized: Causal_Analyst
+[2025-09-18 21:00:20] [INIT] Proposer initialized: Creative_Planner
+[2025-09-18 21:00:20] [INIT] Memory Analyst initialized
+[2025-09-18 21:00:20] [INIT] Aggregator initialized
+[2025-09-18 21:00:20] [INIT] Critic initialized
+[2025-09-18 21:00:20] Initialized 2 proposers, 1 aggregator, 1 critic using AutoGen
+[2025-09-18 21:00:20] === AutoGen MOA Orchestrator initialized for mission: Stwórz prosty pipeline do analizy danych CSV... ===
+[2025-09-18 21:00:20] [RESET] Orchestrator state cleared
+[2025-09-18 21:00:21] [MEMORY] Seeded memory message into history
+[2025-09-18 21:00:21] [MEMORY][DEBUG] m0: type=dict name=Memory_Analyst len=750
+[2025-09-18 21:00:21] [EXPLAINABILITY] causal_analyst confidence: {'node_selection': 0.95, 'edge_conditions': 0.9, 'overall_structure': 0.9}
+[2025-09-18 21:00:21] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Causal Analyst', 'może zawieść']
+[2025-09-18 21:00:21] [EXPLAINABILITY] creative_planner confidence: {'node_selection': 0.9, 'edge_conditions': 0.85, 'overall_structure': 0.88}
+[2025-09-18 21:00:21] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Creative Planner', 'novel twist', 'może zawieść']
+[2025-09-18 21:00:21] [MEMORY ALIGNMENT] phase=post_aggregation score=0.000 strategies_used=0/1 pitfalls_addressed=0/1 examples_ref=0/3
+[2025-09-18 21:00:21] [SUCCESS] Debata zakończona przez StopIteration - plan zatwierdzony
+[2025-09-18 21:00:21] [SUCCESS] Krytyk zatwierdził plan. Rozpoczynam parsowanie...
+[2025-09-18 21:00:21] [PARSER] Znaleziono klucze: ['critique_summary', 'quality_metrics', 'plan_approved', 'decision_marker', 'cognitive_trace']
+[2025-09-18 21:00:21] [SUCCESS] Znaleziono plan pod kluczem: 'plan_approved'
+[2025-09-18 21:00:21] [MEMORY] Saved lightweight memory to GCS: gs://memory-of-moe/learned_strategies.json
+[2025-09-18 21:00:21] [MEMORY] Added successful plan for mission_type=data_processing, nodes=13
+[2025-09-18 21:00:21] Successful plan saved to outputs/autogen_plan_20250918_210021.json
+[2025-09-18 21:00:21] [MEMORY] Saved mission to GCS: gs://memory-of-moe/missions/2025/09/18/20250918_210021-stworz-prosty-pipeline-do-analizy-danych-csv-92ed8ebc.json
+[2025-09-18 21:00:22] [MEMORY] Saved NDJSON index: gs://memory-of-moe/index/metadata_20250918_210021.ndjson
+[2025-09-18 21:00:22] [MEMORY] Learned from success: success_pattern_data_processing, occurrences=33, avg_score=85.29
+[2025-09-18 21:00:22] [MEMORY] Saved lightweight memory to GCS: gs://memory-of-moe/learned_strategies.json
+[2025-09-18 21:00:22] [MEMORY] Saved complete mission: mission_20250918_210021_92ed8ebc
+[2025-09-18 21:00:22] [ORCHESTRATOR] Mission completed and saved as: mission_20250918_210021_92ed8ebc
+[2025-09-18 21:00:23] [EXPORT] Wyeksportowano 0 misji do GCS
+[2025-09-18 21:00:23] [RESET] Orchestrator state cleared
+[2025-09-18 22:13:01] [CFG] enable_sanity_ping=False
+[2025-09-18 22:13:01] [INIT] UserProxy initialized
+[2025-09-18 22:13:01] [INIT] Proposer initialized: Causal_Analyst
+[2025-09-18 22:13:01] [INIT] Proposer initialized: Creative_Planner
+[2025-09-18 22:13:01] [INIT] Memory Analyst initialized
+[2025-09-18 22:13:01] [INIT] Aggregator initialized
+[2025-09-18 22:13:01] [INIT] Critic initialized
+[2025-09-18 22:13:01] Initialized 2 proposers, 1 aggregator, 1 critic using AutoGen
+[2025-09-18 22:13:01] === AutoGen MOA Orchestrator initialized for mission: Stwórz prosty pipeline do analizy danych CSV... ===
+[2025-09-18 22:13:01] [RESET] Orchestrator state cleared
+[2025-09-18 22:13:01] [MEMORY] Seeded memory message into history
+[2025-09-18 22:13:01] [MEMORY][DEBUG] m0: type=dict name=Memory_Analyst len=750
+[2025-09-18 22:13:01] [EXPLAINABILITY] causal_analyst confidence: {'node_selection': 0.95, 'edge_conditions': 0.9, 'overall_structure': 0.9}
+[2025-09-18 22:13:01] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Causal Analyst', 'może zawieść']
+[2025-09-18 22:13:01] [EXPLAINABILITY] creative_planner confidence: {'node_selection': 0.9, 'edge_conditions': 0.85, 'overall_structure': 0.88}
+[2025-09-18 22:13:01] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Creative Planner', 'novel twist', 'może zawieść']
+[2025-09-18 22:13:02] [MEMORY ALIGNMENT] phase=post_aggregation score=0.000 strategies_used=0/1 pitfalls_addressed=0/1 examples_ref=0/3
+[2025-09-18 22:13:02] [SUCCESS] Debata zakończona przez StopIteration - plan zatwierdzony
+[2025-09-18 22:13:02] [SUCCESS] Krytyk zatwierdził plan. Rozpoczynam parsowanie...
+[2025-09-18 22:13:02] [PARSER] Znaleziono klucze: ['critique_summary', 'quality_metrics', 'plan_approved', 'decision_marker', 'cognitive_trace']
+[2025-09-18 22:13:02] [SUCCESS] Znaleziono plan pod kluczem: 'plan_approved'
+[2025-09-18 22:13:02] [MEMORY] Saved lightweight memory to GCS: gs://memory-of-moe/learned_strategies.json
+[2025-09-18 22:13:02] [MEMORY] Added successful plan for mission_type=data_processing, nodes=13
+[2025-09-18 22:13:02] Successful plan saved to outputs/autogen_plan_20250918_221302.json
+[2025-09-18 22:13:02] [MEMORY] Saved mission to GCS: gs://memory-of-moe/missions/2025/09/18/20250918_221302-stworz-prosty-pipeline-do-analizy-danych-csv-92ed8ebc.json
+[2025-09-18 22:13:02] [MEMORY] Saved NDJSON index: gs://memory-of-moe/index/metadata_20250918_221302.ndjson
+[2025-09-18 22:13:02] [MEMORY] Learned from success: success_pattern_data_processing, occurrences=33, avg_score=85.29
+[2025-09-18 22:13:02] [MEMORY] Saved lightweight memory to GCS: gs://memory-of-moe/learned_strategies.json
+[2025-09-18 22:13:02] [MEMORY] Saved complete mission: mission_20250918_221302_92ed8ebc
+[2025-09-18 22:13:02] [ORCHESTRATOR] Mission completed and saved as: mission_20250918_221302_92ed8ebc
+[2025-09-18 22:13:04] [EXPORT] Wyeksportowano 0 misji do GCS
+[2025-09-18 22:13:04] [RESET] Orchestrator state cleared
+[2025-09-18 22:33:27] [CFG] enable_sanity_ping=False
+[2025-09-18 22:33:27] [INIT] UserProxy initialized
+[2025-09-18 22:33:28] [INIT] Proposer initialized: Causal_Analyst
+[2025-09-18 22:33:28] [INIT] Proposer initialized: Creative_Planner
+[2025-09-18 22:33:28] [INIT] Memory Analyst initialized
+[2025-09-18 22:33:28] [INIT] Aggregator initialized
+[2025-09-18 22:33:28] [INIT] Critic initialized
+[2025-09-18 22:33:28] Initialized 2 proposers, 1 aggregator, 1 critic using AutoGen
+[2025-09-18 22:33:28] === AutoGen MOA Orchestrator initialized for mission: Stwórz prosty pipeline do analizy danych CSV... ===
+[2025-09-18 22:33:28] [RESET] Orchestrator state cleared
+[2025-09-18 22:33:28] [MEMORY] Seeded memory message into history
+[2025-09-18 22:33:28] [MEMORY][DEBUG] m0: type=dict name=Memory_Analyst len=750
+[2025-09-18 22:33:28] [EXPLAINABILITY] causal_analyst confidence: {'node_selection': 0.95, 'edge_conditions': 0.9, 'overall_structure': 0.9}
+[2025-09-18 22:33:28] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Causal Analyst', 'może zawieść']
+[2025-09-18 22:33:28] [EXPLAINABILITY] creative_planner confidence: {'node_selection': 0.9, 'edge_conditions': 0.85, 'overall_structure': 0.88}
+[2025-09-18 22:33:28] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Creative Planner', 'novel twist', 'może zawieść']
+[2025-09-18 22:33:28] [MEMORY ALIGNMENT] phase=post_aggregation score=0.000 strategies_used=0/1 pitfalls_addressed=0/1 examples_ref=0/3
+[2025-09-18 22:33:28] [SUCCESS] Debata zakończona przez StopIteration - plan zatwierdzony
+[2025-09-18 22:33:28] [SUCCESS] Krytyk zatwierdził plan. Rozpoczynam parsowanie...
+[2025-09-18 22:33:28] [PARSER] Znaleziono klucze: ['critique_summary', 'quality_metrics', 'plan_approved', 'decision_marker', 'cognitive_trace']
+[2025-09-18 22:33:28] [SUCCESS] Znaleziono plan pod kluczem: 'plan_approved'
+[2025-09-18 22:33:28] [MEMORY] Saved lightweight memory to GCS: gs://memory-of-moe/learned_strategies.json
+[2025-09-18 22:33:28] [MEMORY] Added successful plan for mission_type=data_processing, nodes=13
+[2025-09-18 22:33:28] Successful plan saved to outputs/autogen_plan_20250918_223328.json
+[2025-09-18 22:33:28] [MEMORY] Saved mission to GCS: gs://memory-of-moe/missions/2025/09/18/20250918_223328-stworz-prosty-pipeline-do-analizy-danych-csv-92ed8ebc.json
+[2025-09-18 22:33:29] [MEMORY] Saved NDJSON index: gs://memory-of-moe/index/metadata_20250918_223329.ndjson
+[2025-09-18 22:33:29] [MEMORY] Learned from success: success_pattern_data_processing, occurrences=33, avg_score=85.29
+[2025-09-18 22:33:29] [MEMORY] Saved lightweight memory to GCS: gs://memory-of-moe/learned_strategies.json
+[2025-09-18 22:33:29] [MEMORY] Saved complete mission: mission_20250918_223328_92ed8ebc
+[2025-09-18 22:33:29] [ORCHESTRATOR] Mission completed and saved as: mission_20250918_223328_92ed8ebc
+[2025-09-18 22:33:30] [EXPORT] Wyeksportowano 0 misji do GCS
+[2025-09-18 22:33:30] [RESET] Orchestrator state cleared
+[2025-09-18 22:51:42] [CFG] enable_sanity_ping=False
+[2025-09-18 22:51:42] [INIT] UserProxy initialized
+[2025-09-18 22:51:42] [INIT] Proposer initialized: Causal_Analyst
+[2025-09-18 22:51:42] [INIT] Proposer initialized: Creative_Planner
+[2025-09-18 22:51:42] [INIT] Memory Analyst initialized
+[2025-09-18 22:51:42] [INIT] Aggregator initialized
+[2025-09-18 22:51:42] [INIT] Critic initialized
+[2025-09-18 22:51:42] Initialized 2 proposers, 1 aggregator, 1 critic using AutoGen
+[2025-09-18 22:51:42] === AutoGen MOA Orchestrator initialized for mission: Stwórz prosty pipeline do analizy danych CSV... ===
+[2025-09-18 22:51:42] [RESET] Orchestrator state cleared
+[2025-09-18 22:51:43] [MEMORY] Seeded memory message into history
+[2025-09-18 22:51:43] [MEMORY][DEBUG] m0: type=dict name=Memory_Analyst len=750
+[2025-09-18 22:51:43] [EXPLAINABILITY] causal_analyst confidence: {'node_selection': 0.95, 'edge_conditions': 0.9, 'overall_structure': 0.9}
+[2025-09-18 22:51:43] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Causal Analyst', 'może zawieść']
+[2025-09-18 22:51:43] [EXPLAINABILITY] creative_planner confidence: {'node_selection': 0.9, 'edge_conditions': 0.85, 'overall_structure': 0.88}
+[2025-09-18 22:51:43] [EXPLAINABILITY] Key triggers: ['prosty pipeline', 'analizy danych CSV', 'Creative Planner', 'novel twist', 'może zawieść']
+[2025-09-18 22:51:43] [MEMORY ALIGNMENT] phase=post_aggregation score=0.000 strategies_used=0/1 pitfalls_addressed=0/1 examples_ref=0/3
+[2025-09-18 22:51:43] [SUCCESS] Debata zakończona przez StopIteration - plan zatwierdzony
+[2025-09-18 22:51:43] [SUCCESS] Krytyk zatwierdził plan. Rozpoczynam parsowanie...
+[2025-09-18 22:51:43] [PARSER] Znaleziono klucze: ['critique_summary', 'quality_metrics', 'plan_approved', 'decision_marker', 'cognitive_trace']
+[2025-09-18 22:51:43] [SUCCESS] Znaleziono plan pod kluczem: 'plan_approved'
+[2025-09-18 22:51:43] [MEMORY] Saved lightweight memory to GCS: gs://memory-of-moe/learned_strategies.json
+[2025-09-18 22:51:43] [MEMORY] Added successful plan for mission_type=data_processing, nodes=13
+[2025-09-18 22:51:43] Successful plan saved to outputs/autogen_plan_20250918_225143.json
+[2025-09-18 22:51:43] [MEMORY] Saved mission to GCS: gs://memory-of-moe/missions/2025/09/18/20250918_225143-stworz-prosty-pipeline-do-analizy-danych-csv-92ed8ebc.json
+[2025-09-18 22:51:43] [MEMORY] Saved NDJSON index: gs://memory-of-moe/index/metadata_20250918_225143.ndjson
+[2025-09-18 22:51:43] [MEMORY] Learned from success: success_pattern_data_processing, occurrences=33, avg_score=85.29
+[2025-09-18 22:51:43] [MEMORY] Saved lightweight memory to GCS: gs://memory-of-moe/learned_strategies.json
+[2025-09-18 22:51:43] [MEMORY] Saved complete mission: mission_20250918_225143_92ed8ebc
+[2025-09-18 22:51:43] [ORCHESTRATOR] Mission completed and saved as: mission_20250918_225143_92ed8ebc
+[2025-09-18 22:51:45] [EXPORT] Wyeksportowano 0 misji do GCS
+[2025-09-18 22:51:45] [RESET] Orchestrator state cleared

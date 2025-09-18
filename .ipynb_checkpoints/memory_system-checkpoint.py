@@ -18,7 +18,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 # Lokalny logger procesu
 from process_logger import log as process_log
-
+from datetime import datetime, timezone
 
 import re, unicodedata
 from autogen_vertex_mcp_system_claude import SystemConfig, VertexSearchTool
@@ -569,23 +569,42 @@ class ContextMemory:
                 preview_uri = plan_uri = transcript_uri = meta_uri = f"gs://{self.gcs_bucket}/{mission_blob}"
 
             # 2c) Lekki indeks JSON (zostaje jak był)
-            index_entry = {
-                "mission_id": mission_id,
-                "gcs_path": f"gs://{self.gcs_bucket}/{mission_blob}",
-                "timestamp": mission_record.get("timestamp"),
-                "mission_prompt": mission_record.get("mission_prompt", "")[:100],
-                "mission_type": mission_record.get("mission_type"),
-                "final_score": mission_record.get("final_score"),
-                "tags": mission_record.get("tags", []),
-                "outcome": mission_record.get("outcome"),
-            }
-            index_blob = self._gcs_path(f"index/{mission_id}.json")
-            try:
-                _gcs_upload_json(self.gcs_bucket, index_blob, index_entry)
-            except Exception as e:
-                process_log(f"[MEMORY ERROR] Failed to save index to GCS: {e}")
+            # index_entry = {
+            #     "mission_id": mission_id,
+            #     "gcs_path": f"gs://{self.gcs_bucket}/{mission_blob}",
+            #     "timestamp": mission_record.get("timestamp"),
+            #     "mission_prompt": mission_record.get("mission_prompt", "")[:100],
+            #     "mission_type": mission_record.get("mission_type"),
+            #     "final_score": mission_record.get("final_score"),
+            #     "tags": mission_record.get("tags", []),
+            #     "outcome": mission_record.get("outcome"),
+            # }
+            # index_blob = self._gcs_path(f"index/{mission_id}.json")
+            # try:
+            #     _gcs_upload_json(self.gcs_bucket, index_blob, index_entry)
+            # except Exception as e:
+            #     process_log(f"[MEMORY ERROR] Failed to save index to GCS: {e}")
 
             # 2d) Indeks NDJSON (kanoniczny, 1 linia)
+            
+            
+            title = (mission_record.get("mission_prompt") or mission_record.get("mission_type") or "Misja")[:120]
+
+            node_impls = sorted({
+                (n.get("implementation") or n.get("name") or "").lower()
+                for n in (final_plan or {}).get("nodes", []) if isinstance(n, dict)
+            } - {""})
+
+            summary = mission_record.get("llm_generated_summary") or ""
+
+            content_text = (
+                f"{mission_record.get('mission_prompt','')}\n"
+                f"Plan: {', '.join(node_impls[:10])}\n"
+                f"Summary: {summary[:300]}"
+            )
+
+            
+            
             try:
                 ndjson_line = _ndjson_line(
                     mission_id=mission_id,
@@ -608,6 +627,8 @@ class ContextMemory:
                         "has_optimization": "optimization" in mission_record.get("tags", []),
                         "lang": "pl",
                     },
+                    title=title,
+                    content_text=content_text,
                 )
                 
                 

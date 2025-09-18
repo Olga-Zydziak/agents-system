@@ -182,10 +182,14 @@ def _ndjson_line(
     transcript_uri: str,
     metrics_uri: str,
     metrics: Dict[str, Any],
+    # NEW:
+    title: str | None = None,
+    content_text: str | None = None,
 ) -> str:
     return json.dumps(
         {
             "id": mission_id,
+            "title": (title or metrics.get("mission_prompt") or "")[:120],  # Vertex użyje tego jako nagłówka
             "structData": {
                 **metrics,
                 "links": {
@@ -194,7 +198,12 @@ def _ndjson_line(
                     "metrics_uri": metrics_uri,
                 },
             },
-            "content": {"mimeType": "text/plain", "uri": txt_uri},
+            "content": {
+                "mimeType": "text/plain",
+                "uri": txt_uri,
+                # NEW: dodajemy tekst, żeby Vertex Search miał co indeksować
+                "text": (content_text or metrics.get("mission_prompt") or "")[:5000],
+            },
         },
         ensure_ascii=False,
     )
